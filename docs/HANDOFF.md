@@ -26,25 +26,25 @@ pnpm dev                              # http://localhost:3000
 
 ## Where we are — status snapshot (Phase 0 complete)
 
-| Area                         | Status                                       | Notes                                                         |
-| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------- |
-| Project guide (CLAUDE.md)    | ✅ committed                                 | rules + topics referenced                                     |
-| Rule docs (.claude/rules/)   | ✅ working-principles + backend + frontend   | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น    |
-| Topic docs (.claude/topics/) | ❌ ทุกอันยังว่าง                             | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS" |
-| Skills (.claude/skills/)     | ❌ ว่าง                                      | จะสร้างใน Step 4                                              |
-| Design analysis              | ✅ docs/DESIGN_ANALYSIS.md                   | 7 screens, tokens, interactions, open questions               |
-| DB schema plan               | ✅ docs/DB_SCHEMA.md                         | 19 tables ออกแบบครบ                                           |
-| Drizzle schema file          | ✅ lib/db/schema.ts                          | ตาม DB_SCHEMA.md (ยังไม่ generate migration)                  |
-| Next.js scaffold             | ✅ ทุก config + globals.css                  | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน |
-| Design tokens                | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js`                                 |
-| Shared components            | ✅ components/coach/_ + components/chat/_    | 1:1 port จาก handoff                                          |
-| 7 screens (A1–E4)            | ✅ components/screens/_ + app/_/page.tsx     | static — ไม่มี DB write                                       |
-| Tab-bar navigation           | ✅ wired                                     | /chat ↔ /today ↔ /plan                                        |
-| Canvas review page           | ✅ /canvas                                   | ทุก S26 frame เรียง                                           |
+| Area                         | Status                                       | Notes                                                                 |
+| ---------------------------- | -------------------------------------------- | --------------------------------------------------------------------- |
+| Project guide (CLAUDE.md)    | ✅ committed                                 | rules + topics referenced                                             |
+| Rule docs (.claude/rules/)   | ✅ working-principles + backend + frontend   | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น            |
+| Topic docs (.claude/topics/) | ❌ ทุกอันยังว่าง                             | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"         |
+| Skills (.claude/skills/)     | ❌ ว่าง                                      | จะสร้างใน Step 4                                                      |
+| Design analysis              | ✅ docs/DESIGN_ANALYSIS.md                   | 7 screens, tokens, interactions, open questions                       |
+| DB schema plan               | ✅ docs/DB_SCHEMA.md                         | 19 tables ออกแบบครบ                                                   |
+| Drizzle schema file          | ✅ lib/db/schema.ts                          | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated |
+| Next.js scaffold             | ✅ ทุก config + globals.css                  | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน         |
+| Design tokens                | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js`                                         |
+| Shared components            | ✅ components/coach/_ + components/chat/_    | 1:1 port จาก handoff                                                  |
+| 7 screens (A1–E4)            | ✅ components/screens/_ + app/_/page.tsx     | static — ไม่มี DB write                                               |
+| Tab-bar navigation           | ✅ wired                                     | /chat ↔ /today ↔ /plan                                                |
+| Canvas review page           | ✅ /canvas                                   | ทุก S26 frame เรียง                                                   |
 
 ## What's NOT done (เรียงตาม priority)
 
-### ✅ Blocker #1 — เสร็จแล้ว
+### ✅ Blocker #1 + #2 — เสร็จแล้ว
 
 1. **`pnpm install` + smoke test** — ✅ done
    - `pnpm-lock.yaml` committed
@@ -55,15 +55,22 @@ pnpm dev                              # http://localhost:3000
    - Build รวม 9 routes static (8 หน้าจอ + not-found)
    - คงเหลือ warning: `@next/next/no-page-custom-font` ใน layout.tsx — แก้ตอน refactor ไป `next/font/google` ใน Phase 1
 
+2. **Drizzle initial migration** — ✅ done
+   - `drizzle/migrations/0000_extensions.sql` (custom) — `CREATE EXTENSION pgcrypto / citext / vector` (ตามลำดับ)
+   - `drizzle/migrations/0001_init.sql` (auto-generated, ห้ามแก้) — 20 tables, 22 FKs, 18 indexes รวม partial unique บน `workout_plans`
+   - `_journal.json` ลำดับถูกต้อง: `0000_extensions` → `0001_init`
+   - Schema source-of-truth: `lib/db/schema.ts` (citext + vector(768) ใช้ผ่าน `customType`)
+   - ยังไม่ได้ apply ลง Neon — รอ Phase 1 ตอนตั้ง `DATABASE_URL` จริง
+
 ### 🔴 Blocker / next session ต้องทำ
 
-1. **Generate first Drizzle migration**
-   - `pnpm db:generate` → `drizzle/migrations/0000_initial.sql`
-   - เปิดเช็คว่า extension order ถูก: `CREATE EXTENSION IF NOT EXISTS citext`, `pgcrypto`, `vector` มาก่อน
-   - commit ทั้ง schema + migration
-2. **สร้าง `/me` page (placeholder)** + เปิด `typedRoutes: true` ใน `next.config.ts` กลับ
+1. **สร้าง `/me` page (placeholder)** + เปิด `typedRoutes: true` ใน `next.config.ts` กลับ
    - Tab bar push `/me` ใน 3 ไฟล์ (`app/{chat,today,plan}/page.tsx`) — runtime จะ 404 ตอนนี้
    - Phase 1 จะใส่ profile/account screen จริง
+2. **Apply migration ครั้งแรกบน Neon dev branch**
+   - ตั้ง `DATABASE_URL` ใน `.env.local` (Neon dev branch)
+   - รัน `pnpm db:migrate` → ดู extensions + tables ติด
+   - หลังจากนั้น `pnpm db:studio` ตรวจตาราง
 
 ### 🟠 Phase 1 — wire backend (1-2 sprints)
 
