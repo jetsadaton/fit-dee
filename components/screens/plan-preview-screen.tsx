@@ -1,0 +1,223 @@
+'use client';
+
+import { useState } from 'react';
+import { CoachAvatar, MacroBar, PrimaryBtn, ProgressBar } from '@/components/coach/primitives';
+import { T } from '@/lib/design/tokens';
+
+export function PlanPreview({ onStart }: { onStart?: () => void }) {
+  const [exp, setExp] = useState(false);
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: T.bg }}>
+      <div style={{ padding: '12px 16px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ width: 22 }} />
+          <span
+            style={{
+              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontSize: 11,
+              fontWeight: 700,
+              color: T.textDim,
+              letterSpacing: 0.6,
+              textTransform: 'uppercase',
+            }}
+          >
+            แผนของเรา
+          </span>
+          <div style={{ width: 22 }} />
+        </div>
+        <ProgressBar pct={100} />
+      </div>
+
+      <div style={{ flex: 1, overflow: 'auto', padding: '8px 20px 20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 18 }}>
+          <CoachAvatar size={56} />
+          <h2
+            style={{
+              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontWeight: 900,
+              fontSize: 22,
+              color: T.text,
+              margin: '12px 0 6px',
+              lineHeight: 1.2,
+            }}
+          >
+            พร้อมแล้ว!
+            <br />
+            นี่คือแผนของเรา
+          </h2>
+          <p style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, color: T.textDim, margin: 0 }}>
+            ทุก 14 วันเราปรับให้ตามผลจริง
+          </p>
+        </div>
+
+        <div
+          style={{
+            background: `linear-gradient(160deg, ${T.bg3} 0%, ${T.bg2} 100%)`,
+            borderRadius: 20,
+            border: `1px solid ${T.border}`,
+            padding: 20,
+            marginBottom: 12,
+            textAlign: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontSize: 11,
+              fontWeight: 800,
+              color: T.textDim,
+              letterSpacing: 1.4,
+              textTransform: 'uppercase',
+              marginBottom: 8,
+            }}
+          >
+            เป้าหมายต่อวัน
+          </div>
+          <div
+            style={{
+              fontFamily: 'Inter',
+              fontWeight: 900,
+              fontSize: 56,
+              color: T.coral,
+              lineHeight: 1,
+              letterSpacing: -1,
+            }}
+          >
+            1,820
+          </div>
+          <div
+            style={{
+              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontSize: 13,
+              color: T.textDim,
+              fontWeight: 700,
+              marginTop: 4,
+              letterSpacing: 0.4,
+              textTransform: 'uppercase',
+            }}
+          >
+            kcal / day
+          </div>
+
+          <div style={{ marginTop: 16, padding: '12px 0 0', borderTop: `1px solid ${T.border}` }}>
+            <MacroBar p={{ eaten: 0, goal: 137 }} c={{ eaten: 0, goal: 205 }} f={{ eaten: 0, goal: 60 }} compact />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setExp(!exp)}
+          style={{
+            width: '100%',
+            padding: 14,
+            background: T.bg3,
+            border: `1px solid ${T.border}`,
+            borderRadius: 16,
+            color: T.text,
+            cursor: 'pointer',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 8,
+              background: T.limeBg,
+              color: T.lime,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v4M12 16v.01" strokeLinecap="round" />
+            </svg>
+          </div>
+          <span style={{ flex: 1, fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 700, fontSize: 13.5 }}>
+            ทำไมต้อง 1,820 kcal?
+          </span>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={T.textDim}
+            strokeWidth="2.5"
+            style={{ transform: exp ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+          >
+            <path d="M6 9l6 6 6-6" strokeLinecap="round" />
+          </svg>
+        </button>
+        {exp && (
+          <div style={{ background: T.bg2, borderRadius: 14, padding: 14, marginBottom: 12, border: `1px solid ${T.border}` }}>
+            <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12.5, color: T.textDim, lineHeight: 1.6 }}>
+              <p style={{ margin: '0 0 8px' }}>
+                <b style={{ color: T.text }}>TDEE</b> (พลังงานเผาผลาญต่อวัน) ของนาย ≈ 2,320 kcal
+              </p>
+              <p style={{ margin: 0 }}>
+                เพราะอยากลดน้ำหนัก เราลด 500 kcal เพื่อลด ~0.5 กก./สัปดาห์ — ปลอดภัยและไม่หิวจัด
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+          {[
+            { i: '🍱', t: 'แชทบอกอาหารหรือถ่ายรูป', s: 'เราคำนวณแคลฯ ให้อัตโนมัติ' },
+            { i: '🏋️', t: 'Push/Pull/Legs 4 วัน/สัปดาห์', s: 'ปรับตามอุปกรณ์ที่มี' },
+            { i: '⚖️', t: 'ชั่งน้ำหนักทุกเช้า', s: 'ปรับเป้าทุก 14 วัน' },
+          ].map((it) => (
+            <div
+              key={it.t}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: 12,
+                background: T.bg3,
+                borderRadius: 14,
+                border: `1px solid ${T.border}`,
+              }}
+            >
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: T.bg4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                }}
+              >
+                {it.i}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 13.5 }}>
+                  {it.t}
+                </div>
+                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', color: T.textDim, fontSize: 11.5, marginTop: 2 }}>
+                  {it.s}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: '12px 20px 20px', borderTop: `1px solid ${T.border}`, background: T.bg2 }}>
+        <PrimaryBtn full size="lg" onClick={onStart}>
+          เริ่มวันแรก
+        </PrimaryBtn>
+      </div>
+    </div>
+  );
+}
