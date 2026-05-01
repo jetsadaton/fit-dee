@@ -39,12 +39,12 @@ pnpm dev                              # http://localhost:3000
 | Design tokens                | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js`                                         |
 | Shared components            | ✅ components/coach/_ + components/chat/_    | 1:1 port จาก handoff                                                  |
 | 7 screens (A1–E4)            | ✅ components/screens/_ + app/_/page.tsx     | static — ไม่มี DB write                                               |
-| Tab-bar navigation           | ✅ wired                                     | /chat ↔ /today ↔ /plan                                                |
+| Tab-bar navigation           | ✅ wired                                     | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON     |
 | Canvas review page           | ✅ /canvas                                   | ทุก S26 frame เรียง                                                   |
 
 ## What's NOT done (เรียงตาม priority)
 
-### ✅ Blocker #1 + #2 — เสร็จแล้ว
+### ✅ Blockers Phase 0 — เสร็จแล้ว
 
 1. **`pnpm install` + smoke test** — ✅ done
    - `pnpm-lock.yaml` committed
@@ -67,12 +67,24 @@ pnpm dev                              # http://localhost:3000
    - Verify: `users.email` = `citext`, `foods.embedding` = `vector` ✅
    - ⚠️ DB credentials อยู่ใน `.env.local` (gitignored) — owner ควร rotate password ใน Neon dashboard หลัง dev session เพราะ paste อยู่ใน chat log
 
+4. **`/me` placeholder + เปิด `typedRoutes: true`** — ✅ done
+   - `app/me/page.tsx` placeholder (👤 + "หน้าโปรไฟล์ + ตั้งค่า กำลังจะมาเร็วๆ นี้")
+   - Reuse `BottomTabBar` กับ TabBar คงทำงานครบ 4 tabs
+   - `next.config.ts`: `typedRoutes: true` กลับมา (Next 15 stable, ย้ายออกจาก `experimental`)
+   - Build รวม 10 static routes (เพิ่ม `/me` 714 B)
+   - Phase 1 จะใส่ profile/account screen จริง
+
 ### 🔴 Blocker / next session ต้องทำ
 
-1. **สร้าง `/me` page (placeholder)** + เปิด `typedRoutes: true` ใน `next.config.ts` กลับ
-   - Tab bar push `/me` ใน 3 ไฟล์ (`app/{chat,today,plan}/page.tsx`) — runtime จะ 404 ตอนนี้
-   - Phase 1 จะใส่ profile/account screen จริง
-   - หลังจากนั้น `pnpm db:studio` ตรวจตาราง
+_Phase 0 ปิดครบ → ก้าวเข้า Phase 1_
+
+ลำดับแนะนำสำหรับ Phase 1:
+
+1. **`lib/db/client.ts`** — Neon HTTP/pool client + `getDb()` helper
+2. **`lib/types/db/*.ts`** — `InferSelectModel` exports per aggregate
+3. **`lib/db/repositories/users.ts`** — แรกสุด เพราะทุก service ต้อง resolve user
+4. **Auth.js v5** — `lib/auth.ts` + LINE/Google providers + `app/api/auth/[...nextauth]/route.ts`
+5. **`topics/tdee-and-macros.md`** + **`topics/streak.md`** — interview owner ก่อน implement service
 
 ### 🟠 Phase 1 — wire backend (1-2 sprints)
 
