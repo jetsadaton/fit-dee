@@ -60,16 +60,18 @@ pnpm dev                              # http://localhost:3000
    - `drizzle/migrations/0001_init.sql` (auto-generated, ห้ามแก้) — 20 tables, 22 FKs, 18 indexes รวม partial unique บน `workout_plans`
    - `_journal.json` ลำดับถูกต้อง: `0000_extensions` → `0001_init`
    - Schema source-of-truth: `lib/db/schema.ts` (citext + vector(768) ใช้ผ่าน `customType`)
-   - ยังไม่ได้ apply ลง Neon — รอ Phase 1 ตอนตั้ง `DATABASE_URL` จริง
+
+3. **Apply migration ลง Neon dev branch** — ✅ done
+   - `dotenv-cli` ติดตั้ง + scripts `db:*` + `eval` prefix `dotenv -e .env.local --` แล้ว
+   - `pnpm db:migrate` apply สำเร็จ → 3 extensions, 20 tables, 22 FKs, 43 indexes
+   - Verify: `users.email` = `citext`, `foods.embedding` = `vector` ✅
+   - ⚠️ DB credentials อยู่ใน `.env.local` (gitignored) — owner ควร rotate password ใน Neon dashboard หลัง dev session เพราะ paste อยู่ใน chat log
 
 ### 🔴 Blocker / next session ต้องทำ
 
 1. **สร้าง `/me` page (placeholder)** + เปิด `typedRoutes: true` ใน `next.config.ts` กลับ
    - Tab bar push `/me` ใน 3 ไฟล์ (`app/{chat,today,plan}/page.tsx`) — runtime จะ 404 ตอนนี้
    - Phase 1 จะใส่ profile/account screen จริง
-2. **Apply migration ครั้งแรกบน Neon dev branch**
-   - ตั้ง `DATABASE_URL` ใน `.env.local` (Neon dev branch)
-   - รัน `pnpm db:migrate` → ดู extensions + tables ติด
    - หลังจากนั้น `pnpm db:studio` ตรวจตาราง
 
 ### 🟠 Phase 1 — wire backend (1-2 sprints)
