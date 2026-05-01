@@ -621,7 +621,7 @@ export function PlanScreen({
                 <CoachBubble>
                   บอกได้เลย วันนี้อยากปรับยังไง?
                   <br />
-                  <span style={{ color: T.textMute, fontSize: 12 }}>เช่น "เปลี่ยนเป็นวันไหล่" หรือ "ขอพัก"</span>
+                  <span style={{ color: T.textMute, fontSize: 12 }}>เช่น &quot;เปลี่ยนเป็นวันไหล่&quot; หรือ &quot;ขอพัก&quot;</span>
                 </CoachBubble>
               )}
               {chatMsgs.map((m, i) => {

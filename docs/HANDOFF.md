@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-01 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: `79de014` (pushed to GitHub)
+> Last commit: blocker #1 closed (lockfile + eslint flat config + smoke tests pass)
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -26,36 +26,44 @@ pnpm dev                              # http://localhost:3000
 
 ## Where we are — status snapshot (Phase 0 complete)
 
-| Area | Status | Notes |
-| --- | --- | --- |
-| Project guide (CLAUDE.md) | ✅ committed | rules + topics referenced |
-| Rule docs (.claude/rules/) | ✅ working-principles + backend + frontend | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น |
-| Topic docs (.claude/topics/) | ❌ ทุกอันยังว่าง | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS" |
-| Skills (.claude/skills/) | ❌ ว่าง | จะสร้างใน Step 4 |
-| Design analysis | ✅ docs/DESIGN_ANALYSIS.md | 7 screens, tokens, interactions, open questions |
-| DB schema plan | ✅ docs/DB_SCHEMA.md | 19 tables ออกแบบครบ |
-| Drizzle schema file | ✅ lib/db/schema.ts | ตาม DB_SCHEMA.md (ยังไม่ generate migration) |
-| Next.js scaffold | ✅ ทุก config + globals.css | `pnpm install` ยังไม่รัน → ไม่มี lockfile |
-| Design tokens | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js` |
-| Shared components | ✅ components/coach/* + components/chat/* | 1:1 port จาก handoff |
-| 7 screens (A1–E4) | ✅ components/screens/* + app/*/page.tsx | static — ไม่มี DB write |
-| Tab-bar navigation | ✅ wired | /chat ↔ /today ↔ /plan |
-| Canvas review page | ✅ /canvas | ทุก S26 frame เรียง |
+| Area                         | Status                                       | Notes                                                         |
+| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------- |
+| Project guide (CLAUDE.md)    | ✅ committed                                 | rules + topics referenced                                     |
+| Rule docs (.claude/rules/)   | ✅ working-principles + backend + frontend   | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น    |
+| Topic docs (.claude/topics/) | ❌ ทุกอันยังว่าง                             | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS" |
+| Skills (.claude/skills/)     | ❌ ว่าง                                      | จะสร้างใน Step 4                                              |
+| Design analysis              | ✅ docs/DESIGN_ANALYSIS.md                   | 7 screens, tokens, interactions, open questions               |
+| DB schema plan               | ✅ docs/DB_SCHEMA.md                         | 19 tables ออกแบบครบ                                           |
+| Drizzle schema file          | ✅ lib/db/schema.ts                          | ตาม DB_SCHEMA.md (ยังไม่ generate migration)                  |
+| Next.js scaffold             | ✅ ทุก config + globals.css                  | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน |
+| Design tokens                | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js`                                 |
+| Shared components            | ✅ components/coach/_ + components/chat/_    | 1:1 port จาก handoff                                          |
+| 7 screens (A1–E4)            | ✅ components/screens/_ + app/_/page.tsx     | static — ไม่มี DB write                                       |
+| Tab-bar navigation           | ✅ wired                                     | /chat ↔ /today ↔ /plan                                        |
+| Canvas review page           | ✅ /canvas                                   | ทุก S26 frame เรียง                                           |
 
 ## What's NOT done (เรียงตาม priority)
 
+### ✅ Blocker #1 — เสร็จแล้ว
+
+1. **`pnpm install` + smoke test** — ✅ done
+   - `pnpm-lock.yaml` committed
+   - `eslint.config.mjs` (flat config, extends `next/core-web-vitals`) committed
+   - `next.config.ts`: ปิด `typedRoutes` ชั่วคราว (ต้องเปิดใหม่ใน Phase 1 พร้อมสร้าง `/me` page)
+   - แก้ `react/no-unescaped-entities` 4 จุดใน `plan-screen.tsx:624`
+   - `pnpm typecheck` / `pnpm lint` / `pnpm build` ✅ ทั้งหมด exit 0
+   - Build รวม 9 routes static (8 หน้าจอ + not-found)
+   - คงเหลือ warning: `@next/next/no-page-custom-font` ใน layout.tsx — แก้ตอน refactor ไป `next/font/google` ใน Phase 1
+
 ### 🔴 Blocker / next session ต้องทำ
 
-1. **`pnpm install` + ยืนยัน build ผ่าน** — ตอนนี้ยังไม่มี lockfile
-   - รัน `pnpm install` (ใช้ `packageManager` ใน package.json)
-   - รัน `pnpm typecheck` — fix type errors ที่อาจเกิดจาก strict mode
-   - รัน `pnpm lint` (ESLint config ยังไม่ scaffold — อาจต้อง `next lint --strict` ครั้งแรก)
-   - รัน `pnpm build` — ถ้า fail คือ smoke test ไม่ผ่าน
-   - commit lockfile + ผลลัพธ์
-2. **Generate first Drizzle migration**
+1. **Generate first Drizzle migration**
    - `pnpm db:generate` → `drizzle/migrations/0000_initial.sql`
    - เปิดเช็คว่า extension order ถูก: `CREATE EXTENSION IF NOT EXISTS citext`, `pgcrypto`, `vector` มาก่อน
    - commit ทั้ง schema + migration
+2. **สร้าง `/me` page (placeholder)** + เปิด `typedRoutes: true` ใน `next.config.ts` กลับ
+   - Tab bar push `/me` ใน 3 ไฟล์ (`app/{chat,today,plan}/page.tsx`) — runtime จะ 404 ตอนนี้
+   - Phase 1 จะใส่ profile/account screen จริง
 
 ### 🟠 Phase 1 — wire backend (1-2 sprints)
 
@@ -137,14 +145,14 @@ pnpm dev                              # http://localhost:3000
 
 ทุกหัวข้อต้อง verify กับ **เจ้าของผลิตภัณฑ์** ก่อน implement:
 
-| Topic | File (ยังว่าง) | ใช้ที่ไหน | Owner question |
-| --- | --- | --- | --- |
-| TDEE formula + adjustments | `.claude/topics/tdee-and-macros.md` | `lib/services/tdee.ts`, A3 plan preview, A2 onboarding step 4 estimate | ใช้ Mifflin-St Jeor หรือ Katch-McArdle? % deficit/surplus per goal? Macro split per goal? |
-| kcal floors + ED triggers | `.claude/topics/safety-floors.md` | system prompt + tool guards | Floor < 1200 F / 1500 M? Trigger keywords? Escalation flow → DMH 1323? |
-| PDPA consent | `.claude/topics/pdpa.md` | `users.consents`, retention | Consent versions? Photo retention? Account-delete flow? |
-| Food DB precedence | `.claude/topics/food-db.md` | `lib/services/food-resolver.ts`, `foods.source` | Order: user_edit > vision_cache > USDA > Thai DB > LLM? |
-| Progressive overload | `.claude/topics/progressive-overload.md` | `lib/services/recalibration.ts`, E1 plan suggestions | กฎเพิ่มน้ำหนัก/reps? Deload schedule? |
-| Streak definition | TBD (โผล่ใน design ทุกที่ "🔥 12 วัน") | `lib/services/streak.ts` | นิยามคืออะไร? Any-log? Workout? Kcal-in-range? Reset rule? |
+| Topic                      | File (ยังว่าง)                           | ใช้ที่ไหน                                                              | Owner question                                                                            |
+| -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| TDEE formula + adjustments | `.claude/topics/tdee-and-macros.md`      | `lib/services/tdee.ts`, A3 plan preview, A2 onboarding step 4 estimate | ใช้ Mifflin-St Jeor หรือ Katch-McArdle? % deficit/surplus per goal? Macro split per goal? |
+| kcal floors + ED triggers  | `.claude/topics/safety-floors.md`        | system prompt + tool guards                                            | Floor < 1200 F / 1500 M? Trigger keywords? Escalation flow → DMH 1323?                    |
+| PDPA consent               | `.claude/topics/pdpa.md`                 | `users.consents`, retention                                            | Consent versions? Photo retention? Account-delete flow?                                   |
+| Food DB precedence         | `.claude/topics/food-db.md`              | `lib/services/food-resolver.ts`, `foods.source`                        | Order: user_edit > vision_cache > USDA > Thai DB > LLM?                                   |
+| Progressive overload       | `.claude/topics/progressive-overload.md` | `lib/services/recalibration.ts`, E1 plan suggestions                   | กฎเพิ่มน้ำหนัก/reps? Deload schedule?                                                     |
+| Streak definition          | TBD (โผล่ใน design ทุกที่ "🔥 12 วัน")   | `lib/services/streak.ts`                                               | นิยามคืออะไร? Any-log? Workout? Kcal-in-range? Reset rule?                                |
 
 ใช้ command `/fill-topics <slug>` (ยังไม่ได้สร้างจริง — ต้องเป็น slash command ใน `.claude/commands/`) เพื่อสัมภาษณ์.
 

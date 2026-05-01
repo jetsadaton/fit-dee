@@ -1,0 +1,18 @@
+# Generated / vendored
+node_modules
+.next
+drizzle/migrations
+pnpm-lock.yaml
+next-env.d.ts
+
+# Phase 0 design 1:1 port — keep handoff fidelity, refactor in Phase 1+
+app/**/*.tsx
+components/**/*.tsx
+lib/db/schema.ts
+
+# Existing single-quote configs
+next.config.ts
+drizzle.config.ts
+tailwind.config.ts
+postcss.config.mjs
+app/layout.tsx
