@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-03 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: feat(phase4): offline queue, service worker, web push, insights cache
+> Last commit: feat(me+line): push notification toggle + LINE OA webhook
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -58,6 +58,8 @@ pnpm dev                              # http://localhost:3000
 | **Serwist service worker**        | ✅ **Phase 4**                             | app/sw.ts; withSerwist in next.config.ts (disabled dev); defaultCache                               |
 | **Web Push**                      | ✅ **Phase 4**                             | VAPID keys; push_subscriptions table; /api/push/subscribe; usePushSubscription hook                 |
 | **insights_cache**                | ✅ **Phase 4**                             | DB table + repo; fetchInsightsAction cache-first; weekly-insights writes cache + sends push         |
+| **Push notification toggle**      | ✅ **Phase 4**                             | /me page: subscribe/unsubscribe UI; usePushSubscription hook                                        |
+| **LINE OA webhook**               | ✅ **Phase 4**                             | /api/webhooks/line; HMAC verify; AI pipeline; LINE Reply API; needs LINE*CHANNEL*\* env vars        |
 
 ## Topic docs — all owner-confirmed ✅
 
@@ -72,10 +74,9 @@ pnpm dev                              # http://localhost:3000
 
 ## Next session — pick up here (in order)
 
-1. **เทส Phase 4** — install PWA บน iOS/Android จริง; ทดสอบ offline queue; ทดสอบ push notification
-2. **Push permission prompt** — สร้าง UI ที่ให้ user กด "รับแจ้งเตือน" หลัง install (usePushSubscription hook พร้อมแล้ว)
+1. **เทส Phase 3–4** — install PWA จริง; offline queue; push notification; LINE webhook
+2. **LINE OA setup** — ต้องกรอก LINE_CHANNEL_SECRET + LINE_CHANNEL_ACCESS_TOKEN จาก LINE Developers console
 3. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
-4. LINE webhook (Phase 4) — app/api/webhooks/line/
 
 > Inngest local dev: `npx inngest-cli@latest dev` แล้วเปิด http://localhost:8288
 > Service worker disabled ใน dev mode (next.config.ts) — ต้อง build+serve เพื่อทดสอบ SW จริง
