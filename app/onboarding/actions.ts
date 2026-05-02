@@ -13,6 +13,7 @@ import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { completeOnboarding } from '@/lib/services/onboarding';
 import { generatePlan } from '@/lib/services/plan-generator';
+import { inngest } from '@/inngest/client';
 import { onboardingInputSchema } from '@/lib/types/dto/onboarding';
 
 export type OnboardingActionResult =
@@ -38,6 +39,10 @@ export async function completeOnboardingAction(rawInput: unknown): Promise<Onboa
     const result = await completeOnboarding({ userId: session.user.id, input: parsed.data });
     // Generate workout plan from the new profile (best-effort — don't fail onboarding if exercises table is empty).
     await generatePlan({ userId: session.user.id, profile: result.profile }).catch(() => undefined);
+    // Fire Inngest event for retry/telemetry (best-effort — never blocks onboarding).
+    void inngest
+      .send({ name: 'coachly/onboarding.completed', data: { userId: session.user.id } })
+      .catch(() => undefined);
     // Today / plan / plan-preview all read user_profiles — bust their RSC caches.
     revalidatePath('/today');
     revalidatePath('/plan');

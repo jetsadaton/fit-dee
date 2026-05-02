@@ -1,0 +1,12 @@
+import { serve } from 'inngest/next';
+import { inngest } from '@/inngest/client';
+import { photoExpiry } from '@/inngest/functions/photo-expiry';
+import { weeklyInsights } from '@/inngest/functions/weekly-insights';
+import { planGenerator } from '@/inngest/functions/plan-generator';
+
+// Inngest webhook endpoint — receives events from Inngest cloud (or local dev server).
+// Run `npx inngest-cli@latest dev` to test locally.
+export const { GET, POST, PUT } = serve({
+  client: inngest,
+  functions: [photoExpiry, weeklyInsights, planGenerator],
+});
