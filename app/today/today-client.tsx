@@ -7,7 +7,14 @@ import { TodayScreen, type TodayScreenProps } from '@/components/screens/today-s
 import { queryKeys } from '@/lib/queries/keys';
 import type { TabId } from '@/components/coach/primitives';
 import type { InsightRange } from '@/lib/types/dto/insights';
-import { logMoodAction, logWaterAction, fetchInsightsAction, deleteFoodLogAction, updateFoodLogAction } from './actions';
+import {
+  logMoodAction,
+  logWaterAction,
+  fetchInsightsAction,
+  deleteFoodLogAction,
+  updateFoodLogAction,
+  fetchDaySnapshotAction,
+} from './actions';
 
 // ICT date string (YYYY-MM-DD) used as part of the insights cache key.
 // Insights refresh automatically when the date changes (page reload after midnight).
@@ -21,6 +28,7 @@ export function TodayClient({ data }: { data: TodayData }) {
   const router = useRouter();
   const qc = useQueryClient();
   const [range, setRange] = useState<InsightRange>('today');
+  const [selectedDate, setSelectedDate] = useState(todayIct());
 
   const onTab = (t: TabId) => {
     if (t === 'today') return;
@@ -28,6 +36,31 @@ export function TodayClient({ data }: { data: TodayData }) {
     else if (t === 'plan') router.push('/plan');
     else router.push('/me');
   };
+
+  const isToday = selectedDate === todayIct();
+
+  const dayQuery = useQuery({
+    queryKey: queryKeys.daySnapshot.byDate(selectedDate),
+    queryFn: () => fetchDaySnapshotAction(selectedDate),
+    enabled: !isToday,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Merge: when viewing today use RSC data; for past days overlay dayQuery onto RSC base.
+  const displayData: TodayData = isToday
+    ? data
+    : {
+        ...data,
+        kcalEaten: dayQuery.data?.kcalEaten ?? 0,
+        kcalBurned: dayQuery.data?.kcalBurned ?? 0,
+        proteinEaten: dayQuery.data?.proteinEaten ?? 0,
+        carbEaten: dayQuery.data?.carbEaten ?? 0,
+        fatEaten: dayQuery.data?.fatEaten ?? 0,
+        waterMl: dayQuery.data?.waterMl ?? 0,
+        moodEnergy: dayQuery.data?.moodEnergy ?? null,
+        latestWeightKg: dayQuery.data?.latestWeightKg ?? null,
+        todayFoodLogs: dayQuery.data?.todayFoodLogs ?? [],
+      };
 
   const dateKey = todayIct();
   const insights = useQuery({
@@ -67,6 +100,7 @@ export function TodayClient({ data }: { data: TodayData }) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.dailyDashboard.all });
+      qc.invalidateQueries({ queryKey: queryKeys.daySnapshot.byDate(selectedDate) });
       qc.invalidateQueries({ queryKey: queryKeys.insights.all });
     },
   });
@@ -81,19 +115,23 @@ export function TodayClient({ data }: { data: TodayData }) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.dailyDashboard.all });
+      qc.invalidateQueries({ queryKey: queryKeys.daySnapshot.byDate(selectedDate) });
       qc.invalidateQueries({ queryKey: queryKeys.insights.all });
     },
   });
 
   return (
     <TodayScreen
-      data={data}
+      data={displayData}
       onTab={onTab}
       activeTab="today"
       range={range}
       onRangeChange={setRange}
       insights={insights.data ?? undefined}
       insightsLoading={insights.isFetching}
+      isToday={isToday}
+      selectedDate={selectedDate}
+      onDateChange={setSelectedDate}
       onAddWater={(ml) => water.mutate(ml)}
       onSelectMood={(energy) => mood.mutate(energy)}
       onStartWorkout={() => router.push('/workout/run')}

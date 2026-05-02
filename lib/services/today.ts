@@ -86,6 +86,68 @@ export type TodaySnapshot = {
 
 const ZEROES: DailyFoodTotals = { kcal: 0, proteinG: 0, carbG: 0, fatG: 0, meals: 0 };
 
+/**
+ * Convert a YYYY-MM-DD ICT date string to a UTC [start, end) window.
+ * e.g. '2026-05-03' → [ May 2 17:00 UTC, May 3 17:00 UTC )
+ */
+export function ictDateToUtcWindow(dateIct: string): { start: Date; end: Date } {
+  const [y, m, d] = dateIct.split('-').map(Number);
+  // Date.UTC interprets as UTC midnight; subtract 7h to get ICT midnight in UTC.
+  const start = new Date(Date.UTC(y!, m! - 1, d!, 0, 0, 0) - ICT_OFFSET_MS);
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return { start, end };
+}
+
+/** Day-specific snapshot for the date picker navigation (lighter than full TodaySnapshot). */
+export type DaySnapshot = {
+  kcalEaten: number;
+  kcalBurned: number;
+  proteinEaten: number;
+  carbEaten: number;
+  fatEaten: number;
+  waterMl: number;
+  moodEnergy: number | null;
+  /** Most recent weight ever — intentional: not point-in-time for the selected date. */
+  latestWeightKg: number | null;
+  todayFoodLogs: FoodLogItemDto[];
+};
+
+export async function loadDaySnapshot(userId: string, dateIct: string): Promise<DaySnapshot> {
+  const { start: dayStart, end: dayEnd } = ictDateToUtcWindow(dateIct);
+
+  const [food, waterMl, mood, weight, foodLogs] = await Promise.all([
+    sumFood({ userId, startUtc: dayStart, endUtc: dayEnd }).catch(() => ZEROES),
+    sumWaterMl({ userId, startUtc: dayStart, endUtc: dayEnd }).catch(() => 0),
+    latestMood({ userId, startUtc: dayStart, endUtc: dayEnd }).catch(() => undefined),
+    latestWeight(userId).catch(() => undefined),
+    listWithName({ userId, startUtc: dayStart, endUtc: dayEnd }).catch(() => []),
+  ]);
+
+  return {
+    kcalEaten: food.kcal,
+    kcalBurned: 0,
+    proteinEaten: Math.round(food.proteinG),
+    carbEaten: Math.round(food.carbG),
+    fatEaten: Math.round(food.fatG),
+    waterMl,
+    moodEnergy: mood?.energy ?? null,
+    latestWeightKg: weight?.weightKg != null ? Number(weight.weightKg) : null,
+    todayFoodLogs: foodLogs.map((r) => ({
+      id: r.id,
+      nameTh: r.nameTh,
+      mealType: r.mealType as FoodLogItemDto['mealType'],
+      kcal: r.kcal,
+      kcalLow: r.kcalLow ?? null,
+      kcalHigh: r.kcalHigh ?? null,
+      proteinG: Math.round(Number(r.proteinG) * 10) / 10,
+      carbG: Math.round(Number(r.carbG) * 10) / 10,
+      fatG: Math.round(Number(r.fatG) * 10) / 10,
+      portionG: r.portionG ?? null,
+      loggedAt: r.loggedAt.toISOString(),
+    })),
+  };
+}
+
 const DAY_KEYS: DayKey[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
 function todayDayKey(): DayKey {

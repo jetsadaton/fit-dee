@@ -16,7 +16,7 @@ import {
   logWeightInputSchema,
   updateFoodLogInputSchema,
 } from '@/lib/types/dto/logs';
-import { loadTodaySnapshot } from '@/lib/services/today';
+import { loadTodaySnapshot, loadDaySnapshot, type DaySnapshot } from '@/lib/services/today';
 import { generateInsights } from '@/lib/services/insights';
 import { findFresh, upsert as upsertInsights } from '@/lib/db/repositories/insights-cache';
 import type { Insight, InsightRange } from '@/lib/types/dto/insights';
@@ -161,5 +161,15 @@ export async function fetchInsightsAction(range: InsightRange): Promise<Insight[
     return fresh;
   } catch {
     return [];
+  }
+}
+
+export async function fetchDaySnapshotAction(dateIct: string): Promise<DaySnapshot | null> {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+  try {
+    return await loadDaySnapshot(session.user.id, dateIct);
+  } catch {
+    return null;
   }
 }

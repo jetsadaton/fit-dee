@@ -40,6 +40,11 @@ export const queryKeys = {
     all: ['insights'] as const,
     byRange: (range: string, dateIct: string) => [...queryKeys.insights.all, range, dateIct] as const,
   },
+  // Per-day data for date navigation (< > picker in the Today tab).
+  daySnapshot: {
+    all: ['day-snapshot'] as const,
+    byDate: (dateIct: string) => ['day-snapshot', dateIct] as const,
+  },
   // Add aggregates as services land:
   // foodLogs:       { all: ['food-logs']       as const, today: () => [...]      }
   // workoutPlans:   { all: ['workout-plans']   as const, current: () => [...]    }
