@@ -5,13 +5,21 @@ import { Providers } from './providers';
 export const metadata: Metadata = {
   title: 'Coachly · โค้ชดี',
   description: 'โค้ช AI ส่วนตัวในมือคุณ — แชทกับโค้ชดี บอกว่ากินอะไร เราจัดแผนกินและออกกำลังให้พอดีตัว',
-  applicationName: 'Coachly',
+  applicationName: 'โค้ชดี',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'โค้ชดี',
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: '#0E0F12',
   width: 'device-width',
   initialScale: 1,
+  minimumScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -14,6 +14,7 @@
 import { useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, type QueryClientConfig } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { InstallPrompt } from '@/components/pwa/install-prompt';
 
 const defaultConfig: QueryClientConfig = {
   defaultOptions: {
@@ -39,6 +40,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      <InstallPrompt />
       {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />}
     </QueryClientProvider>
   );
