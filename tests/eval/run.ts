@@ -27,7 +27,18 @@ function createEvalTools() {
     search_food: tool({
       description: 'ค้นหาอาหารจากชื่อภาษาไทยหรืออังกฤษ',
       inputSchema: z.object({ query: z.string() }),
-      execute: async () => [],
+      execute: async (args) => [
+        {
+          foodId: '00000000-0000-0000-0000-000000000001',
+          nameTh: args.query,
+          nameEn: args.query,
+          kcalPer100g: 180,
+          proteinG: 12,
+          carbG: 20,
+          fatG: 5,
+          source: 'eval_stub',
+        },
+      ],
     }),
     log_food: tool({
       description: 'บันทึกมื้ออาหาร',
