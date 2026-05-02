@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { BottomTabBar, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
+import { usePushSubscription } from '@/lib/hooks/use-push-subscription';
 import { signOutAction } from './actions';
 
 type MeClientProps = {
@@ -61,6 +62,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 export function MeClient(props: MeClientProps) {
   const router = useRouter();
+  const { state: pushState, subscribe, unsubscribe } = usePushSubscription();
   const onTab = (t: TabId) => {
     if (t === 'me') return;
     if (t === 'chat') router.push('/chat');
@@ -143,6 +145,38 @@ export function MeClient(props: MeClientProps) {
             </div>
           ))}
         </div>
+
+        {/* Push notifications */}
+        {pushState !== 'unsupported' && (
+          <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 16, padding: '13px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: T.text }}>แจ้งเตือน</div>
+              <div style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>
+                {pushState === 'subscribed' ? 'เปิดอยู่ — รับสรุปทุกวันจันทร์' : pushState === 'denied' ? 'บล็อกโดย browser' : 'ปิดอยู่'}
+              </div>
+            </div>
+            {pushState !== 'denied' && (
+              <button
+                type="button"
+                onClick={pushState === 'subscribed' ? unsubscribe : subscribe}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 999,
+                  border: 'none',
+                  background: pushState === 'subscribed' ? T.bg4 : T.coral,
+                  color: pushState === 'subscribed' ? T.textDim : '#0E0F12',
+                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {pushState === 'subscribed' ? 'ปิด' : 'เปิด'}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Sign out */}
         <form action={signOutAction}>
