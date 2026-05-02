@@ -26,21 +26,25 @@ pnpm dev                              # http://localhost:3000
 
 ## Where we are — status snapshot (Phase 0 complete)
 
-| Area                         | Status                                       | Notes                                                                 |
-| ---------------------------- | -------------------------------------------- | --------------------------------------------------------------------- |
-| Project guide (CLAUDE.md)    | ✅ committed                                 | rules + topics referenced                                             |
-| Rule docs (.claude/rules/)   | ✅ working-principles + backend + frontend   | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น            |
-| Topic docs (.claude/topics/) | ❌ ทุกอันยังว่าง                             | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"         |
-| Skills (.claude/skills/)     | ❌ ว่าง                                      | จะสร้างใน Step 4                                                      |
-| Design analysis              | ✅ docs/DESIGN_ANALYSIS.md                   | 7 screens, tokens, interactions, open questions                       |
-| DB schema plan               | ✅ docs/DB_SCHEMA.md                         | 19 tables ออกแบบครบ                                                   |
-| Drizzle schema file          | ✅ lib/db/schema.ts                          | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated |
-| Next.js scaffold             | ✅ ทุก config + globals.css                  | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน         |
-| Design tokens                | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js`                                         |
-| Shared components            | ✅ components/coach/_ + components/chat/_    | 1:1 port จาก handoff                                                  |
-| 7 screens (A1–E4)            | ✅ components/screens/_ + app/_/page.tsx     | static — ไม่มี DB write                                               |
-| Tab-bar navigation           | ✅ wired                                     | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON     |
-| Canvas review page           | ✅ /canvas                                   | ทุก S26 frame เรียง                                                   |
+| Area                          | Status                                       | Notes                                                                 |
+| ----------------------------- | -------------------------------------------- | --------------------------------------------------------------------- |
+| Project guide (CLAUDE.md)     | ✅ committed                                 | rules + topics referenced                                             |
+| Rule docs (.claude/rules/)    | ✅ working-principles + backend + frontend   | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น            |
+| Topic docs (.claude/topics/)  | ❌ ทุกอันยังว่าง                             | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"         |
+| Skills (.claude/skills/)      | ❌ ว่าง                                      | จะสร้างใน Step 4                                                      |
+| Design analysis               | ✅ docs/DESIGN_ANALYSIS.md                   | 7 screens, tokens, interactions, open questions                       |
+| DB schema plan                | ✅ docs/DB_SCHEMA.md                         | 19 tables ออกแบบครบ                                                   |
+| Drizzle schema file           | ✅ lib/db/schema.ts                          | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated |
+| Next.js scaffold              | ✅ ทุก config + globals.css                  | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน         |
+| Design tokens                 | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js`                                         |
+| Shared components             | ✅ components/coach/_ + components/chat/_    | 1:1 port จาก handoff                                                  |
+| 7 screens (A1–E4)             | ✅ components/screens/_ + app/_/page.tsx     | static — ไม่มี DB write                                               |
+| Tab-bar navigation            | ✅ wired                                     | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON     |
+| Canvas review page            | ✅ /canvas                                   | ทุก S26 frame เรียง                                                   |
+| TanStack Query provider       | ✅ app/providers.tsx + .prettierrc           | staleTime 30s, offlineFirst; client islands ห้าม `fetch` ดิบ          |
+| DB client (Drizzle/Neon HTTP) | ✅ lib/db/client.ts                          | edge-compatible; pool client เพิ่มใน Phase 2 พร้อม chat streaming     |
+| Users repository + types      | ✅ lib/db/repositories/users.ts + types/db   | findById/byLineSub/byGoogleSub + create + softDelete                  |
+| Query key factory             | ✅ lib/queries/keys.ts                       | central registry; กฎใหม่ใน rules/frontend.md ห้าม inline queryKey     |
 
 ## What's NOT done (เรียงตาม priority)
 

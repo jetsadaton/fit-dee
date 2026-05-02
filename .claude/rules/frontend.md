@@ -12,33 +12,34 @@ Next.js 15 (App Router) · TypeScript · Tailwind CSS · **shadcn/ui** (+ Radix 
 2. **Inputs** → ใช้ `<Input>`, `<Textarea>`, `<Select>`, `<Slider>` จาก `components/ui/`. **ห้าม** `<input>`, `<select>`, `<textarea>` ดิบ.
 3. **Shared components** — ห้ามทำซ้ำ:
 
-    | Component | Import | Use for |
-    | --- | --- | --- |
-    | `<Form>` + `<FormField>` | `@/components/ui/form` | ทุก form |
-    | `<KcalRing>` | `@/components/coach/kcal-ring` | dashboard kcal display |
-    | `<MacroBar>` | `@/components/coach/macro-bar` | macro P/C/F |
-    | `<ConfirmCard>` | `@/components/coach/confirm-card` | LLM tool-call confirm |
-    | `<RangeBadge>` | `@/components/coach/range-badge` | "ประมาณ 450–550 kcal" |
-    | `<ExplainerTooltip>` | `@/components/coach/explainer` | jargon (TDEE, โปรตีน) |
-    | `<EmptyStateTeaching>` | `@/components/coach/empty-state` | no-data + next action |
-    | `<RestTimer>` | `@/components/coach/rest-timer` | workout run mode |
-    | `<SetLogger>` | `@/components/coach/set-logger` | reps/weight steppers |
-    | `<BodyMap>` | `@/components/coach/body-map` | injury picker |
-    | `<StreakFlame>` | `@/components/coach/streak-flame` | header badge |
-    | `<CoachAvatar>` | `@/components/coach/avatar` | chat header |
-    | `<ChatBubble>` (variants) | `@/components/chat/bubble` | text / food / workout / insight |
+   | Component                 | Import                            | Use for                         |
+   | ------------------------- | --------------------------------- | ------------------------------- |
+   | `<Form>` + `<FormField>`  | `@/components/ui/form`            | ทุก form                        |
+   | `<KcalRing>`              | `@/components/coach/kcal-ring`    | dashboard kcal display          |
+   | `<MacroBar>`              | `@/components/coach/macro-bar`    | macro P/C/F                     |
+   | `<ConfirmCard>`           | `@/components/coach/confirm-card` | LLM tool-call confirm           |
+   | `<RangeBadge>`            | `@/components/coach/range-badge`  | "ประมาณ 450–550 kcal"           |
+   | `<ExplainerTooltip>`      | `@/components/coach/explainer`    | jargon (TDEE, โปรตีน)           |
+   | `<EmptyStateTeaching>`    | `@/components/coach/empty-state`  | no-data + next action           |
+   | `<RestTimer>`             | `@/components/coach/rest-timer`   | workout run mode                |
+   | `<SetLogger>`             | `@/components/coach/set-logger`   | reps/weight steppers            |
+   | `<BodyMap>`               | `@/components/coach/body-map`     | injury picker                   |
+   | `<StreakFlame>`           | `@/components/coach/streak-flame` | header badge                    |
+   | `<CoachAvatar>`           | `@/components/coach/avatar`       | chat header                     |
+   | `<ChatBubble>` (variants) | `@/components/chat/bubble`        | text / food / workout / insight |
 
-    _(ส่วนใหญ่ยังไม่มี — จะค่อยสร้างตาม Phase. ใช้ตารางนี้เป็น contract เวลาเพิ่มของใหม่)_
+   _(ส่วนใหญ่ยังไม่มี — จะค่อยสร้างตาม Phase. ใช้ตารางนี้เป็น contract เวลาเพิ่มของใหม่)_
 
 4. **Toast** → `sonner` เท่านั้น (`import { toast } from 'sonner'`). ห้าม `alert()` / custom toast component อื่น.
 5. **Styling** — Tailwind utility-first + design tokens ใน `tailwind.config.ts`. ห้ามใส่ inline `style={...}` ยกเว้น dynamic values (chart sizes, animations). ห้ามตั้ง color hex ใน component — ใช้ token (`bg-primary`, `text-coach-coral`, `bg-macro-protein`).
 6. **Icons** → `lucide-react` เท่านั้น. ห้าม `react-icons` / emoji แทนไอคอน.
-7. **Data fetching**:
-   - **Reads**: RSC + Drizzle โดยตรง (server component)
-   - **Mutations**: Server Actions (`'use server'`) → invalidate via `revalidatePath` / `revalidateTag`
-   - **Optimistic + offline queue**: TanStack Query + `useOptimistic` ใน client island
-   - **Chat**: `useChat` จาก `ai/react` (Vercel AI SDK) — ห้าม manual `fetch` + parse SSE
-   - ห้าม `useEffect + fetch` ทำ data fetching
+7. **Data fetching** — **ห้าม `fetch()` / `axios` ตรงๆ ใน client code เด็ดขาด**. Three legal channels only:
+   - **Server reads (RSC)**: import repository functions ตรง — `import { findById } from '@/lib/db/repositories/users'`. ห้ามเรียกผ่าน HTTP จาก server เอง.
+   - **Client reads (islands)**: `useQuery` จาก `@tanstack/react-query` เท่านั้น. ใช้ `queryKey` จาก `lib/queries/keys.ts` (อย่า inline `['food-logs']`). queryFn เรียก Server Action หรือ Route Handler — ไม่ใช่ raw fetch URL.
+   - **Mutations**: `useMutation` ที่เรียก Server Action (`'use server'`). หลังสำเร็จ → `queryClient.invalidateQueries({ queryKey: queryKeys.X.all })` หรือ `revalidatePath()` ฝั่ง server แล้วแต่ scope.
+   - **Chat streaming**: `useChat` จาก `ai/react` (Vercel AI SDK) — wrap ด้วยตัวเองได้แต่ห้าม parse SSE เอง.
+   - **Cache defaults** (อยู่ใน `app/providers.tsx`): `staleTime 30s`, `gcTime 5min`, `refetchOnWindowFocus off`, `networkMode: 'offlineFirst'`. override เฉพาะ hook เมื่อมีเหตุผลชัด (เช่น kcal ring ของ today อาจตั้ง `staleTime: 5s`).
+   - ห้าม `useEffect + fetch`. ห้าม `swr`. ห้าม `useState + เก็บ response` แบบ manual.
 8. **Generated / vendor** — **ห้ามแก้**: `components/ui/*` (shadcn — แก้ผ่าน CLI เท่านั้น), `next-env.d.ts`, `*.generated.ts`
 
 ## Component structure
@@ -115,8 +116,8 @@ app/
 
 ## Docs to update when shared code changes
 
-| Change | Update |
-| --- | --- |
+| Change                    | Update                                          |
+| ------------------------- | ----------------------------------------------- |
 | เพิ่ม/ลบ shared component | ตารางใน file นี้ + skill `frontend-development` |
-| เพิ่ม custom hook | skill `frontend-development` |
-| เปลี่ยน design token | skill `design-system` + `tailwind.config.ts` |
+| เพิ่ม custom hook         | skill `frontend-development`                    |
+| เปลี่ยน design token      | skill `design-system` + `tailwind.config.ts`    |
