@@ -33,7 +33,7 @@ const TOOL_DEFS = `AVAILABLE_TOOLS:
 - log_water({ml: number 50-5000}): บันทึกน้ำดื่ม
 - weigh_in({weightKg: 20-400, bodyFatPct?: 3-60}): บันทึกน้ำหนัก
 - set_mood({energy: 1-5, note?: string}): บันทึก mood/พลังงาน
-- log_exercise({...}): บันทึกการออกกำลังกาย`;
+- log_exercise({semantic_id: string, name_th: string, sets: number, reps: number, weight_kg: number (0 for bodyweight)}): บันทึกการออกกำลังกาย`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',

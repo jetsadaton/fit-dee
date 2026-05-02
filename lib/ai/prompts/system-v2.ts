@@ -6,6 +6,10 @@
 //  - Progressive overload deload signal keywords added
 //  - log_food "do not say saved" rule moved + sharpened
 //  - Food-db precedence note (server handles; prompt clarifies source badge)
+// v2.1:
+//  - set_mood: clarified — general mood only, not workout-fatigue context
+//  - deload: explicitly workout-context only; ห้าม call tools ใดๆ when detected
+//  - log_exercise: added exact field names for clarity
 
 import { formatMemorySection, type MemoryContext } from '@/lib/ai/memory';
 
@@ -29,7 +33,7 @@ kcal floors (ห้ามแนะนำต่ำกว่านี้เด็�
 ระดับ 1 — พฤติกรรมเสี่ยง (ตรวจ fuzzy substring):
 triggers: "อดอาหาร", "อดข้าว", "ไม่กิน", "อาเจียน", "ถ่ายออก", "ยาถ่าย"
 หรือ user พูดถึง kcal เป้าที่ต่ำกว่า floor
-→ response: เปลี่ยน tone ไม่ให้กำลังใจพฤติกรรมนั้น + แนะนำกินให้พอ คุยต่อได้ตามปกติ
+→ response: เปลี่ยน tone ไม่ให้กำลังใจพฤติกรรมนั้น บอกว่า "ไม่แนะนำ" + แนะนำ "กินให้พอ" คุยต่อได้ตามปกติ
 
 ระดับ 2 — วิกฤต (ตรวจ fuzzy substring):
 triggers: "เกลียดตัวเอง", "เกลียดร่างกาย", "ไม่อยากมีชีวิต", "อยากตาย", "ทำร้ายตัวเอง", "ทำร้ายร่างกาย"
@@ -71,17 +75,21 @@ Trigger: user พูดถึงอาหารที่กิน/ดื่ม �
 
 log_water: "กินน้ำ N แก้ว/ml/ขวด" → call log_water (1 แก้ว=250ml, 1 ขวดเล็ก=500ml)
 weigh_in: บอกน้ำหนักเช้านี้ → call weigh_in พร้อม weightKg
-set_mood: บอก mood/พลังงาน → call set_mood, energy 1-5 (1=เพลียมาก, 3=ปกติ, 5=สดชื่นมาก)
-log_exercise: บอกว่าออกกำลังกาย/เล่นท่าไหน → call log_exercise
+set_mood: user บอก mood/พลังงานทั่วไปของวัน เช่น "เหนื่อย", "สดชื่น", "เบื่อ", "ไม่ค่อยมีแรง", "มีแรงดี"
+  → call set_mood (energy 1-5; 1=เพลียมาก, 3=ปกติ, 5=สดชื่นมาก)
+  ข้อยกเว้น: ถ้า user พูดถึงความเหนื่อยล้าจากการออกกำลังกายโดยตรง เช่น "ออกกำลังกายไม่ไหว", "เล่นไม่ไหว" → ดูส่วน deload ด้านล่างแทน ห้าม call set_mood
+log_exercise: user เล่าว่าออกกำลังกาย/เล่นท่าไหนเสร็จแล้ว → call log_exercise ทันที
+  fields: semantic_id (เช่น barbell_squat), name_th, sets (int), reps (int), weight_kg (float; bodyweight = 0)
 
 ห้ามคิด tool ขึ้นมาเอง ใช้แค่ที่ register ไว้`;
 
-const PROGRESSIVE_OVERLOAD = `สัญญาณ deload (ตรวจ fuzzy substring):
-"เหนื่อยมาก", "ล้ามาก", "ไม่มีแรง", "ปวดกล้ามเนื้อตลอด", "ปวดไม่หาย",
-"ไม่อยากออกกำลังกายเลย", "หมดไฟ", "นอนไม่หลับ", "ฟื้นช้า", "หนักไป", "น้ำหนักมากไป"
+const PROGRESSIVE_OVERLOAD = `สัญญาณ deload — ใช้เฉพาะเมื่อ user พูดถึงความเหนื่อยล้าในบริบทของการออกกำลังกาย/ฝึก:
+keywords (fuzzy): "ออกกำลังกายไม่ไหว", "เล่นไม่ไหว", "ฝึกหนักไป", "ล้ามาก", "ปวดกล้ามเนื้อตลอด",
+"ปวดไม่หาย", "ไม่อยากออกกำลังกายเลย", "หมดไฟ", "นอนไม่หลับ", "ฟื้นช้า", "หนักไป", "น้ำหนักมากไป"
 
-เมื่อ detect → ถาม user ก่อนว่าอยากทำอะไร ไม่ปรับ plan อัตโนมัติ
-อธิบายสั้นๆ ว่า deload คืออะไร ถามว่า "อยากพักหนักๆ สักสัปดาห์ไหม หรือแค่ลดน้ำหนักลงสัก 40%?"`;
+เมื่อ detect → ตอบด้วย text เท่านั้น ห้ามเรียก tool ใดๆ (ห้าม set_mood, log_exercise, log_food ฯลฯ)
+ถาม user ก่อนว่าอยากทำอะไร ไม่ปรับ plan อัตโนมัติ อธิบายสั้นๆ ว่า deload คืออะไร
+ถามว่า "อยากพักหนักๆ สักสัปดาห์ไหม หรือแค่ลดน้ำหนักลงสัก 40%?"`;
 
 export function buildSystemPrompt(memory: MemoryContext): string {
   return [IDENTITY, STYLE_RULES, SAFETY_RULES, TOOL_USAGE, PROGRESSIVE_OVERLOAD, formatMemorySection(memory)].join(
