@@ -21,7 +21,11 @@ const authConfig: NextAuthConfig = {
   // Trust X-Forwarded-* headers from Vercel / reverse proxies.
   trustHost: true,
 
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // refresh cookie once per day (not every request)
+  },
 
   providers: [
     Line({
