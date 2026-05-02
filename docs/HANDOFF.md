@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: feat(insights): AIInsightCard — real Kimi-generated insights per range
+> Last commit: feat(heatmap): MonthHeatmap real activity data from DB
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -36,6 +36,7 @@ pnpm dev                              # http://localhost:3000
 | Onboarding flow                   | ✅ /onboarding → /plan-preview → /today    | 9-turn → DB → real targets                                                                        |
 | /today RSC                        | ✅ real data — ทุก tab                     | วันนี้: MacroBar+WeightTrend+WorkoutCTA; สัปดาห์/เดือน: stats จริงทั้งหมด                         |
 | **AIInsightCard**                 | ✅ **real AI insights**                    | moonshot-v1-8k; Server Action + useQuery; skeleton → real → hardcode fallback; staleTime:Infinity |
+| **MonthHeatmap**                  | ✅ **real activity data**                  | level 0-3 per day (food/workout/kcal≥80%); datesWithWorkoutInRange repo; /canvas fallback         |
 | /plan RSC                         | ✅ real data                               | findActive() → enriched exercises → buildScreenPlan()                                             |
 | /chat                             | ✅ UX fixed                                | typing bubble in message list; scroll-to-bottom on load+response; food confirm card v2            |
 | **/me page**                      | ✅ **real data**                           | RSC → profile data; avatar initials; macro bars; sign out                                         |
@@ -65,13 +66,14 @@ pnpm dev                              # http://localhost:3000
 
 ## Next session — pick up here (in order)
 
-1. **Eval other cases (safety/water/deload)** — 17 cases ยังไม่ได้รัน
-   - `pnpm eval:claude --filter other` — ใช้ Claude Haiku (Kimi credits หมด)
-   - target: pass rate ≥ 90%
+1. **Eval 88% (52/59)** — failures: exercise x3, safety_002, deload_001 (+ 1 unknown)
+   - exercise_001/002/003 ทั้ง 3 fail → น่าจะ prompt/tool schema issue
+   - safety_002 (L1 อดข้าว) + deload_001 fail → prompt ต้อง tune
+   - target: ≥ 90% (ขาดอีก 1–2 case)
 
-2. **MonthHeatmap** — hardcoded 30-day grid → real activity data (Phase 3)
+2. **WeightTrend sparkline** — real weight series (ข้อมูลจาก weight_logs, 30d)
 
-3. **WeightTrend sparkline** — decorative fake data → real weight series (Phase 3)
+3. **Fix eval exercise/safety/deload failures** — tune system prompt v2
 
 4. **Inngest / PWA / offline** — Phase 3–4 (deferred)
 
