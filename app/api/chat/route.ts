@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     model: kimi(DEFAULT_MODEL),
     system: systemPrompt,
     messages: modelMessages,
-    temperature: 0.6,
+    temperature: 1, // kimi-k2.6 with thinking mode requires temperature = 1
     tools: createCoachTools(userId),
     stopWhen: stepCountIs(5),
     // Kimi K2.6 extended thinking — improves multi-step reasoning for food/workout advice.
