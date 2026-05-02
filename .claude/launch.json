@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Next.js dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/admin/Documents/Code/fit-dee/node_modules/next/dist/bin/next", "dev"],
+      "port": 3000,
+      "autoPort": false
+    },
+    {
+      "name": "Next.js prod",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/admin/Documents/Code/fit-dee/node_modules/next/dist/bin/next", "start"],
+      "port": 3000,
+      "autoPort": false
+    },
+    {
+      "name": "Drizzle Studio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--env-file=/Users/admin/Documents/Code/fit-dee/.env.local",
+        "/Users/admin/Documents/Code/fit-dee/node_modules/drizzle-kit/bin.cjs",
+        "studio"
+      ],
+      "port": 4983,
+      "autoPort": false
+    }
+  ]
+}
