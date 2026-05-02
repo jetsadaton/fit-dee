@@ -26,34 +26,36 @@ pnpm dev                              # http://localhost:3000
 
 ## Where we are — status snapshot (Phase 0 complete)
 
-| Area                                | Status                                       | Notes                                                                 |
-| ----------------------------------- | -------------------------------------------- | --------------------------------------------------------------------- |
-| Project guide (CLAUDE.md)           | ✅ committed                                 | rules + topics referenced                                             |
-| Rule docs (.claude/rules/)          | ✅ working-principles + backend + frontend   | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น            |
-| Topic docs (.claude/topics/)        | ❌ ทุกอันยังว่าง                             | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"         |
-| Skills (.claude/skills/)            | ❌ ว่าง                                      | จะสร้างใน Step 4                                                      |
-| Design analysis                     | ✅ docs/DESIGN_ANALYSIS.md                   | 7 screens, tokens, interactions, open questions                       |
-| DB schema plan                      | ✅ docs/DB_SCHEMA.md                         | 19 tables ออกแบบครบ                                                   |
-| Drizzle schema file                 | ✅ lib/db/schema.ts                          | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated |
-| Next.js scaffold                    | ✅ ทุก config + globals.css                  | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน         |
-| Design tokens                       | ✅ lib/design/tokens.ts + tailwind.config.ts | parity กับ design `tokens.js`                                         |
-| Shared components                   | ✅ components/coach/_ + components/chat/_    | 1:1 port จาก handoff                                                  |
-| 7 screens (A1–E4)                   | ✅ components/screens/_ + app/_/page.tsx     | static — ไม่มี DB write                                               |
-| Tab-bar navigation                  | ✅ wired                                     | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON     |
-| Canvas review page                  | ✅ /canvas                                   | ทุก S26 frame เรียง                                                   |
-| TanStack Query provider             | ✅ app/providers.tsx + .prettierrc           | staleTime 30s, offlineFirst; client islands ห้าม `fetch` ดิบ          |
-| DB client (Drizzle/Neon HTTP)       | ✅ lib/db/client.ts                          | edge-compatible; pool client เพิ่มใน Phase 2 พร้อม chat streaming     |
-| Users repository + types            | ✅ lib/db/repositories/users.ts + types/db   | findById/byLineSub/byGoogleSub + create + softDelete                  |
-| Query key factory                   | ✅ lib/queries/keys.ts                       | central registry; กฎใหม่ใน rules/frontend.md ห้าม inline queryKey     |
-| Topics (TDEE / streak)              | ✅ .claude/topics/\*.md                      | owner-confirmed; AI ห้ามเดาเกินจากนี้                                 |
-| Services (TDEE + streak)            | ✅ lib/services/{tdee,streak}.ts             | pure, 33 vitest cases pass                                            |
-| Auth.js v5 (LINE + Google)          | ✅ lib/auth.ts + middleware + welcome wired  | JWT session, signIn callback resolves/creates users row; routes guard |
-| Profiles repo + DTO + service       | ✅ lib/services/onboarding.ts + Zod          | upsert pattern; Mifflin/Katch switch; macro scaler                    |
-| Onboarding flow end-to-end          | ✅ /onboarding RSC + action + UI wired       | 9-turn → DB → /plan-preview (real targets) → /today                   |
-| Plan-preview real data              | ✅ RSC reads user_profiles                   | dynamic explainer copy per goal; redirects mid-onboarding users       |
-| Logs repos (food/water/mood/weight) | ✅ lib/db/repositories/\*-logs.ts            | sumInRange, latest, createPending/Confirmed                           |
-| Logs server actions                 | ✅ app/today/actions.ts                      | logWater/logMood/logWeight; auth + Zod + revalidatePath               |
-| /today RSC (read side)              | ✅ loadTodaySnapshot + TodayClient           | header + kcal ring real; water/mood/weight click still optimistic     |
+| Area                                | Status                                                      | Notes                                                                 |
+| ----------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| Project guide (CLAUDE.md)           | ✅ committed                                                | rules + topics referenced                                             |
+| Rule docs (.claude/rules/)          | ✅ working-principles + backend + frontend                  | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น            |
+| Topic docs (.claude/topics/)        | ❌ ทุกอันยังว่าง                                            | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"         |
+| Skills (.claude/skills/)            | ❌ ว่าง                                                     | จะสร้างใน Step 4                                                      |
+| Design analysis                     | ✅ docs/DESIGN_ANALYSIS.md                                  | 7 screens, tokens, interactions, open questions                       |
+| DB schema plan                      | ✅ docs/DB_SCHEMA.md                                        | 19 tables ออกแบบครบ                                                   |
+| Drizzle schema file                 | ✅ lib/db/schema.ts                                         | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated |
+| Next.js scaffold                    | ✅ ทุก config + globals.css                                 | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน         |
+| Design tokens                       | ✅ lib/design/tokens.ts + tailwind.config.ts                | parity กับ design `tokens.js`                                         |
+| Shared components                   | ✅ components/coach/_ + components/chat/_                   | 1:1 port จาก handoff                                                  |
+| 7 screens (A1–E4)                   | ✅ components/screens/_ + app/_/page.tsx                    | static — ไม่มี DB write                                               |
+| Tab-bar navigation                  | ✅ wired                                                    | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON     |
+| Canvas review page                  | ✅ /canvas                                                  | ทุก S26 frame เรียง                                                   |
+| TanStack Query provider             | ✅ app/providers.tsx + .prettierrc                          | staleTime 30s, offlineFirst; client islands ห้าม `fetch` ดิบ          |
+| DB client (Drizzle/Neon HTTP)       | ✅ lib/db/client.ts                                         | edge-compatible; pool client เพิ่มใน Phase 2 พร้อม chat streaming     |
+| Users repository + types            | ✅ lib/db/repositories/users.ts + types/db                  | findById/byLineSub/byGoogleSub + create + softDelete                  |
+| Query key factory                   | ✅ lib/queries/keys.ts                                      | central registry; กฎใหม่ใน rules/frontend.md ห้าม inline queryKey     |
+| Topics (TDEE / streak)              | ✅ .claude/topics/\*.md                                     | owner-confirmed; AI ห้ามเดาเกินจากนี้                                 |
+| Services (TDEE + streak)            | ✅ lib/services/{tdee,streak}.ts                            | pure, 33 vitest cases pass                                            |
+| Auth.js v5 (LINE + Google)          | ✅ lib/auth.ts + middleware + welcome wired                 | JWT session, signIn callback resolves/creates users row; routes guard |
+| Profiles repo + DTO + service       | ✅ lib/services/onboarding.ts + Zod                         | upsert pattern; Mifflin/Katch switch; macro scaler                    |
+| Onboarding flow end-to-end          | ✅ /onboarding RSC + action + UI wired                      | 9-turn → DB → /plan-preview (real targets) → /today                   |
+| Plan-preview real data              | ✅ RSC reads user_profiles                                  | dynamic explainer copy per goal; redirects mid-onboarding users       |
+| Logs repos (food/water/mood/weight) | ✅ lib/db/repositories/\*-logs.ts                           | sumInRange, latest, createPending/Confirmed                           |
+| Logs server actions                 | ✅ app/today/actions.ts                                     | logWater/logMood/logWeight; auth + Zod + revalidatePath               |
+| /today RSC (read + write loop)      | ✅ loadTodaySnapshot + TodayClient                          | header/kcal real; water + mood click → useMutation → action → RSC     |
+| Workout repos (4 aggregates)        | ✅ lib/db/repositories/{exercises,workout-\*,exercise-logs} | findActive, three-stage session lifecycle, bulk createMany            |
+| Provisioned services (Phase 2 prep) | ✅ Neon · Auth · Upstash · Kimi · Vercel Blob               | all probed end-to-end; Helicone dropped from stack                    |
 
 ## What's NOT done (เรียงตาม priority)
 
