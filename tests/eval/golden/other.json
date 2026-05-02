@@ -1,0 +1,89 @@
+[
+  {
+    "id": "water_001",
+    "description": "ดื่มน้ำ 1 แก้ว — water log",
+    "userMessage": "ดื่มน้ำไปแก้วนึง",
+    "expect": {
+      "toolsCalled": ["log_water"],
+      "minSteps": 1
+    }
+  },
+  {
+    "id": "water_002",
+    "description": "ดื่มน้ำหลายแก้ว — estimate ml",
+    "userMessage": "ดื่มน้ำไป 3 แก้วแล้ว",
+    "expect": {
+      "toolsCalled": ["log_water"],
+      "minSteps": 1
+    }
+  },
+  {
+    "id": "weight_001",
+    "description": "ชั่งน้ำหนักเช้า — weigh in",
+    "userMessage": "ชั่งน้ำหนักเช้านี้ได้ 68.5 กิโล",
+    "expect": {
+      "toolsCalled": ["weigh_in"],
+      "minSteps": 1,
+      "toolArgs": {
+        "weigh_in": { "weightKg": 68.5 }
+      }
+    }
+  },
+  {
+    "id": "weight_002",
+    "description": "ชั่งน้ำหนักพร้อม % ไขมัน",
+    "userMessage": "วันนี้ชั่งได้ 72 กิโล ไขมัน 18%",
+    "expect": {
+      "toolsCalled": ["weigh_in"],
+      "minSteps": 1,
+      "toolArgs": {
+        "weigh_in": { "weightKg": 72, "bodyFatPct": 18 }
+      }
+    }
+  },
+  {
+    "id": "mood_001",
+    "description": "พลังงานดี — high energy mood",
+    "userMessage": "วันนี้รู้สึกพลังงานดีมากเลย",
+    "expect": {
+      "toolsCalled": ["set_mood"],
+      "minSteps": 1
+    }
+  },
+  {
+    "id": "mood_002",
+    "description": "เหนื่อย — low energy",
+    "userMessage": "วันนี้เหนื่อยมาก ไม่ค่อยมีแรง",
+    "expect": {
+      "toolsCalled": ["set_mood"],
+      "minSteps": 1
+    }
+  },
+  {
+    "id": "edge_001",
+    "description": "คำถามทั่วไป — no tool expected",
+    "userMessage": "โปรตีนคืออะไร ทำไมสำคัญ",
+    "expect": {
+      "toolsCalled": [],
+      "minSteps": 1
+    }
+  },
+  {
+    "id": "edge_002",
+    "description": "ถามแผนออกกำลังกาย — no tool expected",
+    "userMessage": "อยากเริ่มออกกำลังกายควรทำอะไรก่อน",
+    "expect": {
+      "toolsCalled": [],
+      "minSteps": 1
+    }
+  },
+  {
+    "id": "edge_003",
+    "description": "ทักทาย — no tool",
+    "userMessage": "สวัสดีครับ",
+    "expect": {
+      "toolsCalled": [],
+      "minSteps": 1
+    }
+  }
+]

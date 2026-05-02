@@ -1,0 +1,113 @@
+[
+  {
+    "id": "food_001",
+    "description": "ข้าวกะเพราหมูสับ — lunch context",
+    "userMessage": "กินข้าวกะเพราหมูสับมื้อกลางวัน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_002",
+    "description": "ผัดไทยกุ้ง — no meal context (default OK)",
+    "userMessage": "เพิ่งกินผัดไทยกุ้งมา",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2
+    }
+  },
+  {
+    "id": "food_003",
+    "description": "อาหารเช้า — breakfast detection",
+    "userMessage": "กินไข่ดาว 2 ฟอง กับข้าวเหนียวมะม่วงตอนเช้า",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "breakfast" }
+      }
+    }
+  },
+  {
+    "id": "food_004",
+    "description": "ข้าวมันไก่ — common dish",
+    "userMessage": "มื้อเย็นกินข้าวมันไก่ครึ่งชุด",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_005",
+    "description": "ของว่าง snack — snack detection",
+    "userMessage": "ของว่างกินกล้วยหนึ่งลูก",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_006",
+    "description": "ส้มตำ — common Thai dish",
+    "userMessage": "กินส้มตำไทยกับข้าวเหนียว",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2
+    }
+  },
+  {
+    "id": "food_007",
+    "description": "ต้มยำกุ้ง — soup",
+    "userMessage": "มื้อเที่ยงกินต้มยำกุ้งน้ำข้น",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_008",
+    "description": "แมคโดนัลด์ บิ๊กแมค — international fast food",
+    "userMessage": "กินบิ๊กแมค 1 ชุด + เฟรนช์ฟรายส์ตอนเที่ยง",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_009",
+    "description": "โปรตีนเชค — supplement drink",
+    "userMessage": "ดื่มเวย์โปรตีนหลังออกกำลังกาย",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_010",
+    "description": "ข้าวผัด — fried rice",
+    "userMessage": "เพิ่งกินข้าวผัดกุ้งมาหนึ่งจาน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2
+    }
+  }
+]
