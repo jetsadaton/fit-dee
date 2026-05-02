@@ -1,21 +1,10 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { create } from '@/lib/db/repositories/mood-logs';
+import type { MoodLogDonePayload } from './shared-types';
+import { MOOD_LABEL } from './shared-types';
 
-export type MoodLogDonePayload = {
-  type: 'mood_log_done';
-  energy: number;
-  note: string | null;
-  loggedAt: string;
-};
-
-const MOOD_LABEL: Record<number, string> = {
-  1: 'เหนื่อยมาก 😩',
-  2: 'ล้า 😔',
-  3: 'ปกติ 😐',
-  4: 'โอเค 🙂',
-  5: 'พลังเต็ม 🔥',
-};
+export type { MoodLogDonePayload };
 
 export function createSetMoodTool(userId: string) {
   return tool({

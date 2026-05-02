@@ -1,12 +1,9 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { create } from '@/lib/db/repositories/water-logs';
+import type { WaterLogDonePayload } from './shared-types';
 
-export type WaterLogDonePayload = {
-  type: 'water_log_done';
-  ml: number;
-  loggedAt: string;
-};
+export type { WaterLogDonePayload };
 
 export function createLogWaterTool(userId: string) {
   return tool({

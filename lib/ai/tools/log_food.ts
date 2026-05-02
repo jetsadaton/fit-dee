@@ -1,20 +1,9 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { createPending } from '@/lib/db/repositories/food-logs';
+import type { FoodLogConfirmPayload } from './shared-types';
 
-export type FoodLogConfirmPayload = {
-  type: 'food_log_confirm';
-  pendingId: string;
-  nameTh: string;
-  mealType: string;
-  kcalLow: number;
-  kcalHigh: number;
-  kcal: number;
-  proteinG: number;
-  carbG: number;
-  fatG: number;
-  portionG: number | null;
-};
+export type { FoodLogConfirmPayload };
 
 // Factory closes over userId so the LLM never sees or controls it.
 export function createLogFoodTool(userId: string) {

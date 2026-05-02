@@ -5,11 +5,16 @@ import { createWeighInTool } from './weigh_in';
 import { createSetMoodTool } from './set_mood';
 import { createLogExerciseTool } from './log_exercise';
 
-export { type FoodLogConfirmPayload } from './log_food';
-export { type WaterLogDonePayload } from './log_water';
-export { type WeighInDonePayload } from './weigh_in';
-export { type MoodLogDonePayload, MOOD_LABEL } from './set_mood';
-export { type ExerciseLogDonePayload } from './log_exercise';
+// Re-export shared types + constants from the client-safe module.
+// Server code may import from here; client code must import from './shared-types' directly.
+export type {
+  FoodLogConfirmPayload,
+  WaterLogDonePayload,
+  WeighInDonePayload,
+  MoodLogDonePayload,
+  ExerciseLogDonePayload,
+} from './shared-types';
+export { MOOD_LABEL } from './shared-types';
 
 // Factory closes over userId — never include userId in any tool's inputSchema.
 export function createCoachTools(userId: string) {

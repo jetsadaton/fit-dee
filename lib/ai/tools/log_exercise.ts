@@ -3,15 +3,9 @@ import { z } from 'zod';
 import * as workoutSessions from '@/lib/db/repositories/workout-sessions';
 import * as exerciseLogs from '@/lib/db/repositories/exercise-logs';
 
-export type ExerciseLogDonePayload = {
-  type: 'exercise_log_done';
-  exerciseNameTh: string;
-  sets: number;
-  reps: number;
-  weightKg: number;
-  sessionId: string;
-  loggedAt: string;
-};
+import type { ExerciseLogDonePayload } from './shared-types';
+
+export type { ExerciseLogDonePayload };
 
 const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 

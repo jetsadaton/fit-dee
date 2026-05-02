@@ -1,13 +1,9 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { create } from '@/lib/db/repositories/weight-logs';
+import type { WeighInDonePayload } from './shared-types';
 
-export type WeighInDonePayload = {
-  type: 'weigh_in_done';
-  weightKg: number;
-  bodyFatPct: number | null;
-  loggedAt: string;
-};
+export type { WeighInDonePayload };
 
 export function createWeighInTool(userId: string) {
   return tool({

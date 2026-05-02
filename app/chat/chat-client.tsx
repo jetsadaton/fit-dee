@@ -8,8 +8,8 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type FileUIPart, type UIMessage } from 'ai';
 import { BottomTabBar, CoachAvatar, KcalRing, StreakFlame, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
-import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload } from '@/lib/ai/tools';
-import { MOOD_LABEL } from '@/lib/ai/tools';
+import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload } from '@/lib/ai/tools/shared-types';
+import { MOOD_LABEL } from '@/lib/ai/tools/shared-types';
 import { resizeImage } from '@/lib/utils/resize-image';
 import { confirmFoodLogAction, cancelFoodLogAction } from './actions';
 
