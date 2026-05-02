@@ -1,8 +1,8 @@
 # Coachly · Session Handoff
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
-> Last updated: 2026-05-01 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: blocker #1 closed (lockfile + eslint flat config + smoke tests pass)
+> Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
+> Last commit: phase 2 chat MVP — /chat streams from Kimi end-to-end (no tools yet)
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -60,6 +60,10 @@ pnpm dev                              # http://localhost:3000
 | Kimi client                          | ✅ lib/ai/kimi.ts                                               | createOpenAI → api.moonshot.ai/v1; lazy throw on missing key           |
 | Memory context builder               | ✅ lib/ai/memory.ts                                             | profile_block (numeric only) + summary_7d + notes; formatMemorySection |
 | AI SDK installed                     | ✅ ai 6 + @ai-sdk/openai 3 + @ai-sdk/react 3                    | also @upstash/redis + @upstash/ratelimit                               |
+| System prompt v1                     | ✅ lib/ai/prompts/system-v1.ts                                  | identity / style / safety / tool-usage + injects memory                |
+| Rate limit (Upstash)                 | ✅ lib/ai/rate-limit.ts                                         | sliding window 30/hr/user; Redis key = SHA-256(users.id)               |
+| Chat endpoint (/api/chat)            | ✅ app/api/chat/route.ts                                        | auth + rate + streamText + onFinish persists to messages table         |
+| Chat UI MVP (/chat)                  | ✅ app/chat/{page,chat-client}.tsx                              | minimal useChat; full ChatScreen integration deferred (see Phase 2.5)  |
 
 ## What's NOT done (เรียงตาม priority)
 
@@ -129,48 +133,41 @@ _Phase 0 ปิดครบ → ก้าวเข้า Phase 1_
    - Zod input validation, `auth()` ภายใน — **ห้ามรับ `userId` จาก request body**
    - `revalidatePath('/today')` หลังเขียน
 
-### 🟡 Phase 2 — AI tool layer (IN PROGRESS)
+### 🟡 Phase 2 — AI tool layer (text-only chat WORKS; tools next)
 
-**Already shipped** (commits `441a850` + `<this>`):
+**Already shipped (commits up through `<this>`)**:
 
-- ✅ AI SDK installed: `ai@6` + `@ai-sdk/openai@3` + `@ai-sdk/react@3` + `@upstash/redis` + `@upstash/ratelimit`
-- ✅ `lib/ai/kimi.ts` — `createOpenAI({ baseURL: 'https://api.moonshot.ai/v1' })`. Exports `kimi`, `DEFAULT_MODEL` (`moonshot-v1-32k`), `VISION_MODEL`. Throws lazily if `KIMI_API_KEY` missing.
-- ✅ Chat repos + types: `chat-threads` (`getOrCreate`/`touch`), `messages` (`findRecentByThread`/`findByThreadAsc`/`create`/`softDelete`), `memory-blocks` (`upsert`), `lib/types/db/chat.ts`.
-- ✅ `lib/ai/memory.ts` — `loadMemoryContext(userId)` returns `{ profileBlock, summary7d, notes }`. `formatMemorySection` wraps with `<USER_PROFILE>...</USER_PROFILE>` etc. PII contract enforced (no email/sub/real name; only display_name + numeric).
+- ✅ AI SDK + Upstash clients installed.
+- ✅ `lib/ai/kimi.ts` (createOpenAI → api.moonshot.ai/v1).
+- ✅ Chat repos + types: `chat-threads`, `messages`, `memory-blocks`, `lib/types/db/chat.ts`.
+- ✅ `lib/ai/memory.ts` — `loadMemoryContext` + `formatMemorySection`. PII-safe.
+- ✅ `lib/ai/prompts/system-v1.ts` — identity / style / safety / tool-usage + memory injection. `PROMPT_VERSION = 'v1'`.
+- ✅ `lib/ai/rate-limit.ts` — sliding window 30/hr/user, SHA-256 keys.
+- ✅ `app/api/chat/route.ts` — Node runtime (not edge yet), auth + rate limit + streamText + onFinish persists user+assistant rows with `kimi_request_id`/`token_in`/`token_out`/`latency_ms`.
+- ✅ `app/chat/{page,chat-client}.tsx` — minimal useChat UI; hydrates initialMessages from DB; Server Component gates on auth + profile.
 
-**Next session — pick up here**:
+**Verified e2e flow**: `/` → signIn → `/onboarding` → `/plan-preview` → `/today` → `/chat` (talk to Kimi, see assistant reply stream, message persisted to DB).
 
-8. **System prompt** — `lib/ai/prompts/system-v1.ts`
-   - Versioned (eval harness reads `prompt_version`).
-   - Blocks: identity (โค้ชดี, tone กันเอง, นาย/เรา), rules (confirm-before-write, range badge `~450-550`, kcal floor 1500M/1200F per `topics/safety-floors.md` (still empty — verify with owner!), no PII), memory section (use `formatMemorySection`).
-   - Export `buildSystemPrompt(memory: MemoryContext): string` and `PROMPT_VERSION = 'v1'`.
-9. **Rate limit** — `lib/ai/rate-limit.ts`
-   - `@upstash/ratelimit` sliding window: 30 chat msgs / hour / user.
-   - Function `chatLimiter.limit(userIdHash)` → `{ success, reset, remaining }`.
-   - Hash userId via SHA-256 to keep Redis keys non-PII.
-10. **Streaming chat endpoint** — `app/api/chat/route.ts`
-    - `runtime = 'edge'` (HTTP-driver Drizzle is edge-safe; Kimi via fetch is too).
-    - `auth()` → reject 401 if missing.
-    - Rate limit check → 429 if over.
-    - `getOrCreate` thread, `findRecentByThread(20)` for short-term context.
-    - `loadMemoryContext` + `buildSystemPrompt`.
-    - `streamText({ model: kimi(DEFAULT_MODEL), system, messages, ... })`.
-    - On `onFinish` callback: persist user msg + assistant msg into `messages` table with `kimi_request_id`, token counts, latency. Bump `chat_threads.last_message_at`.
-    - Return `result.toDataStreamResponse()`.
-11. **Wire `app/chat/page.tsx`** — replace mock with `useChat({ api: '/api/chat' })`
-    - Server-render initial messages from `findRecentByThread` for fast first paint.
-    - Client island uses `useChat` with `initialMessages`.
-    - Existing `ChatScreen` already accepts custom message arrays — pass `messages.map` to it.
-12. **First 2 tools** — `lib/ai/tools/search_food.ts` + `log_food.ts`
-    - Each = `tool({ description, inputSchema (Zod), execute })`.
-    - `search_food`: query `foods.embedding` via pgvector, return top-5 candidates with semantic_id + macros per 100g.
-    - `log_food`: returns confirm card payload (food_id + portion_g + computed kcal/macros + range). Does NOT write directly — UI shows confirm card → user accepts → `confirmFoodLogAction` (Server Action) commits via repo.
-13. **Tool registry** — `lib/ai/tools/index.ts` exports `coachTools = { search_food, log_food, ... }` — pass to `streamText({ tools: coachTools })`.
-14. **Eval harness** — `tests/eval/run.ts` + `tests/eval/golden/*.json`
-    - 50 Thai food prompts (รออาหารจริงจากเจ้าของ)
-    - regression check ก่อน merge ทุก system-prompt change
+**Next session — pick up here (in order)**:
 
-**Open topic still required before service builds**: `topics/safety-floors.md` (kcal floors + ED triggers + DMH 1323 escalation) — interview owner. System prompt v1 references it.
+1. **Verify the chat actually works in the browser** before adding tools. Open `/chat` after onboarding, send "ทดสอบ" — should see a streamed Thai reply and a row appear in `messages` (use `pnpm db:studio` to confirm). Persist failures live in `console.error` only; production needs proper logging in Phase 3.
+2. **First 2 tools** — `lib/ai/tools/search_food.ts` + `log_food.ts`
+   - `tool({ description, inputSchema (Zod), execute })` from `ai`.
+   - `search_food`: takes Thai query string, runs pgvector similarity on `foods.embedding`, returns top-5 with semantic_id + per-100g macros.
+   - `log_food`: returns a confirm card payload only — does NOT write the row. UI shows the card; user taps confirm; `confirmFoodLogAction` (Server Action) commits via `food-logs.confirm`.
+3. **Tool registry** — `lib/ai/tools/index.ts` exports `coachTools = { search_food, log_food, ... }`. Pass to `streamText({ tools: coachTools })` in `app/api/chat/route.ts`. Tool-call rows go into `messages.tool_calls` jsonb.
+4. **Refactor full ChatScreen** to consume the same data — remove the minimal `ChatClient`, instead pass `useChat`'s messages into `ChatScreen` (which already has bubble variants for food/workout/insight). Wire confirm cards into food bubble.
+5. **Remaining tools** — `log_water` / `log_exercise` / `update_plan` / `weigh_in` / `set_mood` / `update_profile`. Mostly thin wrappers over the existing Server Actions.
+6. **Plan generator** — `lib/services/plan-generator.ts`. Takes profile → produces a `WorkoutPlan` row. Triggered (a) automatically right after onboarding, (b) by `update_plan` tool. `/plan` RSC reads `findActive` and renders.
+7. **Eval harness** — `tests/eval/run.ts` + `tests/eval/golden/*.json`. 50 Thai food prompts (need owner). Gates merges that touch `system-v*.ts` or any tool.
+
+**Topic gap (BLOCKING before pushing safety-critical changes)**: `topics/safety-floors.md` is empty. System prompt v1 quotes 1500M / 1200F + DMH 1323 — these are owner-confirmed in `topics/tdee-and-macros.md` but ED triggers / escalation flow still need explicit owner sign-off.
+
+**Outstanding gaps from Phase 1 (deferable)**:
+
+- `goals` repo + `attachments` repo (Phase 3 + Phase 2 photo flow respectively).
+- Workout plan/session UI wiring (`/plan` and `/workout/run` still mock).
+- `WeightTrend` Today card — display only; mutation lands when `weigh_in` tool ships.
 
 ### 🟢 Phase 3 — background jobs (Inngest)
 
