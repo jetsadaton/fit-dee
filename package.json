@@ -17,7 +17,8 @@
     "db:seed": "dotenv -e .env.local -- tsx scripts/seed-exercises.ts",
     "db:seed:foods": "dotenv -e .env.local -- tsx scripts/seed-thai-foods.ts",
     "db:seed:moph2018": "dotenv -e .env.local -- tsx scripts/seed-moph2018.ts",
-    "eval": "dotenv -e .env.local -- tsx tests/eval/run.ts"
+    "eval": "dotenv -e .env.local -- tsx tests/eval/run.ts",
+    "eval:claude": "dotenv -e .env.local -- tsx tests/eval/run-claude.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.58",

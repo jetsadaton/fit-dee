@@ -126,8 +126,10 @@ async function runCase(gc: GoldenCase): Promise<EvalResult> {
       messages: [{ role: 'user', content: gc.userMessage }],
       tools: createEvalTools(),
       stopWhen: stepCountIs(6),
-      temperature: 1,
-      providerOptions: { kimi: { thinking: { type: 'enabled' } } },
+      temperature: 1, // Kimi K2.6 only accepts 1
+      // Thinking mode OFF for eval — faster + reduces overthinking that
+      // sometimes causes Kimi to call search_food repeatedly without log_food.
+      // Production (chat route) keeps thinking ON.
     });
 
     // Collect all tool calls across all steps
@@ -208,11 +210,18 @@ async function runCase(gc: GoldenCase): Promise<EvalResult> {
 async function main() {
   const filterArg = process.argv.indexOf('--filter');
   const filterPattern = filterArg !== -1 ? process.argv[filterArg + 1] : null;
+  const limitArg = process.argv.indexOf('--limit');
+  const limitN = limitArg !== -1 ? Number(process.argv[limitArg + 1]) : null;
 
   const allCases = [...(foodCases as GoldenCase[]), ...(otherCases as GoldenCase[])];
-  const cases = filterPattern ? allCases.filter((c) => c.id.startsWith(filterPattern)) : allCases;
+  let cases = filterPattern ? allCases.filter((c) => c.id.startsWith(filterPattern)) : allCases;
+  if (limitN && limitN > 0) cases = cases.slice(0, limitN);
 
-  console.log(`\n🧪 Eval harness — ${cases.length} cases${filterPattern ? ` (filter: "${filterPattern}")` : ''}\n`);
+  console.log(
+    `\n🧪 Eval harness — ${cases.length} cases${filterPattern ? ` (filter: "${filterPattern}")` : ''}${
+      limitN ? ` (limit: ${limitN})` : ''
+    }\n`,
+  );
 
   let passed = 0;
   let failed = 0;

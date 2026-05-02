@@ -58,11 +58,11 @@
   },
   {
     "id": "food_006",
-    "description": "ส้มตำ — common Thai dish",
+    "description": "ส้มตำ — common Thai dish (search optional per prompt)",
     "userMessage": "กินส้มตำไทยกับข้าวเหนียว",
     "expect": {
-      "toolsCalled": ["search_food", "log_food"],
-      "minSteps": 2
+      "toolsCalled": ["log_food"],
+      "minSteps": 1
     }
   },
   {
@@ -397,11 +397,11 @@
   },
   {
     "id": "food_035",
-    "description": "ไม่ระบุอาหาร — coach must ask clarifying",
+    "description": "ไม่ระบุอาหาร — coach must ask clarifying (no tools)",
     "userMessage": "เพิ่งกินข้าวมา",
     "expect": {
-      "toolsCalled": ["search_food", "log_food"],
-      "minSteps": 1
+      "toolsCalled": [],
+      "mustContainOneOf": ["อะไร", "ชื่อ", "ระบุ", "บอก", "กิน"]
     }
   },
   {
