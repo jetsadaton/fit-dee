@@ -5,7 +5,7 @@ import { BottomTabBar, CoachAvatar, RangeBadge, type TabId } from '@/components/
 import { CoachBubble, CoachCard, TypingDots, UserBubble } from '@/components/chat/bubbles';
 import { T } from '@/lib/design/tokens';
 
-type ExerciseRow = {
+export type ExerciseRow = {
   name: string;
   sets: number;
   reps: string;
@@ -13,8 +13,8 @@ type ExerciseRow = {
   tip: string | null;
   formCues: string[];
 };
-type DayPlan = { name: string; focus?: string; mins?: number; rest?: boolean; exercises?: ExerciseRow[] };
-type WeekPlan = Record<string, DayPlan>;
+export type DayPlan = { name: string; focus?: string; mins?: number; rest?: boolean; exercises?: ExerciseRow[] };
+export type WeekPlan = Record<string, DayPlan>;
 
 const EX = (
   name: string,
@@ -109,10 +109,12 @@ export function PlanScreen({
   onTab,
   activeTab = 'plan' as TabId,
   onStartWorkout,
+  initialPlan,
 }: {
   onTab?: (t: TabId) => void;
   activeTab?: TabId;
   onStartWorkout?: () => void;
+  initialPlan?: WeekPlan;
 }) {
   const days = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'] as const;
   const dayLabel: Record<string, string> = {
@@ -125,7 +127,7 @@ export function PlanScreen({
     อา: 'อาทิตย์',
   };
   const today = 'จ';
-  const [plan, setPlan] = useState<WeekPlan>(DEFAULT_PLAN);
+  const [plan, setPlan] = useState<WeekPlan>(initialPlan ?? DEFAULT_PLAN);
   const [selected, setSelected] = useState<string>(today);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);

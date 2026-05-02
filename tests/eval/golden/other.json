@@ -85,5 +85,41 @@
       "toolsCalled": [],
       "minSteps": 1
     }
+  },
+  {
+    "id": "exercise_001",
+    "description": "สควอต 3 เซต — log exercise",
+    "userMessage": "เพิ่งทำสควอต 3 เซต 10 ครั้ง น้ำหนัก 60 กิโล",
+    "expect": {
+      "toolsCalled": ["log_exercise"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_exercise": { "sets": 3, "reps": 10, "weight_kg": 60 }
+      }
+    }
+  },
+  {
+    "id": "exercise_002",
+    "description": "ดันพื้น bodyweight — log exercise weight=0",
+    "userMessage": "ทำ push-up ไป 4 เซต 20 ครั้งครับ",
+    "expect": {
+      "toolsCalled": ["log_exercise"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_exercise": { "sets": 4, "reps": 20, "weight_kg": 0 }
+      }
+    }
+  },
+  {
+    "id": "exercise_003",
+    "description": "เดดลิฟท์ — ระบุน้ำหนัก",
+    "userMessage": "เพิ่งเล่น deadlift 5 เซต 5 ครั้ง หนัก 100 กิโล",
+    "expect": {
+      "toolsCalled": ["log_exercise"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_exercise": { "sets": 5, "reps": 5, "weight_kg": 100 }
+      }
+    }
   }
 ]

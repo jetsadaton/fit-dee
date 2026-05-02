@@ -14,7 +14,7 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type FileUIPart, type UIMessage } from 'ai';
 import { BottomTabBar, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
-import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload } from '@/lib/ai/tools';
+import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload } from '@/lib/ai/tools';
 import { MOOD_LABEL } from '@/lib/ai/tools';
 import { resizeImage } from '@/lib/utils/resize-image';
 import { confirmFoodLogAction, cancelFoodLogAction } from './actions';
@@ -186,6 +186,21 @@ function MoodLogCard({ payload }: { payload: MoodLogDonePayload }) {
   );
 }
 
+function ExerciseLogCard({ payload }: { payload: ExerciseLogDonePayload }) {
+  return (
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ fontSize: 22 }}>💪</span>
+      <div>
+        <div style={{ fontWeight: 700, color: T.text }}>บันทึกท่าออกกำลังแล้ว</div>
+        <div style={{ color: T.textDim, fontSize: 12 }}>
+          {payload.exerciseNameTh} · {payload.sets} เซต × {payload.reps} ครั้ง
+          {payload.weightKg > 0 ? ` @ ${payload.weightKg} kg` : ' (bodyweight)'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type ChatClientProps = {
   initialMessages: UIMessage[];
   displayName: string;
@@ -351,6 +366,12 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
                 bubbles.push(
                   <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
                     <MoodLogCard payload={out as unknown as MoodLogDonePayload} />
+                  </div>
+                );
+              } else if (p.type === 'tool-log_exercise' && out?.type === 'exercise_log_done') {
+                bubbles.push(
+                  <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
+                    <ExerciseLogCard payload={out as unknown as ExerciseLogDonePayload} />
                   </div>
                 );
               }
