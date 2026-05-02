@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { searchByName } from '@/lib/db/repositories/foods';
+import { foodResolverService } from '@/lib/services/food-resolver';
 
 export function createSearchFoodTool() {
   return tool({
@@ -10,7 +10,7 @@ export function createSearchFoodTool() {
       query: z.string().describe('ชื่ออาหารหรือ keyword เช่น "ข้าวกะเพรา" หรือ "pad krapao"'),
     }),
     execute: async ({ query }) => {
-      const rows = await searchByName(query);
+      const rows = await foodResolverService.search(query);
       return rows.map((f) => ({
         foodId: f.id,
         semanticId: f.semanticId,

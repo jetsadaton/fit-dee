@@ -35,5 +35,8 @@ test-results
 # drizzle / db
 drizzle/.snapshot
 
+# generated extraction output (Thai nutrition PDF pipeline)
+scripts/extracted/
+
 # vercel
 .vercel

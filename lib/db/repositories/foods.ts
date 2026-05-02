@@ -20,6 +20,7 @@ export async function searchByName(query: string, limit = 5): Promise<FoodSearch
       carbGPer100g: foods.carbGPer100g,
       fatGPer100g: foods.fatGPer100g,
       defaultPortionG: foods.defaultPortionG,
+      source: foods.source,
     })
     .from(foods)
     .where(or(ilike(foods.nameTh, pattern), ilike(foods.nameEn, pattern)))

@@ -15,6 +15,13 @@
       "when": 1777653603617,
       "tag": "0001_init",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777709600146,
+      "tag": "0002_overconfident_mesmero",
+      "breakpoints": true
     }
   ]
 }

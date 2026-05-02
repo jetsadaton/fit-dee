@@ -139,6 +139,28 @@ export const foods = pgTable(
     proteinGPer100g: numeric('protein_g_per_100g', { precision: 5, scale: 2 }).notNull(),
     carbGPer100g: numeric('carb_g_per_100g', { precision: 5, scale: 2 }).notNull(),
     fatGPer100g: numeric('fat_g_per_100g', { precision: 5, scale: 2 }).notNull(),
+    // Proximate
+    waterGPer100g: numeric('water_g_per_100g', { precision: 5, scale: 2 }),
+    fiberGPer100g: numeric('fiber_g_per_100g', { precision: 5, scale: 2 }),
+    sugarGPer100g: numeric('sugar_g_per_100g', { precision: 5, scale: 2 }),
+    ashGPer100g: numeric('ash_g_per_100g', { precision: 5, scale: 2 }),
+    // Minerals
+    calciumMgPer100g: numeric('calcium_mg_per_100g', { precision: 7, scale: 2 }),
+    phosphorusMgPer100g: numeric('phosphorus_mg_per_100g', { precision: 7, scale: 2 }),
+    magnesiumMgPer100g: numeric('magnesium_mg_per_100g', { precision: 7, scale: 2 }),
+    sodiumMgPer100g: numeric('sodium_mg_per_100g', { precision: 7, scale: 2 }),
+    potassiumMgPer100g: numeric('potassium_mg_per_100g', { precision: 7, scale: 2 }),
+    ironMgPer100g: numeric('iron_mg_per_100g', { precision: 5, scale: 3 }),
+    copperMgPer100g: numeric('copper_mg_per_100g', { precision: 5, scale: 3 }),
+    zincMgPer100g: numeric('zinc_mg_per_100g', { precision: 5, scale: 3 }),
+    iodineUgPer100g: numeric('iodine_ug_per_100g', { precision: 7, scale: 2 }),
+    // Vitamins
+    vitaminAUgRaePer100g: numeric('vitamin_a_ug_rae_per_100g', { precision: 7, scale: 2 }),
+    thiaminMgPer100g: numeric('thiamin_mg_per_100g', { precision: 5, scale: 3 }),
+    riboflavinMgPer100g: numeric('riboflavin_mg_per_100g', { precision: 5, scale: 3 }),
+    niacinMgPer100g: numeric('niacin_mg_per_100g', { precision: 5, scale: 2 }),
+    vitaminCMgPer100g: numeric('vitamin_c_mg_per_100g', { precision: 5, scale: 2 }),
+    vitaminEMgPer100g: numeric('vitamin_e_mg_per_100g', { precision: 5, scale: 2 }),
     defaultPortionG: smallint('default_portion_g'),
     source: text('source').notNull(), // 'usda' | 'thai_db' | 'user' | 'llm_estimate'
     verified: boolean('verified').notNull().default(false),

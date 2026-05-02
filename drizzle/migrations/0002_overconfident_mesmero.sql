@@ -1,0 +1,19 @@
+ALTER TABLE "foods" ADD COLUMN "water_g_per_100g" numeric(5, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "fiber_g_per_100g" numeric(5, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "sugar_g_per_100g" numeric(5, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "ash_g_per_100g" numeric(5, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "calcium_mg_per_100g" numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "phosphorus_mg_per_100g" numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "magnesium_mg_per_100g" numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "sodium_mg_per_100g" numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "potassium_mg_per_100g" numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "iron_mg_per_100g" numeric(5, 3);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "copper_mg_per_100g" numeric(5, 3);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "zinc_mg_per_100g" numeric(5, 3);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "iodine_ug_per_100g" numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "vitamin_a_ug_rae_per_100g" numeric(7, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "thiamin_mg_per_100g" numeric(5, 3);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "riboflavin_mg_per_100g" numeric(5, 3);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "niacin_mg_per_100g" numeric(5, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "vitamin_c_mg_per_100g" numeric(5, 2);--> statement-breakpoint
+ALTER TABLE "foods" ADD COLUMN "vitamin_e_mg_per_100g" numeric(5, 2);

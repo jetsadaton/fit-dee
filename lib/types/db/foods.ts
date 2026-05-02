@@ -15,4 +15,11 @@ export type FoodSearchResult = Pick<
   | 'carbGPer100g'
   | 'fatGPer100g'
   | 'defaultPortionG'
+  | 'source'
 >;
+
+/**
+ * Unified result from the food resolver (Thai DB + USDA fallback).
+ * `source` values: 'thai_db' | 'usda' | 'user' | 'llm_estimate'
+ */
+export type FoodResolverResult = FoodSearchResult;

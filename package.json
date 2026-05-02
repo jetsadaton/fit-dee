@@ -16,6 +16,7 @@
     "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
     "db:seed": "dotenv -e .env.local -- tsx scripts/seed-exercises.ts",
     "db:seed:foods": "dotenv -e .env.local -- tsx scripts/seed-thai-foods.ts",
+    "db:seed:moph2018": "dotenv -e .env.local -- tsx scripts/seed-moph2018.ts",
     "eval": "dotenv -e .env.local -- tsx tests/eval/run.ts"
   },
   "dependencies": {

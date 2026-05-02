@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { T } from '@/lib/design/tokens';
 
-type Ex = {
+export type Ex = {
+  semanticId: string;
   name: string;
   sets: number;
   reps: string;
@@ -15,6 +16,7 @@ type Ex = {
 
 const RUN_PLAN: Ex[] = [
   {
+    semanticId: 'barbell_bench_press',
     name: 'Bench Press',
     sets: 3,
     reps: '8-10',
@@ -23,6 +25,7 @@ const RUN_PLAN: Ex[] = [
     formCues: ['หลังแนบเบาะ ขาแน่นพื้น', 'ลดบาร์ลงช้า ~3 วิ', 'ดันขึ้นเร็ว หายใจออก'],
   },
   {
+    semanticId: 'overhead_press',
     name: 'Shoulder Press',
     sets: 3,
     reps: '10-12',
@@ -31,6 +34,7 @@ const RUN_PLAN: Ex[] = [
     formCues: ['นั่งหลังตรง', 'ดันจนข้อศอกเกือบเหยียดสุด', 'อย่าโค้งหลัง'],
   },
   {
+    semanticId: 'dumbbell_press',
     name: 'Incline DB Press',
     sets: 3,
     reps: '10-12',
@@ -39,6 +43,7 @@ const RUN_PLAN: Ex[] = [
     formCues: ['เบาะเอียง 30-45°', 'ลดถึงระดับอก', 'บีบอกตอนดัน'],
   },
   {
+    semanticId: 'lateral_raise',
     name: 'Lateral Raise',
     sets: 3,
     reps: '12-15',
@@ -47,6 +52,7 @@ const RUN_PLAN: Ex[] = [
     formCues: ['ยืนตรง เกร็งแกน', 'ยกถึงระดับไหล่', 'ลงช้า 2 วิ'],
   },
   {
+    semanticId: 'tricep_pushdown',
     name: 'Tricep Pushdown',
     sets: 3,
     reps: '12-15',
@@ -55,6 +61,9 @@ const RUN_PLAN: Ex[] = [
     formCues: ['ข้อศอกชิดข้างลำตัว', 'เหยียดสุด บีบไตรเซป', 'กลับเข้าช้า'],
   },
 ];
+
+/** Exposed so RSC page + run-client can reference the fallback plan without re-importing. */
+export const DEFAULT_RUN_PLAN = RUN_PLAN;
 
 type Phase = 'working' | 'resting' | 'done';
 
@@ -88,7 +97,17 @@ const bigStepBtn: CSSProperties = {
   flexShrink: 0,
 };
 
-export function WorkoutRun({ onExit }: { onExit?: () => void }) {
+export function WorkoutRun({
+  onExit,
+  initialPlan,
+  sessionName,
+  onSave,
+}: {
+  onExit?: () => void;
+  initialPlan?: Ex[];
+  sessionName?: string;
+  onSave?: (logs: Record<string, { w: number; r: string }>, elapsed: number) => Promise<void>;
+}) {
   const [exIdx, setExIdx] = useState(0);
   const [setIdx, setSetIdx] = useState(0);
   const [phase, setPhase] = useState<Phase>('working');
@@ -97,6 +116,7 @@ export function WorkoutRun({ onExit }: { onExit?: () => void }) {
   const [logs, setLogs] = useState<Record<string, { w: number; r: string }>>({});
   const [confirm, setConfirm] = useState<'exit' | null>(null);
   const prevPhase = useRef<Phase>(phase);
+  const plan = initialPlan ?? RUN_PLAN;
 
   useEffect(() => {
     if (phase === 'done') return;
@@ -119,9 +139,9 @@ export function WorkoutRun({ onExit }: { onExit?: () => void }) {
     return () => clearInterval(id);
   }, [phase]);
 
-  const ex = RUN_PLAN[exIdx]!;
-  const totalSets = RUN_PLAN.reduce((s, e) => s + e.sets, 0);
-  const doneSets = RUN_PLAN.slice(0, exIdx).reduce((s, e) => s + e.sets, 0) + setIdx;
+  const ex = plan[exIdx]!;
+  const totalSets = plan.reduce((s, e) => s + e.sets, 0);
+  const doneSets = plan.slice(0, exIdx).reduce((s, e) => s + e.sets, 0) + setIdx;
   const progressPct = (doneSets / totalSets) * 100;
 
   const advanceAfterRest = () => {
@@ -144,7 +164,7 @@ export function WorkoutRun({ onExit }: { onExit?: () => void }) {
 
   const completeSet = (reps: string, weight: number) => {
     setLogs((L) => ({ ...L, [`${exIdx}-${setIdx}`]: { w: weight, r: reps } }));
-    if (setIdx + 1 >= ex.sets && exIdx + 1 >= RUN_PLAN.length) {
+    if (setIdx + 1 >= ex.sets && exIdx + 1 >= plan.length) {
       setPhase('done');
       return;
     }
@@ -158,7 +178,8 @@ export function WorkoutRun({ onExit }: { onExit?: () => void }) {
   };
   const addRest = (s: number) => setRestLeft((r) => r + s);
 
-  if (phase === 'done') return <WorkoutDone elapsed={elapsed} logs={logs} onExit={onExit} />;
+  if (phase === 'done')
+    return <WorkoutDone elapsed={elapsed} logs={logs} plan={plan} onSave={onSave} onExit={onExit} />;
 
   return (
     <div
@@ -194,10 +215,10 @@ export function WorkoutRun({ onExit }: { onExit?: () => void }) {
               color: T.textDim,
             }}
           >
-            Push Day · {fmt(elapsed)}
+            {sessionName ?? 'Workout'} · {fmt(elapsed)}
           </div>
           <div style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 800, color: T.text, marginTop: 2 }}>
-            ท่า {exIdx + 1}/{RUN_PLAN.length} · เซ็ต {setIdx + 1}/{ex.sets}
+            ท่า {exIdx + 1}/{plan.length} · เซ็ต {setIdx + 1}/{ex.sets}
           </div>
         </div>
         <button type="button" style={iconBtnStyle} aria-label="เพิ่มเติม">
@@ -228,9 +249,9 @@ export function WorkoutRun({ onExit }: { onExit?: () => void }) {
           <RestingPhase
             seconds={restLeft}
             total={ex.rest}
-            nextEx={setIdx + 1 < ex.sets ? ex : RUN_PLAN[exIdx + 1]}
+            nextEx={setIdx + 1 < ex.sets ? ex : plan[exIdx + 1]}
             nextSetLabel={
-              setIdx + 1 < ex.sets ? `เซ็ต ${setIdx + 2}/${ex.sets}` : `ท่าใหม่ · ${RUN_PLAN[exIdx + 1]?.name ?? ''}`
+              setIdx + 1 < ex.sets ? `เซ็ต ${setIdx + 2}/${ex.sets}` : `ท่าใหม่ · ${plan[exIdx + 1]?.name ?? ''}`
             }
             onSkip={skipRest}
             onAdd={() => addRest(15)}
@@ -761,14 +782,32 @@ function RestingPhase({
 function WorkoutDone({
   elapsed,
   logs,
+  plan,
+  onSave,
   onExit,
 }: {
   elapsed: number;
   logs: Record<string, { w: number; r: string }>;
+  plan: Ex[];
+  onSave?: (logs: Record<string, { w: number; r: string }>, elapsed: number) => Promise<void>;
   onExit?: () => void;
 }) {
+  const [saving, setSaving] = useState(false);
   const totalReps = Object.values(logs).reduce((s, l) => s + parseInt(l.r || '0'), 0);
   const totalVolume = Object.values(logs).reduce((s, l) => s + parseInt(l.r || '0') * (l.w || 0), 0);
+
+  const handleFinish = async () => {
+    if (onSave) {
+      setSaving(true);
+      try {
+        await onSave(logs, elapsed);
+      } finally {
+        setSaving(false);
+      }
+    } else {
+      onExit?.();
+    }
+  };
   return (
     <div
       style={{
@@ -879,7 +918,7 @@ function WorkoutDone({
           >
             สรุปเซ็ต
           </div>
-          {RUN_PLAN.map((ex, i) => (
+          {plan.map((ex, i) => (
             <div
               key={i}
               style={{
@@ -887,7 +926,7 @@ function WorkoutDone({
                 alignItems: 'center',
                 gap: 10,
                 padding: '8px 0',
-                borderBottom: i < RUN_PLAN.length - 1 ? `1px solid ${T.border}` : 'none',
+                borderBottom: i < plan.length - 1 ? `1px solid ${T.border}` : 'none',
               }}
             >
               <div style={{ flex: 1, fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 700, color: T.text, fontSize: 13 }}>
@@ -921,22 +960,23 @@ function WorkoutDone({
 
         <button
           type="button"
-          onClick={onExit}
+          onClick={handleFinish}
+          disabled={saving}
           style={{
             width: '100%',
             height: 56,
             borderRadius: 14,
-            background: T.coral,
+            background: saving ? T.coral + '88' : T.coral,
             border: 'none',
             color: '#0E0F12',
             fontFamily: 'Inter,"Noto Sans Thai"',
             fontWeight: 900,
             fontSize: 15,
-            cursor: 'pointer',
+            cursor: saving ? 'not-allowed' : 'pointer',
             whiteSpace: 'nowrap',
           }}
         >
-          กลับหน้าหลัก
+          {saving ? 'กำลังบันทึก...' : 'กลับหน้าหลัก'}
         </button>
       </div>
     </div>
