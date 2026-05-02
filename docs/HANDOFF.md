@@ -1,8 +1,8 @@
 # Coachly · Session Handoff
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
-> Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: feat(weight): WeightTrend sparkline uses real weight_logs data
+> Last updated: 2026-05-03 · Branch: `claude/build-coachly-coach-ZBpRx`
+> Last commit: feat(inngest): scaffold 3 background jobs + API route
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -24,35 +24,37 @@ pnpm dev                              # http://localhost:3000
 
 ## Where we are — status snapshot
 
-| Area                              | Status                                     | Notes                                                                                             |
-| --------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Project guide (CLAUDE.md)         | ✅                                         | rules + topics referenced                                                                         |
-| Rule docs (.claude/rules/)        | ✅ working-principles + backend + frontend | types.md + git-workflow.md สร้างเมื่อจำเป็น                                                       |
-| **Topic docs (.claude/topics/)**  | ✅ **ครบทุกอัน**                           | owner-confirmed 2026-05-02                                                                        |
-| Design analysis                   | ✅ docs/DESIGN_ANALYSIS.md                 | 7 screens, tokens, interactions                                                                   |
-| DB schema                         | ✅ lib/db/schema.ts + migrations applied   | 20 tables, 22 FKs, 43 indexes; migration 0002 applied (19 nutrient cols)                          |
-| Design tokens + shared components | ✅                                         | 1:1 port จาก design handoff                                                                       |
-| Auth.js v5 (LINE + Google)        | ✅                                         | JWT session, signIn callback                                                                      |
-| Onboarding flow                   | ✅ /onboarding → /plan-preview → /today    | 9-turn → DB → real targets                                                                        |
-| /today RSC                        | ✅ real data — ทุก tab                     | วันนี้: MacroBar+WeightTrend+WorkoutCTA; สัปดาห์/เดือน: stats จริงทั้งหมด                         |
-| **AIInsightCard**                 | ✅ **real AI insights**                    | moonshot-v1-8k; Server Action + useQuery; skeleton → real → hardcode fallback; staleTime:Infinity |
-| **MonthHeatmap**                  | ✅ **real activity data**                  | level 0-3 per day (food/workout/kcal≥80%); datesWithWorkoutInRange repo; /canvas fallback         |
-| **WeightTrend sparkline**         | ✅ **real weight_logs data**               | weightSeriesKg oldest→newest; hasSpark≥2; ซ่อน SVG เมื่อไม่มีข้อมูล (feedback rule)               |
-| /plan RSC                         | ✅ real data                               | findActive() → enriched exercises → buildScreenPlan()                                             |
-| /chat                             | ✅ UX fixed                                | typing bubble in message list; scroll-to-bottom on load+response; food confirm card v2            |
-| **/me page**                      | ✅ **real data**                           | RSC → profile data; avatar initials; macro bars; sign out                                         |
-| Tabbar layout                     | ✅ fixed                                   | Today/Plan ใช้ height:100dvh แล้ว; BottomTabBar pin ที่ footer                                    |
-| AI tools (6 tools)                | ✅                                         | search_food, log_food, log_water, weigh_in, set_mood, log_exercise                                |
-| Tool payload types                | ✅ shared-types.ts                         | client-safe; ไม่ pull DB code เข้า browser bundle                                                 |
-| **Eval harness**                  | ✅ **57/59 = 97% (claude-haiku sim)**      | 2 remaining = simulator artifacts (food_021/038); system-v2.1; pnpm eval:claude / pnpm eval       |
-| Exercise seed                     | ✅ pnpm db:seed                            | 19 exercises (gym/home_eq/bodyweight)                                                             |
-| **Thai food seed**                | ✅ **323 rows seeded**                     | BaoWio 1,005 fetched → 323 complete rows; CC-BY-SA 4.0                                            |
-| USDA food resolver                | ✅ lib/services/food-resolver.ts           | Thai DB → USDA chain; 3s timeout; missing key → skip silently                                     |
-| **MOPH 2018 seed**                | ✅ **857 foods in DB**                     | migration 0003 applied (precision fix); all_foods_fixed.json in scripts/extracted/                |
-| **System prompt**                 | ✅ **v2 live**                             | L1/L2 ED triggers exact; DMH 1323 template; deload keywords; log_food "ไม่บันทึกก่อน"             |
-| Workout repos                     | ✅                                         | findActive, session lifecycle, bulk createMany                                                    |
-| /workout/run                      | ✅ real data                               | RSC → findActive plan → create session → RunClient → saveWorkoutAction                            |
-| Inngest / PWA / offline           | ❌ Phase 3–4                               | deferred                                                                                          |
+| Area                              | Status                                     | Notes                                                                                               |
+| --------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Project guide (CLAUDE.md)         | ✅                                         | rules + topics referenced                                                                           |
+| Rule docs (.claude/rules/)        | ✅ working-principles + backend + frontend | types.md + git-workflow.md สร้างเมื่อจำเป็น                                                         |
+| **Topic docs (.claude/topics/)**  | ✅ **ครบทุกอัน**                           | owner-confirmed 2026-05-02                                                                          |
+| Design analysis                   | ✅ docs/DESIGN_ANALYSIS.md                 | 7 screens, tokens, interactions                                                                     |
+| DB schema                         | ✅ lib/db/schema.ts + migrations applied   | 20 tables, 22 FKs, 43 indexes; migration 0002 applied (19 nutrient cols)                            |
+| Design tokens + shared components | ✅                                         | 1:1 port จาก design handoff                                                                         |
+| Auth.js v5 (LINE + Google)        | ✅                                         | JWT session, signIn callback                                                                        |
+| Onboarding flow                   | ✅ /onboarding → /plan-preview → /today    | 9-turn → DB → real targets                                                                          |
+| /today RSC                        | ✅ real data — ทุก tab                     | วันนี้: MacroBar+WeightTrend+WorkoutCTA; สัปดาห์/เดือน: stats จริงทั้งหมด                           |
+| **AIInsightCard**                 | ✅ **real AI insights**                    | moonshot-v1-8k; Server Action + useQuery; skeleton → real → hardcode fallback; staleTime:Infinity   |
+| **MonthHeatmap**                  | ✅ **real activity data**                  | level 0-3 per day (food/workout/kcal≥80%); datesWithWorkoutInRange repo; /canvas fallback           |
+| **WeightTrend sparkline**         | ✅ **real weight_logs data**               | weightSeriesKg oldest→newest; hasSpark≥2; ซ่อน SVG เมื่อไม่มีข้อมูล (feedback rule)                 |
+| /plan RSC                         | ✅ real data                               | findActive() → enriched exercises → buildScreenPlan()                                               |
+| /chat                             | ✅ UX fixed                                | typing bubble in message list; scroll-to-bottom on load+response; food confirm card v2              |
+| **/me page**                      | ✅ **real data**                           | RSC → profile data; avatar initials; macro bars; sign out                                           |
+| Tabbar layout                     | ✅ fixed                                   | Today/Plan ใช้ height:100dvh แล้ว; BottomTabBar pin ที่ footer                                      |
+| AI tools (6 tools)                | ✅                                         | search_food, log_food, log_water, weigh_in, set_mood, log_exercise                                  |
+| Tool payload types                | ✅ shared-types.ts                         | client-safe; ไม่ pull DB code เข้า browser bundle                                                   |
+| **Eval harness**                  | ✅ **57/59 = 97% (claude-haiku sim)**      | 2 remaining = simulator artifacts (food_021/038); system-v2.1; pnpm eval:claude / pnpm eval         |
+| Exercise seed                     | ✅ pnpm db:seed                            | 19 exercises (gym/home_eq/bodyweight)                                                               |
+| **Thai food seed**                | ✅ **323 rows seeded**                     | BaoWio 1,005 fetched → 323 complete rows; CC-BY-SA 4.0                                              |
+| USDA food resolver                | ✅ lib/services/food-resolver.ts           | Thai DB → USDA chain; 3s timeout; missing key → skip silently                                       |
+| **MOPH 2018 seed**                | ✅ **857 foods in DB**                     | migration 0003 applied (precision fix); all_foods_fixed.json in scripts/extracted/                  |
+| **System prompt**                 | ✅ **v2 live**                             | L1/L2 ED triggers exact; DMH 1323 template; deload keywords; log_food "ไม่บันทึกก่อน"               |
+| Workout repos                     | ✅                                         | findActive, session lifecycle, bulk createMany                                                      |
+| /workout/run                      | ✅ real data                               | RSC → findActive plan → create session → RunClient → saveWorkoutAction                              |
+| **Inngest**                       | ✅ **3 functions scaffolded**              | photo-expiry (daily), weekly-insights (Mon 08 ICT), plan-generator (event); INNGEST_EVENT_KEY=local |
+| **PWA manifest + install prompt** | ✅ **shipped**                             | app/manifest.ts; icon 192×192; iOS/Android install prompt (after 2nd visit)                         |
+| Offline queue / Web Push          | ❌ Phase 4                                 | Dexie + Workbox + VAPID — deferred                                                                  |
 
 ## Topic docs — all owner-confirmed ✅
 
@@ -67,10 +69,15 @@ pnpm dev                              # http://localhost:3000
 
 ## Next session — pick up here (in order)
 
-1. **Inngest / PWA / offline** — Phase 3–4 (deferred)
+1. **Offline queue** — Dexie IndexedDB + Workbox background sync (Phase 4)
 
-2. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
+2. **Web Push** — VAPID keys + push subscription + iOS 16.4+ (Phase 4)
 
+3. **insights_cache table** — migration + populate from weekly-insights Inngest job (Phase 4)
+
+4. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
+
+> Inngest local dev: `npx inngest-cli@latest dev` แล้วเปิด http://localhost:8288
 > หมายเหตุ: `pnpm eval` (Kimi real) ยัง pending credits — รัน `pnpm eval:claude` แทนได้
 
 ## Critical known bugs / debt
@@ -78,7 +85,6 @@ pnpm dev                              # http://localhost:3000
 - **`@next/next/no-img-element`** (2x) ใน chat-client.tsx — pre-existing; แก้ตอน refactor ไป `next/image`
 - **`@next/next/no-page-custom-font`** ใน layout.tsx — แก้ตอน migrate ไป `next/font/google`
 - **workout_plans อาจว่าง** สำหรับ user เก่า — plan-generator trigger หลัง onboarding เท่านั้น; `/plan` fallback → DEFAULT_PLAN
-- **body photo** — Kimi วิเคราะห์แล้วเก็บเป็น text ตาม pdpa.md; ยังไม่ implement `attachments` cleanup job
 
 ## Architecture quick-ref
 
