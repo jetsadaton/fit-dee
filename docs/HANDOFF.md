@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: phase 2 complete — all 5 tools + photo upload + plan generator + eval harness
+> Last commit: /plan RSC wired to real DB + log_exercise tool (6th tool) + exercises seeded
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -174,14 +174,18 @@ _Phase 0 ปิดครบ → ก้าวเข้า Phase 1_
 - ✅ `lib/services/plan-generator.ts` — full-body/upper-lower/PPL split; triggered after onboarding (best-effort)
 - ✅ `tests/eval/run.ts` + `golden/food.json` + `golden/other.json` — 19 cases; `pnpm eval [--filter <id>]`
 
+**Shipped this session (2026-05-02 continued)**:
+
+- ✅ `pnpm db:seed` — 19 exercises upserted (barbell/dumbbell/bodyweight tiers)
+- ✅ `/plan` RSC — auth() → findActive() → findBySemanticIds() enriches tip/formCues → buildScreenPlan() maps DayKey→Thai label → PlanClient (client island)
+- ✅ `log_exercise` tool — factory closes over userId; finds/creates today's workout session; bulk createMany sets; ExerciseLogCard in chat; 3 golden eval cases
+- ✅ `plan-screen.tsx` — export WeekPlan/ExerciseRow/DayPlan types; add `initialPlan` prop
+
 **Next session — pick up here (in order)**:
 
-1. **Run `pnpm db:seed`** — populate exercises table so plan generator produces real plans (run once on dev Neon branch)
-2. **Wire `/plan` RSC to real data** — `app/plan/page.tsx` RSC calls `findActive(userId)` → render real `WorkoutPlan.days` in the plan screen instead of static mock
-3. **`log_exercise` tool** — needs workout-sessions repo wired; call `create` in workout-sessions then `createMany` in exercise-logs; return `exercise_log_done` card in chat
-4. **Full ChatScreen refactor (Phase 2.5)** — replace minimal `ChatClient` with `ChatScreen` component integration + `useChat` wired through proper bubble variants
-5. **Add 30+ Thai food golden cases** — requires owner to supply prompts + expected tool calls; current eval has 10 food + 9 other
-6. **topics/progressive-overload.md** — interview owner; rep-range policy + deload schedule; unblock `plan-generator` hardcoded defaults
+1. **Full ChatScreen refactor (Phase 2.5)** — replace minimal `ChatClient` with `ChatScreen` component integration + `useChat` wired through proper bubble variants
+2. **Add 30+ Thai food golden cases** — requires owner to supply prompts + expected tool calls; current eval has 10 food + 12 other
+3. **topics/progressive-overload.md** — interview owner; rep-range policy + deload schedule; unblock `plan-generator` hardcoded defaults
 
 **Notes on foods table**: table is empty — `search_food` returns `[]` for any query. LLM falls through to estimate macros from training data and calls `log_food` directly. `food_logs.food_id` is nullable so this is valid. Seed foods data when real Thai food DB content is available.
 
