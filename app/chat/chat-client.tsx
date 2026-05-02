@@ -44,7 +44,7 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100dvh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
       <header style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
         <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, fontWeight: 700, color: T.textDim, letterSpacing: 0.6, textTransform: 'uppercase' }}>
           แชทกับโค้ชดี
@@ -91,7 +91,7 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} style={{ padding: 12, borderTop: `1px solid ${T.border}`, display: 'flex', gap: 8, flexShrink: 0 }}>
+      <form onSubmit={handleSubmit} style={{ padding: '12px 12px', paddingBottom: 'calc(68px + env(safe-area-inset-bottom, 0px))', borderTop: `1px solid ${T.border}`, display: 'flex', gap: 8, flexShrink: 0 }}>
         <input
           type="text"
           value={input}
