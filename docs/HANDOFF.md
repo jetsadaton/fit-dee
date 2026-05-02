@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: fix(eval): eval 97% (57/59) — exercise schema, mood/deload, safety keywords
+> Last commit: feat(weight): WeightTrend sparkline uses real weight_logs data
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -37,6 +37,7 @@ pnpm dev                              # http://localhost:3000
 | /today RSC                        | ✅ real data — ทุก tab                     | วันนี้: MacroBar+WeightTrend+WorkoutCTA; สัปดาห์/เดือน: stats จริงทั้งหมด                         |
 | **AIInsightCard**                 | ✅ **real AI insights**                    | moonshot-v1-8k; Server Action + useQuery; skeleton → real → hardcode fallback; staleTime:Infinity |
 | **MonthHeatmap**                  | ✅ **real activity data**                  | level 0-3 per day (food/workout/kcal≥80%); datesWithWorkoutInRange repo; /canvas fallback         |
+| **WeightTrend sparkline**         | ✅ **real weight_logs data**               | weightSeriesKg oldest→newest; hasSpark≥2; ซ่อน SVG เมื่อไม่มีข้อมูล (feedback rule)               |
 | /plan RSC                         | ✅ real data                               | findActive() → enriched exercises → buildScreenPlan()                                             |
 | /chat                             | ✅ UX fixed                                | typing bubble in message list; scroll-to-bottom on load+response; food confirm card v2            |
 | **/me page**                      | ✅ **real data**                           | RSC → profile data; avatar initials; macro bars; sign out                                         |
@@ -66,11 +67,9 @@ pnpm dev                              # http://localhost:3000
 
 ## Next session — pick up here (in order)
 
-1. **WeightTrend sparkline** — real weight series (weight_logs 30d → SVG path)
+1. **Inngest / PWA / offline** — Phase 3–4 (deferred)
 
-2. **Inngest / PWA / offline** — Phase 3–4 (deferred)
-
-3. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
+2. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
 
 > หมายเหตุ: `pnpm eval` (Kimi real) ยัง pending credits — รัน `pnpm eval:claude` แทนได้
 
