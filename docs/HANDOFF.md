@@ -45,6 +45,9 @@ pnpm dev                              # http://localhost:3000
 | DB client (Drizzle/Neon HTTP) | ✅ lib/db/client.ts                          | edge-compatible; pool client เพิ่มใน Phase 2 พร้อม chat streaming     |
 | Users repository + types      | ✅ lib/db/repositories/users.ts + types/db   | findById/byLineSub/byGoogleSub + create + softDelete                  |
 | Query key factory             | ✅ lib/queries/keys.ts                       | central registry; กฎใหม่ใน rules/frontend.md ห้าม inline queryKey     |
+| Topics (TDEE / streak)        | ✅ .claude/topics/\*.md                      | owner-confirmed; AI ห้ามเดาเกินจากนี้                                 |
+| Services (TDEE + streak)      | ✅ lib/services/{tdee,streak}.ts             | pure, 33 vitest cases pass                                            |
+| Auth.js v5 (LINE + Google)    | ✅ lib/auth.ts + middleware + welcome wired  | JWT session, signIn callback resolves/creates users row; routes guard |
 
 ## What's NOT done (เรียงตาม priority)
 

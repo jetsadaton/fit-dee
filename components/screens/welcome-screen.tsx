@@ -3,7 +3,15 @@
 import { CoachAvatar, PrimaryBtn } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
 
-export function WelcomeScreen({ onStart }: { onStart?: () => void }) {
+export function WelcomeScreen({
+  onStart,
+  onLineSignIn,
+  onGoogleSignIn,
+}: {
+  onStart?: () => void;
+  onLineSignIn?: () => void;
+  onGoogleSignIn?: () => void;
+}) {
   return (
     <div
       style={{
@@ -147,6 +155,7 @@ export function WelcomeScreen({ onStart }: { onStart?: () => void }) {
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             type="button"
+            onClick={onLineSignIn}
             style={{
               flex: 1,
               height: 48,
@@ -169,6 +178,7 @@ export function WelcomeScreen({ onStart }: { onStart?: () => void }) {
           </button>
           <button
             type="button"
+            onClick={onGoogleSignIn}
             style={{
               flex: 1,
               height: 48,
