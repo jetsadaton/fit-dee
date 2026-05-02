@@ -2,7 +2,7 @@
 
 ## Tech Stack
 
-TypeScript · Next.js 15 (App Router, Route Handlers) · **Drizzle ORM** · **Neon Postgres** (+ pgvector) · **Zod** validation · **Auth.js v5** (LINE + Google) · **Inngest** (background jobs) · **Vercel AI SDK** + Kimi K2.6 · **Helicone** (LLM proxy/tracing) · **Vercel Blob** (storage) · **Upstash Redis** (rate limit + cache).
+TypeScript · Next.js 15 (App Router, Route Handlers) · **Drizzle ORM** · **Neon Postgres** (+ pgvector) · **Zod** validation · **Auth.js v5** (LINE + Google) · **Inngest** (background jobs) · **Vercel AI SDK** + Kimi K2.6 · **In-DB LLM tracing** via `messages` table (Helicone/Langfuse deferred) · **Vercel Blob** (storage) · **Upstash Redis** (rate limit + cache).
 
 ## Architecture: Feature-folder + Service/Repository
 
@@ -38,23 +38,23 @@ drizzle/
 
 **Layer responsibilities**:
 
-| Layer | Lives here | Does NOT |
-| --- | --- | --- |
-| **Route Handler** (`app/api/.../route.ts`) | parse request, auth check, call service, format response | business logic, raw SQL |
-| **Service** (`lib/services/*.ts`) | business rules (TDEE, macro calc, plan gen, recalibration) | HTTP, SQL |
-| **Repository** (`lib/db/repositories/*.ts`) | DB queries via Drizzle, transactions | business rules, HTTP |
-| **AI tool handler** (`lib/ai/tools/*.ts`) | wrap services into LLM-callable tools w/ Zod schema | inline DB queries |
+| Layer                                       | Lives here                                                 | Does NOT                |
+| ------------------------------------------- | ---------------------------------------------------------- | ----------------------- |
+| **Route Handler** (`app/api/.../route.ts`)  | parse request, auth check, call service, format response   | business logic, raw SQL |
+| **Service** (`lib/services/*.ts`)           | business rules (TDEE, macro calc, plan gen, recalibration) | HTTP, SQL               |
+| **Repository** (`lib/db/repositories/*.ts`) | DB queries via Drizzle, transactions                       | business rules, HTTP    |
+| **AI tool handler** (`lib/ai/tools/*.ts`)   | wrap services into LLM-callable tools w/ Zod schema        | inline DB queries       |
 
 Reference file (จะมีหลัง Phase 0): `app/api/food/route.ts` + `lib/services/food.ts` + `lib/db/repositories/food-logs.ts`
 
 ## Data access strategy
 
-| Query shape | Use | Why |
-| --- | --- | --- |
-| Simple CRUD on aggregate | Drizzle query in repository | type-safe, close to schema |
-| Complex aggregation (weekly summary, trend) | Drizzle SQL builder + raw helpers | composable, still typed |
-| Vector search (food cache) | `pgvector` via Drizzle custom type | on-platform |
-| Cross-aggregate read for RSC | view or denormalized read model | RSC ต้องเร็ว |
+| Query shape                                 | Use                                | Why                        |
+| ------------------------------------------- | ---------------------------------- | -------------------------- |
+| Simple CRUD on aggregate                    | Drizzle query in repository        | type-safe, close to schema |
+| Complex aggregation (weekly summary, trend) | Drizzle SQL builder + raw helpers  | composable, still typed    |
+| Vector search (food cache)                  | `pgvector` via Drizzle custom type | on-platform                |
+| Cross-aggregate read for RSC                | view or denormalized read model    | RSC ต้องเร็ว               |
 
 ## Auth / identity
 
@@ -87,7 +87,7 @@ Reference file (จะมีหลัง Phase 0): `app/api/food/route.ts` + `li
 - **Postgres-only** features OK (Neon = Postgres 16); ห้ามคิดถึง MySQL/SQLite portability
 - Edge runtime สำหรับ read-only routes (ใช้ `@neondatabase/serverless` HTTP); Node runtime สำหรับ AI streaming + Inngest
 - ห้าม return raw DB row ออก API — แปลงเป็น DTO ก่อน (ดู `rules/types.md`)
-- ห้าม log PII — Helicone จะเห็น prompt ทั้งหมด, profile ที่ส่งไป Kimi ต้องไม่มี email/ชื่อจริง
+- ห้าม log PII — prompt ที่ส่งไป Kimi ต้องไม่มี email/ชื่อจริง. ใช้ `user_id_hash` (SHA-256 ของ users.id) + numeric profile เท่านั้น. `messages` table ใน DB เก็บ prompt + token + latency ครบ — ถือเป็น source of truth สำหรับ debug AI
 
 ## Skills for details
 

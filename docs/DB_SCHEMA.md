@@ -8,7 +8,7 @@
 1. **One aggregate per repository** — repositories ใน `lib/db/repositories/` มี 1 file ต่อ aggregate (foods, food-logs, plans, exercises, ...)
 2. **Soft delete** — `deleted_at timestamptz null`; ห้าม hard-delete user-generated content (PDPA: ผู้ใช้ขอลบ → soft + tombstone)
 3. **Audit columns** — ทุก table มี `created_at`, `updated_at` (default `now()`); user-mutable rows มี `updated_by` (= user_id)
-4. **No PII to LLM** — `users.email`, `users.line_sub`, `users.google_sub` ห้ามส่งไป Kimi/Helicone. Coach context ใช้ `user_id_hash` (deterministic SHA-256 of `users.id`) + numeric profile only
+4. **No PII to LLM** — `users.email`, `users.line_sub`, `users.google_sub` ห้ามส่งไป Kimi. Coach context ใช้ `user_id_hash` (deterministic SHA-256 of `users.id`) + numeric profile only
 5. **Semantic IDs for LLM** — `foods.semantic_id = 'thai_pad_kra_pao_chicken'`, `exercises.semantic_id = 'bench_press_barbell'` — LLM tool args ใช้ semantic_id ไม่ใช่ UUID
 6. **Read models** — `daily_summaries` view/materialized table สำหรับ dashboard (ไม่อ่าน sum() บน food_logs ทุก request)
 7. **Source-of-truth for foods** — precedence: `user_edit > vision_cache > usda > thai_db > llm_estimate` (ดู `topics/food-db.md` เมื่อ owner confirm)
@@ -217,7 +217,7 @@ messages
 ├── content         text null            null if tool_calls only
 ├── tool_calls      jsonb null           [{ name, arguments, result }] OpenAI-style
 ├── attachments     uuid[] default '{}'  → attachments(id)
-├── kimi_request_id text null            for Helicone trace lookup
+├── kimi_request_id text null            Moonshot request ID for support/debug
 ├── token_in        smallint null
 ├── token_out       smallint null
 ├── latency_ms      int null

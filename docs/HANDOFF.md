@@ -126,7 +126,8 @@ _Phase 0 ปิดครบ → ก้าวเข้า Phase 1_
 ### 🟡 Phase 2 — AI tool layer
 
 8. **Kimi K2.6 client** — `lib/ai/kimi.ts`
-   - OpenAI-compatible client + Helicone proxy URL
+   - OpenAI-compatible client → `https://api.moonshot.ai/v1` (global endpoint, not .cn)
+   - Log every call into `messages` table (`kimi_request_id`, `token_in`, `token_out`, `latency_ms`) — external tracing (Helicone/Langfuse) deferred
    - System prompt builder (ใช้ memory blocks: profile + summary_7d + last-20)
 9. **Tool definitions** — `lib/ai/tools/*.ts` (one file per tool)
    - `search_food`, `log_food`, `log_water`, `log_exercise`, `update_plan`, `weigh_in`, `set_mood`, `update_profile`
@@ -276,5 +277,5 @@ fit-dee/
 - ห้าม return raw DB row จาก API
 - ห้ามเดาชื่อ column / FK — เปิดอ่าน `lib/db/schema.ts` ก่อน
 - ห้าม inline tool name ใน LLM call — ต้องอ้าง `lib/ai/tools/*` ที่มีอยู่จริง
-- ห้าม send PII (email, real name, phone) ไป Kimi/Helicone — ใช้ user_id_hash
+- ห้าม send PII (email, real name, phone) ไป Kimi — ใช้ user_id_hash + numeric profile เท่านั้น
 - ห้ามแก้ auto-generated: `drizzle/migrations/*.sql`, `*.generated.ts`, `next-env.d.ts`

@@ -70,15 +70,15 @@ Semantic:
 
 ## 3. Screens (7 total)
 
-| ID | Name | Purpose | Key components |
-| --- | --- | --- | --- |
-| **A1** | Welcome | Hero + auth choice | Big avatar, gradient bg, 3 CTAs (เริ่มเลย / LINE / Google) |
-| **A2** | Onboarding chat | 9-turn profile setup | Progress bar, chat bubbles, context-sensitive input (text / chips / steppers) |
-| **A3** | Plan preview | Show kcal target + macros after onboarding | Big "1,820" kcal, MacroBar, "Why?" expandable |
-| **B1** | Chat | Daily AI coach interaction | All bubble types: text, food, workout, demo, photo, insight, weigh-in, water, typing |
-| **C1** | Today dashboard | วันนี้ / สัปดาห์ / เดือน tabs | TripleRing kcal, AI insight card, water/mood/weight, week bars, month heatmap, before/after |
-| **E1** | Plan week | Editable weekly workout | Week strip (จ-อา), day card, exercise list, AI swap chat (bottom sheet), exercise detail sheet (demo + log) |
-| **E4** | Workout run | Live mid-set | Working/Resting/Done state machine, big timer ring, reps/weight steppers, form cues |
+| ID     | Name            | Purpose                                    | Key components                                                                                              |
+| ------ | --------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **A1** | Welcome         | Hero + auth choice                         | Big avatar, gradient bg, 3 CTAs (เริ่มเลย / LINE / Google)                                                  |
+| **A2** | Onboarding chat | 9-turn profile setup                       | Progress bar, chat bubbles, context-sensitive input (text / chips / steppers)                               |
+| **A3** | Plan preview    | Show kcal target + macros after onboarding | Big "1,820" kcal, MacroBar, "Why?" expandable                                                               |
+| **B1** | Chat            | Daily AI coach interaction                 | All bubble types: text, food, workout, demo, photo, insight, weigh-in, water, typing                        |
+| **C1** | Today dashboard | วันนี้ / สัปดาห์ / เดือน tabs              | TripleRing kcal, AI insight card, water/mood/weight, week bars, month heatmap, before/after                 |
+| **E1** | Plan week       | Editable weekly workout                    | Week strip (จ-อา), day card, exercise list, AI swap chat (bottom sheet), exercise detail sheet (demo + log) |
+| **E4** | Workout run     | Live mid-set                               | Working/Resting/Done state machine, big timer ring, reps/weight steppers, form cues                         |
 
 ### Cross-screen patterns
 
@@ -103,17 +103,18 @@ Semantic:
 
 ### Stack mapping (per `CLAUDE.md`)
 
-| Design medium | Production target |
-| --- | --- |
-| HTML/CSS/JS prototype with inline styles | Next.js 15 App Router + TS + Tailwind + shadcn/ui |
-| `tokens.js` global object | `lib/design/tokens.ts` + `tailwind.config.ts` extension |
-| `S26Frame` device frame | Render unframed in production routes, framed only on `/canvas` design preview |
-| In-memory React state | Server Actions + Drizzle (writes), RSC + Drizzle (reads), TanStack Query (optimistic) |
-| Mock data inline (DEFAULT_PLAN, RUN_PLAN) | Seed scripts + DB tables |
+| Design medium                             | Production target                                                                     |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| HTML/CSS/JS prototype with inline styles  | Next.js 15 App Router + TS + Tailwind + shadcn/ui                                     |
+| `tokens.js` global object                 | `lib/design/tokens.ts` + `tailwind.config.ts` extension                               |
+| `S26Frame` device frame                   | Render unframed in production routes, framed only on `/canvas` design preview         |
+| In-memory React state                     | Server Actions + Drizzle (writes), RSC + Drizzle (reads), TanStack Query (optimistic) |
+| Mock data inline (DEFAULT_PLAN, RUN_PLAN) | Seed scripts + DB tables                                                              |
 
 ### Phasing
 
 **Phase 0 (this commit)** — Static design port
+
 1. Scaffold Next.js + TS + Tailwind + Drizzle
 2. Port tokens to Tailwind config + CSS vars
 3. Port all components (CoachAvatar, KcalRing, MacroBar, RangeBadge, BottomTabBar, etc.)
@@ -122,22 +123,26 @@ Semantic:
 6. Generate first migration
 
 **Phase 1 (next)** — Wire backend
+
 - Auth.js v5 (LINE + Google)
 - Replace mock data with Drizzle queries (RSC for reads)
 - Server Actions for mutations (water log, weight log, mood, workout completion)
 
 **Phase 2** — AI tool layer
+
 - Kimi K2.6 client (`lib/ai/kimi.ts`)
 - Tool definitions (`lib/ai/tools/*`): `log_food`, `log_water`, `log_exercise`, `update_plan`, `weigh_in`, `set_mood`
 - Streaming chat via `useChat` from Vercel AI SDK
-- Helicone proxy for tracing
+- LLM tracing in-DB via `messages` table (Helicone/Langfuse deferred)
 
 **Phase 3** — Background jobs
+
 - Inngest weekly insight generation
 - Plan recalibration every 14 days
 - Photo expiry (signed URL refresh)
 
 **Phase 4** — PWA + offline
+
 - next-pwa manifest, install prompt
 - IndexedDB queue for offline logs
 - Web Push (VAPID) for daily nudges
