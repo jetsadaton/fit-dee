@@ -14,7 +14,8 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type FileUIPart, type UIMessage } from 'ai';
 import { BottomTabBar, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
-import type { FoodLogConfirmPayload } from '@/lib/ai/tools';
+import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload } from '@/lib/ai/tools';
+import { MOOD_LABEL } from '@/lib/ai/tools';
 import { resizeImage } from '@/lib/utils/resize-image';
 import { confirmFoodLogAction, cancelFoodLogAction } from './actions';
 
@@ -140,6 +141,47 @@ function MacroPill({ label, value, unit, color }: { label: string; value: number
     >
       <div style={{ fontSize: 12, fontWeight: 700, color }}>{value}{unit}</div>
       <div style={{ fontSize: 10, color: T.textDim }}>{label}</div>
+    </div>
+  );
+}
+
+function WaterLogCard({ payload }: { payload: WaterLogDonePayload }) {
+  return (
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ fontSize: 22 }}>💧</span>
+      <div>
+        <div style={{ fontWeight: 700, color: T.text }}>บันทึกน้ำแล้ว</div>
+        <div style={{ color: T.textDim, fontSize: 12 }}>{payload.ml} ml</div>
+      </div>
+    </div>
+  );
+}
+
+function WeighInCard({ payload }: { payload: WeighInDonePayload }) {
+  return (
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ fontSize: 22 }}>⚖️</span>
+      <div>
+        <div style={{ fontWeight: 700, color: T.text }}>บันทึกน้ำหนักแล้ว</div>
+        <div style={{ color: T.textDim, fontSize: 12 }}>
+          {payload.weightKg} kg{payload.bodyFatPct != null ? ` · ไขมัน ${payload.bodyFatPct}%` : ''}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MoodLogCard({ payload }: { payload: MoodLogDonePayload }) {
+  return (
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ fontSize: 22 }}>🎯</span>
+      <div>
+        <div style={{ fontWeight: 700, color: T.text }}>บันทึกพลังงานแล้ว</div>
+        <div style={{ color: T.textDim, fontSize: 12 }}>
+          {MOOD_LABEL[payload.energy] ?? `ระดับ ${payload.energy}`}
+          {payload.note ? ` — ${payload.note}` : ''}
+        </div>
+      </div>
     </div>
   );
 }
@@ -283,13 +325,32 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
               );
             }
 
-            // Food confirm card (AI SDK v6: type 'tool-{toolName}', state 'output-available', part.output)
-            if (p.type === 'tool-log_food' && 'state' in p && p.state === 'output-available' && 'output' in p) {
-              const result = p.output as FoodLogConfirmPayload;
-              if (result?.type === 'food_log_confirm') {
+            // Tool result cards (AI SDK v6: type 'tool-{toolName}', state 'output-available', part.output)
+            if ('state' in p && p.state === 'output-available' && 'output' in p) {
+              const out = p.output as Record<string, unknown>;
+
+              if (p.type === 'tool-log_food' && out?.type === 'food_log_confirm') {
                 bubbles.push(
                   <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
-                    <FoodConfirmCard payload={result} />
+                    <FoodConfirmCard payload={out as unknown as FoodLogConfirmPayload} />
+                  </div>
+                );
+              } else if (p.type === 'tool-log_water' && out?.type === 'water_log_done') {
+                bubbles.push(
+                  <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
+                    <WaterLogCard payload={out as unknown as WaterLogDonePayload} />
+                  </div>
+                );
+              } else if (p.type === 'tool-weigh_in' && out?.type === 'weigh_in_done') {
+                bubbles.push(
+                  <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
+                    <WeighInCard payload={out as unknown as WeighInDonePayload} />
+                  </div>
+                );
+              } else if (p.type === 'tool-set_mood' && out?.type === 'mood_log_done') {
+                bubbles.push(
+                  <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
+                    <MoodLogCard payload={out as unknown as MoodLogDonePayload} />
                   </div>
                 );
               }
