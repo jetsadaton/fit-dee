@@ -1,8 +1,12 @@
 // Kimi (Moonshot AI) client — OpenAI-compatible.
 // Endpoint pinned to the global (.ai) host; .cn is China-only and
 // requires an RMB-billable account.
+//
+// Uses @ai-sdk/openai-compatible (not @ai-sdk/openai) because Kimi only
+// implements /v1/chat/completions. The @ai-sdk/openai package v3+ defaults
+// to the newer OpenAI Responses API (/v1/responses) which Kimi does not support.
 
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 
 const apiKey = process.env.KIMI_API_KEY;
 if (!apiKey) {
@@ -12,13 +16,14 @@ if (!apiKey) {
 
 const baseURL = process.env.KIMI_BASE_URL ?? 'https://api.moonshot.ai/v1';
 
-export const kimi = createOpenAI({
+export const kimi = createOpenAICompatible({
+  name: 'kimi',
   apiKey,
   baseURL,
 });
 
-/** Default chat model for the coach. K2.6 alias when available; v1-32k for now. */
-export const DEFAULT_MODEL = 'moonshot-v1-32k';
+/** Default chat model for the coach. K2.6 is multimodal + supports tools + thinking. */
+export const DEFAULT_MODEL = 'kimi-k2.6';
 
-/** Used by the vision pipeline (Phase 2 photo flow). */
-export const VISION_MODEL = 'moonshot-v1-32k-vision-preview';
+/** Used by the vision pipeline (Phase 2 photo flow). K2.5 = multimodal variant. */
+export const VISION_MODEL = 'kimi-k2.5';

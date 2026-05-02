@@ -89,6 +89,11 @@ export async function POST(req: Request) {
     temperature: 0.6,
     tools: createCoachTools(userId),
     stopWhen: stepCountIs(5),
+    // Kimi K2.6 extended thinking — improves multi-step reasoning for food/workout advice.
+    // tool_choice defaults to 'auto' which is required when thinking is enabled.
+    providerOptions: {
+      kimi: { thinking: { type: 'enabled' } },
+    },
 
     onFinish: async ({ text, usage, response, steps }) => {
       const latencyMs = Date.now() - startedAt;
