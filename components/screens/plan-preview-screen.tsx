@@ -4,8 +4,38 @@ import { useState } from 'react';
 import { CoachAvatar, MacroBar, PrimaryBtn, ProgressBar } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
 
-export function PlanPreview({ onStart }: { onStart?: () => void }) {
+export type PlanPreviewProps = {
+  onStart?: () => void;
+  /** Daily kcal target (post-floor). Falls back to 1820 for /canvas review. */
+  kcalTarget?: number;
+  /** Maintenance TDEE pre-goal-adjustment. */
+  tdee?: number;
+  /** Macro grams per day. */
+  macros?: { proteinG: number; carbG: number; fatG: number };
+  goal?: 'lose' | 'gain' | 'fit';
+};
+
+const DEFAULT_KCAL = 1820;
+const DEFAULT_TDEE = 2320;
+const DEFAULT_MACROS = { proteinG: 137, carbG: 205, fatG: 60 };
+const DEFAULT_GOAL: 'lose' | 'gain' | 'fit' = 'lose';
+
+export function PlanPreview({
+  onStart,
+  kcalTarget = DEFAULT_KCAL,
+  tdee = DEFAULT_TDEE,
+  macros = DEFAULT_MACROS,
+  goal = DEFAULT_GOAL,
+}: PlanPreviewProps) {
   const [exp, setExp] = useState(false);
+  const delta = Math.abs(tdee - kcalTarget);
+  const weeklyKgChange = ((delta * 7) / 7700).toFixed(2);
+  const explainer =
+    goal === 'lose'
+      ? `เพราะอยากลดน้ำหนัก เราลด ${delta.toLocaleString()} kcal เพื่อลด ~${weeklyKgChange} กก./สัปดาห์ — ปลอดภัยและไม่หิวจัด`
+      : goal === 'gain'
+        ? `เพราะอยากเพิ่มกล้าม เราเพิ่ม ${delta.toLocaleString()} kcal เพื่อเพิ่ม ~${weeklyKgChange} กก./สัปดาห์ — ขึ้น lean ไม่อ้วน`
+        : `รักษาน้ำหนักไว้ที่ระดับ TDEE — เน้นโภชนาการที่สมดุล`;
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: T.bg }}>
       <div style={{ padding: '12px 16px 14px' }}>
@@ -83,7 +113,7 @@ export function PlanPreview({ onStart }: { onStart?: () => void }) {
               letterSpacing: -1,
             }}
           >
-            1,820
+            {kcalTarget.toLocaleString()}
           </div>
           <div
             style={{
@@ -100,7 +130,12 @@ export function PlanPreview({ onStart }: { onStart?: () => void }) {
           </div>
 
           <div style={{ marginTop: 16, padding: '12px 0 0', borderTop: `1px solid ${T.border}` }}>
-            <MacroBar p={{ eaten: 0, goal: 137 }} c={{ eaten: 0, goal: 205 }} f={{ eaten: 0, goal: 60 }} compact />
+            <MacroBar
+              p={{ eaten: 0, goal: macros.proteinG }}
+              c={{ eaten: 0, goal: macros.carbG }}
+              f={{ eaten: 0, goal: macros.fatG }}
+              compact
+            />
           </div>
         </div>
 
@@ -141,7 +176,7 @@ export function PlanPreview({ onStart }: { onStart?: () => void }) {
             </svg>
           </div>
           <span style={{ flex: 1, fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 700, fontSize: 13.5 }}>
-            ทำไมต้อง 1,820 kcal?
+            ทำไมต้อง {kcalTarget.toLocaleString()} kcal?
           </span>
           <svg
             width="18"
@@ -159,11 +194,9 @@ export function PlanPreview({ onStart }: { onStart?: () => void }) {
           <div style={{ background: T.bg2, borderRadius: 14, padding: 14, marginBottom: 12, border: `1px solid ${T.border}` }}>
             <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12.5, color: T.textDim, lineHeight: 1.6 }}>
               <p style={{ margin: '0 0 8px' }}>
-                <b style={{ color: T.text }}>TDEE</b> (พลังงานเผาผลาญต่อวัน) ของนาย ≈ 2,320 kcal
+                <b style={{ color: T.text }}>TDEE</b> (พลังงานเผาผลาญต่อวัน) ของนาย ≈ {tdee.toLocaleString()} kcal
               </p>
-              <p style={{ margin: 0 }}>
-                เพราะอยากลดน้ำหนัก เราลด 500 kcal เพื่อลด ~0.5 กก./สัปดาห์ — ปลอดภัยและไม่หิวจัด
-              </p>
+              <p style={{ margin: 0 }}>{explainer}</p>
             </div>
           </div>
         )}
