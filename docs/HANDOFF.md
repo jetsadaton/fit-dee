@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: phase 2 chat MVP — /chat streams from Kimi end-to-end (no tools yet)
+> Last commit: phase 2 — search_food + log_food tools wired; /api/chat streams with multi-step tool calling
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -26,44 +26,50 @@ pnpm dev                              # http://localhost:3000
 
 ## Where we are — status snapshot (Phase 0 complete)
 
-| Area                                 | Status                                                          | Notes                                                                  |
-| ------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Project guide (CLAUDE.md)            | ✅ committed                                                    | rules + topics referenced                                              |
-| Rule docs (.claude/rules/)           | ✅ working-principles + backend + frontend                      | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น             |
-| Topic docs (.claude/topics/)         | ❌ ทุกอันยังว่าง                                                | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"          |
-| Skills (.claude/skills/)             | ❌ ว่าง                                                         | จะสร้างใน Step 4                                                       |
-| Design analysis                      | ✅ docs/DESIGN_ANALYSIS.md                                      | 7 screens, tokens, interactions, open questions                        |
-| DB schema plan                       | ✅ docs/DB_SCHEMA.md                                            | 19 tables ออกแบบครบ                                                    |
-| Drizzle schema file                  | ✅ lib/db/schema.ts                                             | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated  |
-| Next.js scaffold                     | ✅ ทุก config + globals.css                                     | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน          |
-| Design tokens                        | ✅ lib/design/tokens.ts + tailwind.config.ts                    | parity กับ design `tokens.js`                                          |
-| Shared components                    | ✅ components/coach/_ + components/chat/_                       | 1:1 port จาก handoff                                                   |
-| 7 screens (A1–E4)                    | ✅ components/screens/_ + app/_/page.tsx                        | static — ไม่มี DB write                                                |
-| Tab-bar navigation                   | ✅ wired                                                        | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON      |
-| Canvas review page                   | ✅ /canvas                                                      | ทุก S26 frame เรียง                                                    |
-| TanStack Query provider              | ✅ app/providers.tsx + .prettierrc                              | staleTime 30s, offlineFirst; client islands ห้าม `fetch` ดิบ           |
-| DB client (Drizzle/Neon HTTP)        | ✅ lib/db/client.ts                                             | edge-compatible; pool client เพิ่มใน Phase 2 พร้อม chat streaming      |
-| Users repository + types             | ✅ lib/db/repositories/users.ts + types/db                      | findById/byLineSub/byGoogleSub + create + softDelete                   |
-| Query key factory                    | ✅ lib/queries/keys.ts                                          | central registry; กฎใหม่ใน rules/frontend.md ห้าม inline queryKey      |
-| Topics (TDEE / streak)               | ✅ .claude/topics/\*.md                                         | owner-confirmed; AI ห้ามเดาเกินจากนี้                                  |
-| Services (TDEE + streak)             | ✅ lib/services/{tdee,streak}.ts                                | pure, 33 vitest cases pass                                             |
-| Auth.js v5 (LINE + Google)           | ✅ lib/auth.ts + middleware + welcome wired                     | JWT session, signIn callback resolves/creates users row; routes guard  |
-| Profiles repo + DTO + service        | ✅ lib/services/onboarding.ts + Zod                             | upsert pattern; Mifflin/Katch switch; macro scaler                     |
-| Onboarding flow end-to-end           | ✅ /onboarding RSC + action + UI wired                          | 9-turn → DB → /plan-preview (real targets) → /today                    |
-| Plan-preview real data               | ✅ RSC reads user_profiles                                      | dynamic explainer copy per goal; redirects mid-onboarding users        |
-| Logs repos (food/water/mood/weight)  | ✅ lib/db/repositories/\*-logs.ts                               | sumInRange, latest, createPending/Confirmed                            |
-| Logs server actions                  | ✅ app/today/actions.ts                                         | logWater/logMood/logWeight; auth + Zod + revalidatePath                |
-| /today RSC (read + write loop)       | ✅ loadTodaySnapshot + TodayClient                              | header/kcal real; water + mood click → useMutation → action → RSC      |
-| Workout repos (4 aggregates)         | ✅ lib/db/repositories/{exercises,workout-\*,exercise-logs}     | findActive, three-stage session lifecycle, bulk createMany             |
-| Provisioned services (Phase 2 prep)  | ✅ Neon · Auth · Upstash · Kimi · Vercel Blob                   | all probed end-to-end; Helicone dropped from stack                     |
-| Chat repos (threads/messages/memory) | ✅ lib/db/repositories/{chat-threads,messages,memory-blocks}.ts | getOrCreate, findRecent (DESC then reverse), upsert (1:1)              |
-| Kimi client                          | ✅ lib/ai/kimi.ts                                               | createOpenAI → api.moonshot.ai/v1; lazy throw on missing key           |
-| Memory context builder               | ✅ lib/ai/memory.ts                                             | profile_block (numeric only) + summary_7d + notes; formatMemorySection |
-| AI SDK installed                     | ✅ ai 6 + @ai-sdk/openai 3 + @ai-sdk/react 3                    | also @upstash/redis + @upstash/ratelimit                               |
-| System prompt v1                     | ✅ lib/ai/prompts/system-v1.ts                                  | identity / style / safety / tool-usage + injects memory                |
-| Rate limit (Upstash)                 | ✅ lib/ai/rate-limit.ts                                         | sliding window 30/hr/user; Redis key = SHA-256(users.id)               |
-| Chat endpoint (/api/chat)            | ✅ app/api/chat/route.ts                                        | auth + rate + streamText + onFinish persists to messages table         |
-| Chat UI MVP (/chat)                  | ✅ app/chat/{page,chat-client}.tsx                              | minimal useChat; full ChatScreen integration deferred (see Phase 2.5)  |
+| Area                                 | Status                                                          | Notes                                                                   |
+| ------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Project guide (CLAUDE.md)            | ✅ committed                                                    | rules + topics referenced                                               |
+| Rule docs (.claude/rules/)           | ✅ working-principles + backend + frontend                      | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น              |
+| Topic docs (.claude/topics/)         | ❌ ทุกอันยังว่าง                                                | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"           |
+| Skills (.claude/skills/)             | ❌ ว่าง                                                         | จะสร้างใน Step 4                                                        |
+| Design analysis                      | ✅ docs/DESIGN_ANALYSIS.md                                      | 7 screens, tokens, interactions, open questions                         |
+| DB schema plan                       | ✅ docs/DB_SCHEMA.md                                            | 19 tables ออกแบบครบ                                                     |
+| Drizzle schema file                  | ✅ lib/db/schema.ts                                             | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated   |
+| Next.js scaffold                     | ✅ ทุก config + globals.css                                     | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน           |
+| Design tokens                        | ✅ lib/design/tokens.ts + tailwind.config.ts                    | parity กับ design `tokens.js`                                           |
+| Shared components                    | ✅ components/coach/_ + components/chat/_                       | 1:1 port จาก handoff                                                    |
+| 7 screens (A1–E4)                    | ✅ components/screens/_ + app/_/page.tsx                        | static — ไม่มี DB write                                                 |
+| Tab-bar navigation                   | ✅ wired                                                        | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON       |
+| Canvas review page                   | ✅ /canvas                                                      | ทุก S26 frame เรียง                                                     |
+| TanStack Query provider              | ✅ app/providers.tsx + .prettierrc                              | staleTime 30s, offlineFirst; client islands ห้าม `fetch` ดิบ            |
+| DB client (Drizzle/Neon HTTP)        | ✅ lib/db/client.ts                                             | edge-compatible; pool client เพิ่มใน Phase 2 พร้อม chat streaming       |
+| Users repository + types             | ✅ lib/db/repositories/users.ts + types/db                      | findById/byLineSub/byGoogleSub + create + softDelete                    |
+| Query key factory                    | ✅ lib/queries/keys.ts                                          | central registry; กฎใหม่ใน rules/frontend.md ห้าม inline queryKey       |
+| Topics (TDEE / streak)               | ✅ .claude/topics/\*.md                                         | owner-confirmed; AI ห้ามเดาเกินจากนี้                                   |
+| Services (TDEE + streak)             | ✅ lib/services/{tdee,streak}.ts                                | pure, 33 vitest cases pass                                              |
+| Auth.js v5 (LINE + Google)           | ✅ lib/auth.ts + middleware + welcome wired                     | JWT session, signIn callback resolves/creates users row; routes guard   |
+| Profiles repo + DTO + service        | ✅ lib/services/onboarding.ts + Zod                             | upsert pattern; Mifflin/Katch switch; macro scaler                      |
+| Onboarding flow end-to-end           | ✅ /onboarding RSC + action + UI wired                          | 9-turn → DB → /plan-preview (real targets) → /today                     |
+| Plan-preview real data               | ✅ RSC reads user_profiles                                      | dynamic explainer copy per goal; redirects mid-onboarding users         |
+| Logs repos (food/water/mood/weight)  | ✅ lib/db/repositories/\*-logs.ts                               | sumInRange, latest, createPending/Confirmed                             |
+| Logs server actions                  | ✅ app/today/actions.ts                                         | logWater/logMood/logWeight; auth + Zod + revalidatePath                 |
+| /today RSC (read + write loop)       | ✅ loadTodaySnapshot + TodayClient                              | header/kcal real; water + mood click → useMutation → action → RSC       |
+| Workout repos (4 aggregates)         | ✅ lib/db/repositories/{exercises,workout-\*,exercise-logs}     | findActive, three-stage session lifecycle, bulk createMany              |
+| Provisioned services (Phase 2 prep)  | ✅ Neon · Auth · Upstash · Kimi · Vercel Blob                   | all probed end-to-end; Helicone dropped from stack                      |
+| Chat repos (threads/messages/memory) | ✅ lib/db/repositories/{chat-threads,messages,memory-blocks}.ts | getOrCreate, findRecent (DESC then reverse), upsert (1:1)               |
+| Kimi client                          | ✅ lib/ai/kimi.ts                                               | createOpenAI → api.moonshot.ai/v1; lazy throw on missing key            |
+| Memory context builder               | ✅ lib/ai/memory.ts                                             | profile_block (numeric only) + summary_7d + notes; formatMemorySection  |
+| AI SDK installed                     | ✅ ai 6 + @ai-sdk/openai 3 + @ai-sdk/react 3                    | also @upstash/redis + @upstash/ratelimit                                |
+| System prompt v1                     | ✅ lib/ai/prompts/system-v1.ts                                  | identity / style / safety / tool-usage + injects memory                 |
+| Rate limit (Upstash)                 | ✅ lib/ai/rate-limit.ts                                         | sliding window 30/hr/user; Redis key = SHA-256(users.id)                |
+| Chat endpoint (/api/chat)            | ✅ app/api/chat/route.ts                                        | auth + rate + streamText + onFinish persists to messages table          |
+| Chat UI MVP (/chat)                  | ✅ app/chat/{page,chat-client}.tsx                              | minimal useChat; full ChatScreen integration deferred (see Phase 2.5)   |
+| Foods repo (text search)             | ✅ lib/db/repositories/foods.ts + lib/types/db/foods.ts         | ilike on name_th/name_en; vector search deferred to Phase 3             |
+| search_food tool                     | ✅ lib/ai/tools/search_food.ts                                  | factory fn; returns top-5 with semantic_id + per-100g macros            |
+| log_food tool                        | ✅ lib/ai/tools/log_food.ts                                     | factory closes over userId; writes pending row; returns confirm payload |
+| Tool registry                        | ✅ lib/ai/tools/index.ts                                        | createCoachTools(userId) → { search_food, log_food }                    |
+| confirmFoodLogAction                 | ✅ app/chat/actions.ts                                          | Server Action; calls food-logs.confirm(pendingId); revalidates /today   |
+| /api/chat + tools                    | ✅ app/api/chat/route.ts                                        | tools wired + stopWhen stepCountIs(5) + tool_calls jsonb persisted      |
 
 ## What's NOT done (เรียงตาม priority)
 
@@ -148,18 +154,27 @@ _Phase 0 ปิดครบ → ก้าวเข้า Phase 1_
 
 **Verified e2e flow**: `/` → signIn → `/onboarding` → `/plan-preview` → `/today` → `/chat` (talk to Kimi, see assistant reply stream, message persisted to DB).
 
+**Already shipped this session (2026-05-02)**:
+
+- ✅ `lib/types/db/foods.ts` + `lib/db/repositories/foods.ts` — `searchByName` (ilike text search; vector deferred Phase 3)
+- ✅ `lib/ai/tools/search_food.ts` — factory fn, returns top-5 with semantic_id + per-100g macros
+- ✅ `lib/ai/tools/log_food.ts` — factory closes over userId; writes pending row; returns `FoodLogConfirmPayload`
+- ✅ `lib/ai/tools/index.ts` — `createCoachTools(userId)` registry
+- ✅ `app/chat/actions.ts` — `confirmFoodLogAction` Server Action calls `food-logs.confirm(pendingId)` + revalidates `/today`
+- ✅ `app/api/chat/route.ts` — tools wired + `stopWhen: stepCountIs(5)` + tool_calls jsonb persisted in onFinish
+- ✅ `app/chat/chat-client.tsx` — guards empty text (tool-only messages skip render)
+- ✅ `pnpm build` passes; pushed to remote
+
 **Next session — pick up here (in order)**:
 
-1. **Verify the chat actually works in the browser** before adding tools. Open `/chat` after onboarding, send "ทดสอบ" — should see a streamed Thai reply and a row appear in `messages` (use `pnpm db:studio` to confirm). Persist failures live in `console.error` only; production needs proper logging in Phase 3.
-2. **First 2 tools** — `lib/ai/tools/search_food.ts` + `log_food.ts`
-   - `tool({ description, inputSchema (Zod), execute })` from `ai`.
-   - `search_food`: takes Thai query string, runs pgvector similarity on `foods.embedding`, returns top-5 with semantic_id + per-100g macros.
-   - `log_food`: returns a confirm card payload only — does NOT write the row. UI shows the card; user taps confirm; `confirmFoodLogAction` (Server Action) commits via `food-logs.confirm`.
-3. **Tool registry** — `lib/ai/tools/index.ts` exports `coachTools = { search_food, log_food, ... }`. Pass to `streamText({ tools: coachTools })` in `app/api/chat/route.ts`. Tool-call rows go into `messages.tool_calls` jsonb.
-4. **Refactor full ChatScreen** to consume the same data — remove the minimal `ChatClient`, instead pass `useChat`'s messages into `ChatScreen` (which already has bubble variants for food/workout/insight). Wire confirm cards into food bubble.
-5. **Remaining tools** — `log_water` / `log_exercise` / `update_plan` / `weigh_in` / `set_mood` / `update_profile`. Mostly thin wrappers over the existing Server Actions.
-6. **Plan generator** — `lib/services/plan-generator.ts`. Takes profile → produces a `WorkoutPlan` row. Triggered (a) automatically right after onboarding, (b) by `update_plan` tool. `/plan` RSC reads `findActive` and renders.
-7. **Eval harness** — `tests/eval/run.ts` + `tests/eval/golden/*.json`. 50 Thai food prompts (need owner). Gates merges that touch `system-v*.ts` or any tool.
+1. **Verify /chat + tools e2e in browser** — open `/chat`, send "กินข้าวกะเพราหมูสับ"; should see Kimi call search_food (empty result OK) then log_food (pending row in DB); `pnpm db:studio` ดู `food_logs` + `messages.tool_calls`. Report back to confirm before wiring UI cards.
+2. **Refactor full ChatScreen (Phase 2.5)** — remove minimal `ChatClient`, pass `useChat` messages into `ChatScreen` (components/screens/chat-screen.tsx). Add `tool-invocation` part rendering for `food_log_confirm` payload → show confirm card + wire `confirmFoodLogAction`.
+3. **Remaining tools** — `log_water` / `weigh_in` / `set_mood`. Thin wrappers over existing Server Actions in `today/actions.ts`. Add to `createCoachTools`.
+4. **log_exercise tool** — needs workout-sessions + exercise-logs repos wired. Depends on plan generator.
+5. **Plan generator** — `lib/services/plan-generator.ts`. Takes profile → produces a `WorkoutPlan` row. Triggered (a) right after onboarding, (b) by `update_plan` tool. `/plan` RSC reads `findActive` and renders.
+6. **Eval harness** — `tests/eval/run.ts` + `tests/eval/golden/*.json`. 50 Thai food prompts (need owner). Gates merges that touch `system-v*.ts` or any tool.
+
+**Notes on foods table**: table is empty — `search_food` returns `[]` for any query. LLM falls through to estimate macros from training data and calls `log_food` directly. `food_logs.food_id` is nullable so this is valid. Seed foods data when real Thai food DB content is available.
 
 **Topic gap (BLOCKING before pushing safety-critical changes)**: `topics/safety-floors.md` is empty. System prompt v1 quotes 1500M / 1200F + DMH 1323 — these are owner-confirmed in `topics/tdee-and-macros.md` but ED triggers / escalation flow still need explicit owner sign-off.
 
