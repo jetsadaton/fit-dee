@@ -60,28 +60,32 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
             ทักโค้ชดีได้เลย เช่น &quot;วันนี้กินข้าวกะเพราหมูสับ&quot; หรือ &quot;เพิ่งกินน้ำ 1 แก้ว&quot;
           </div>
         )}
-        {messages.map((m) => (
-          <div key={m.id} style={{ marginBottom: 12, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-            <div
-              style={{
-                maxWidth: '80%',
-                padding: '10px 14px',
-                borderRadius: 16,
-                background: m.role === 'user' ? T.coral : T.bg3,
-                color: m.role === 'user' ? '#0E0F12' : T.text,
-                fontSize: 14,
-                lineHeight: 1.5,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-            >
-              {m.parts
-                .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
-                .map((p) => p.text)
-                .join('')}
+        {messages.map((m) => {
+          const text = m.parts
+            .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+            .map((p) => p.text)
+            .join('');
+          if (!text) return null;
+          return (
+            <div key={m.id} style={{ marginBottom: 12, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div
+                style={{
+                  maxWidth: '80%',
+                  padding: '10px 14px',
+                  borderRadius: 16,
+                  background: m.role === 'user' ? T.coral : T.bg3,
+                  color: m.role === 'user' ? '#0E0F12' : T.text,
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {text}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {submitting && (
           <div style={{ color: T.textMute, fontSize: 12, padding: 8 }}>โค้ชกำลังพิมพ์…</div>
         )}

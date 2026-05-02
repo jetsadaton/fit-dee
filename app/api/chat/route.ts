@@ -13,14 +13,16 @@
 // Drizzle's HTTP driver both work in Node. Move to edge after we confirm
 // streaming latency under prod traffic.
 
-import { convertToModelMessages, streamText, type UIMessage } from 'ai';
+import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from 'ai';
 import { auth } from '@/lib/auth';
 import { kimi, DEFAULT_MODEL } from '@/lib/ai/kimi';
 import { loadMemoryContext } from '@/lib/ai/memory';
 import { buildSystemPrompt, PROMPT_VERSION } from '@/lib/ai/prompts/system-v1';
 import { checkChatLimit } from '@/lib/ai/rate-limit';
+import { createCoachTools } from '@/lib/ai/tools';
 import { getOrCreate as getOrCreateThread, touch as touchThread } from '@/lib/db/repositories/chat-threads';
 import { create as createMessage } from '@/lib/db/repositories/messages';
+import type { ToolCall } from '@/lib/types/db/chat';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30; // seconds — Vercel default for Hobby tier
@@ -85,8 +87,10 @@ export async function POST(req: Request) {
     system: systemPrompt,
     messages: modelMessages,
     temperature: 0.6,
+    tools: createCoachTools(userId),
+    stopWhen: stepCountIs(5),
 
-    onFinish: async ({ text, usage, response }) => {
+    onFinish: async ({ text, usage, response, steps }) => {
       const latencyMs = Date.now() - startedAt;
       const requestId = response?.id ?? null;
 
@@ -101,11 +105,26 @@ export async function POST(req: Request) {
             content: latestUserText,
           });
         }
+        // Collect tool calls + results across all steps for in-DB tracing.
+        // Cast through unknown: AI SDK v6 uses `input`/`output` (not `args`/`result`).
+        const toolCalls: ToolCall[] = (steps ?? []).flatMap((step) => {
+          const calls = step.toolCalls as unknown as Array<{ toolName: string; input: unknown; toolCallId: string }>;
+          const results = step.toolResults as unknown as Array<{ toolCallId: string; output: unknown }> | undefined;
+          return (calls ?? []).map((tc) => ({
+            name: tc.toolName,
+            arguments: tc.input as Record<string, unknown>,
+            result: results?.find((tr) => tr.toolCallId === tc.toolCallId)?.output as
+              | Record<string, unknown>
+              | undefined,
+          }));
+        });
+
         await createMessage({
           threadId: thread.id,
           userId,
           role: 'assistant',
-          content: text,
+          content: text || null,
+          toolCalls: toolCalls.length > 0 ? toolCalls : null,
           kimiRequestId: requestId,
           tokenIn: usage?.inputTokens ?? null,
           tokenOut: usage?.outputTokens ?? null,
