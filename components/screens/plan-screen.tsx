@@ -201,7 +201,7 @@ export function PlanScreen({
     <div
       style={{
         width: '100%',
-        height: '100%',
+        height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         background: T.bg,
@@ -319,7 +319,7 @@ export function PlanScreen({
         })}
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '4px 16px 8px' }}>
+      <div style={{ flex: 1, overflow: 'auto', padding: '4px 16px calc(76px + env(safe-area-inset-bottom, 0px))' }}>
         {cur.rest ? (
           <div
             style={{

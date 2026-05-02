@@ -835,7 +835,7 @@ export function TodayScreen({
     <div
       style={{
         width: '100%',
-        height: '100%',
+        height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         background: T.bg,
@@ -929,7 +929,7 @@ export function TodayScreen({
         </div>
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto', padding: '14px 16px 8px' }}>
+      <div style={{ flex: 1, overflow: 'auto', padding: '14px 16px calc(76px + env(safe-area-inset-bottom, 0px))' }}>
         {range === 'today' && (
           <>
             <div
