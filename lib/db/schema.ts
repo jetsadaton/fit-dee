@@ -150,17 +150,17 @@ export const foods = pgTable(
     magnesiumMgPer100g: numeric('magnesium_mg_per_100g', { precision: 7, scale: 2 }),
     sodiumMgPer100g: numeric('sodium_mg_per_100g', { precision: 7, scale: 2 }),
     potassiumMgPer100g: numeric('potassium_mg_per_100g', { precision: 7, scale: 2 }),
-    ironMgPer100g: numeric('iron_mg_per_100g', { precision: 5, scale: 3 }),
-    copperMgPer100g: numeric('copper_mg_per_100g', { precision: 5, scale: 3 }),
-    zincMgPer100g: numeric('zinc_mg_per_100g', { precision: 5, scale: 3 }),
+    ironMgPer100g: numeric('iron_mg_per_100g', { precision: 8, scale: 3 }),
+    copperMgPer100g: numeric('copper_mg_per_100g', { precision: 8, scale: 3 }),
+    zincMgPer100g: numeric('zinc_mg_per_100g', { precision: 8, scale: 3 }),
     iodineUgPer100g: numeric('iodine_ug_per_100g', { precision: 7, scale: 2 }),
     // Vitamins
     vitaminAUgRaePer100g: numeric('vitamin_a_ug_rae_per_100g', { precision: 7, scale: 2 }),
-    thiaminMgPer100g: numeric('thiamin_mg_per_100g', { precision: 5, scale: 3 }),
-    riboflavinMgPer100g: numeric('riboflavin_mg_per_100g', { precision: 5, scale: 3 }),
-    niacinMgPer100g: numeric('niacin_mg_per_100g', { precision: 5, scale: 2 }),
-    vitaminCMgPer100g: numeric('vitamin_c_mg_per_100g', { precision: 5, scale: 2 }),
-    vitaminEMgPer100g: numeric('vitamin_e_mg_per_100g', { precision: 5, scale: 2 }),
+    thiaminMgPer100g: numeric('thiamin_mg_per_100g', { precision: 8, scale: 3 }),
+    riboflavinMgPer100g: numeric('riboflavin_mg_per_100g', { precision: 8, scale: 3 }),
+    niacinMgPer100g: numeric('niacin_mg_per_100g', { precision: 8, scale: 2 }),
+    vitaminCMgPer100g: numeric('vitamin_c_mg_per_100g', { precision: 8, scale: 2 }),
+    vitaminEMgPer100g: numeric('vitamin_e_mg_per_100g', { precision: 8, scale: 2 }),
     defaultPortionG: smallint('default_portion_g'),
     source: text('source').notNull(), // 'usda' | 'thai_db' | 'user' | 'llm_estimate'
     verified: boolean('verified').notNull().default(false),
@@ -448,6 +448,52 @@ export const aiInsights = pgTable(
   },
   (t) => ({
     uniqueRange: uniqueIndex('ai_insights_unique').on(t.userId, t.range, t.forDate),
+  }),
+);
+
+// ─── operational ─────────────────────────────────────────────────────
+
+// ─── AI insights cache ───────────────────────────────────────────────
+// Pre-generated per (userId, range, dateIct). weekly-insights Inngest job
+// populates this; fetchInsightsAction reads here first to avoid per-request
+// LLM calls. TTL enforced by read-side: stale if generated_at > 12h old.
+
+export const insightsCache = pgTable(
+  'insights_cache',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    range: text('range').notNull(), // 'today' | 'week' | 'month'
+    dateIct: text('date_ict').notNull(), // YYYY-MM-DD ICT
+    insights: jsonb('insights').notNull(), // Insight[]
+    generatedAt: timestamp('generated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    pk: uniqueIndex('insights_cache_user_range_date_idx').on(t.userId, t.range, t.dateIct),
+    byUser: index('insights_cache_user_idx').on(t.userId, t.generatedAt),
+  }),
+);
+
+// ─── push subscriptions ──────────────────────────────────────────────
+// One row per browser/device. endpoint is globally unique per W3C spec.
+
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byEndpoint: uniqueIndex('push_subs_endpoint_idx').on(t.endpoint),
+    byUser: index('push_subs_user_idx').on(t.userId),
   }),
 );
 

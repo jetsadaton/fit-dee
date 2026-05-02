@@ -12,6 +12,7 @@ import { create as createWeight } from '@/lib/db/repositories/weight-logs';
 import { logMoodInputSchema, logWaterInputSchema, logWeightInputSchema } from '@/lib/types/dto/logs';
 import { loadTodaySnapshot } from '@/lib/services/today';
 import { generateInsights } from '@/lib/services/insights';
+import { findFresh, upsert as upsertInsights } from '@/lib/db/repositories/insights-cache';
 import type { Insight, InsightRange } from '@/lib/types/dto/insights';
 
 export type LogActionResult =
@@ -99,10 +100,24 @@ export async function logWeightAction(rawInput: unknown): Promise<LogActionResul
 export async function fetchInsightsAction(range: InsightRange): Promise<Insight[]> {
   const session = await auth();
   if (!session?.user?.id) return [];
+  const userId = session.user.id;
+
+  // ICT date key (same key used by weekly-insights Inngest job).
+  const dateIct = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
 
   try {
-    const snapshot = await loadTodaySnapshot(session.user.id);
-    return await generateInsights(snapshot, range);
+    // Cache-first: skip LLM if a fresh pre-generated result exists.
+    const cached = await findFresh({ userId, range, dateIct });
+    if (cached) return cached;
+
+    const snapshot = await loadTodaySnapshot(userId);
+    const fresh = await generateInsights(snapshot, range);
+
+    if (fresh.length > 0) {
+      // Write back to cache (best-effort).
+      void upsertInsights({ userId, range, dateIct, insights: fresh }).catch(() => undefined);
+    }
+    return fresh;
   } catch {
     return [];
   }
