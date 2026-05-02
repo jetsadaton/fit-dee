@@ -23,10 +23,19 @@ export const queryKeys = {
     me: () => [...queryKeys.users.all, 'me'] as const,
     byId: (id: string) => [...queryKeys.users.all, 'byId', id] as const,
   },
+  /**
+   * The unified read model that backs /today. Server Actions for water /
+   * mood / weight invalidate this single key after a successful mutation,
+   * triggering the RSC refetch (we don't store the snapshot in the
+   * client cache — it's RSC-resolved — but the key exists so optimistic
+   * islands can opt in to manual cache writes when needed).
+   */
+  dailyDashboard: {
+    all: ['daily-dashboard'] as const,
+    today: () => [...queryKeys.dailyDashboard.all, 'today'] as const,
+  },
   // Add aggregates as services land:
-  // dailySummaries: { all: ['daily-summaries'] as const, byDate: (d: string) => [...] }
   // foodLogs:       { all: ['food-logs']       as const, today: () => [...]      }
-  // waterLogs:      { all: ['water-logs']      as const, today: () => [...]      }
   // workoutPlans:   { all: ['workout-plans']   as const, current: () => [...]    }
   // chatMessages:   { all: ['chat-messages']   as const, recent: (n=20) => [...] }
 } as const;

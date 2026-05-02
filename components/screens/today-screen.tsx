@@ -250,9 +250,42 @@ function AIInsightCard({ items, range = 'today' }: { items: Insight[]; range?: R
   );
 }
 
-function WaterCard() {
-  const [drunk, setDrunk] = useState(5);
-  const goal = 8;
+/**
+ * 1 glass = 250ml. Card is purely display + click; the parent passes an
+ * `onAdd(ml)` to persist via Server Action. Optimistic state lives here so
+ * taps feel instant; on error the parent can revert by re-rendering with
+ * a smaller `initialMl`.
+ */
+function WaterCard({
+  initialMl = 1250,
+  goalGlasses = 8,
+  glassMl = 250,
+  onAdd,
+}: {
+  initialMl?: number;
+  goalGlasses?: number;
+  glassMl?: number;
+  onAdd?: (ml: number) => void;
+}) {
+  const goal = goalGlasses;
+  const initialDrunk = Math.min(goal, Math.round(initialMl / glassMl));
+  const [drunk, setDrunk] = useState(initialDrunk);
+  const handleClick = (i: number) => {
+    const filled = i < drunk;
+    if (filled && i === drunk - 1) {
+      // Tapping the last filled glass undoes a single +250ml entry.
+      // Phase 1 doesn't expose a delete-water action; revert visually only.
+      // (User can re-tap to add again.)
+      setDrunk(drunk - 1);
+      return;
+    }
+    const next = i + 1;
+    const delta = (next - drunk) * glassMl;
+    if (delta > 0) {
+      setDrunk(next);
+      onAdd?.(delta);
+    }
+  };
   return (
     <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 16, padding: 14, gridColumn: 'span 2' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -284,7 +317,7 @@ function WaterCard() {
             <button
               type="button"
               key={i}
-              onClick={() => setDrunk(filled && i === drunk - 1 ? drunk - 1 : i + 1)}
+              onClick={() => handleClick(i)}
               style={{
                 flex: 1,
                 height: 28,
@@ -303,8 +336,19 @@ function WaterCard() {
   );
 }
 
-function MoodCard() {
-  const [mood, setMood] = useState(3);
+function MoodCard({
+  initialMood = null,
+  onSelect,
+}: {
+  /** 1-5; null when user hasn't logged today yet — UI defaults to 3 ('ดี'). */
+  initialMood?: number | null;
+  onSelect?: (energy: number) => void;
+}) {
+  const [mood, setMood] = useState(initialMood ?? 3);
+  const handlePick = (v: number) => {
+    setMood(v);
+    onSelect?.(v);
+  };
   const moods = [
     { v: 1, e: '😩', l: 'หมดแรง' },
     { v: 2, e: '😐', l: 'พอไหว' },
@@ -345,7 +389,7 @@ function MoodCard() {
           <button
             type="button"
             key={m.v}
-            onClick={() => setMood(m.v)}
+            onClick={() => handlePick(m.v)}
             style={{
               flex: 1,
               height: 44,
@@ -762,11 +806,26 @@ export type TodayScreenProps = {
     kcalEaten?: number;
     kcalGoal?: number;
     kcalBurned?: number;
+    waterMl?: number;
+    moodEnergy?: number | null;
   };
+  /** Optional mutation hooks. When supplied, click writes through to the
+   * Server Action; if omitted the card falls back to local-only optimistic
+   * state (used by /canvas review). */
+  onAddWater?: (ml: number) => void;
+  onSelectMood?: (energy: number) => void;
 };
 
-export function TodayScreen({ onTab, activeTab = 'today' as TabId, data }: TodayScreenProps) {
+export function TodayScreen({
+  onTab,
+  activeTab = 'today' as TabId,
+  data,
+  onAddWater,
+  onSelectMood,
+}: TodayScreenProps) {
   const [range, setRange] = useState<Range>('today');
+  const waterMl = data?.waterMl ?? 1250;
+  const moodEnergy = data?.moodEnergy ?? null;
   const displayName = data?.displayName ?? 'โบ้';
   const streak = data?.streak ?? 12;
   const kcalEaten = data?.kcalEaten ?? 1450;
@@ -891,8 +950,8 @@ export function TodayScreen({ onTab, activeTab = 'today' as TabId, data }: Today
             <AIInsightCard items={insights.today} range="today" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
               <WorkoutCTA />
-              <WaterCard />
-              <MoodCard />
+              <WaterCard initialMl={waterMl} onAdd={onAddWater} />
+              <MoodCard initialMood={moodEnergy} onSelect={onSelectMood} />
               <WeightTrend />
             </div>
           </>

@@ -26,6 +26,8 @@ export default async function TodayPage() {
         kcalEaten: data.kcalEaten,
         kcalGoal: data.kcalGoal,
         kcalBurned: data.kcalBurned,
+        waterMl: data.waterMl,
+        moodEnergy: data.moodEnergy,
       }}
     />
   );
