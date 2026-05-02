@@ -5,10 +5,24 @@
 // totals — per topic doc; coach-proposed but unconfirmed rows live in DB
 // but are invisible to summaries).
 
-import { and, between, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm';
+import { and, asc, between, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { foodLogs } from '@/lib/db/schema';
+import { foodLogs, foods } from '@/lib/db/schema';
 import type { DailyFoodTotals, FoodLog, NewFoodLog } from '@/lib/types/db/logs';
+
+export type FoodLogWithName = {
+  id: string;
+  nameTh: string;
+  mealType: string;
+  kcal: number;
+  kcalLow: number | null;
+  kcalHigh: number | null;
+  proteinG: string;
+  carbG: string;
+  fatG: string;
+  portionG: number | null;
+  loggedAt: Date;
+};
 
 const isLive = and(isNull(foodLogs.deletedAt), isNotNull(foodLogs.confirmedAt));
 
@@ -133,4 +147,74 @@ export async function softDelete(id: string): Promise<void> {
     .update(foodLogs)
     .set({ deletedAt: new Date() })
     .where(and(eq(foodLogs.id, id), isNull(foodLogs.deletedAt)));
+}
+
+/** Soft-delete with ownership check — safe for user-facing actions. */
+export async function softDeleteOwned(id: string, userId: string): Promise<void> {
+  await db
+    .update(foodLogs)
+    .set({ deletedAt: new Date() })
+    .where(and(eq(foodLogs.id, id), eq(foodLogs.userId, userId), isNull(foodLogs.deletedAt)));
+}
+
+/**
+ * Confirmed food logs for today with display name.
+ * name_th: COALESCE(food_logs.name_th, foods.name_th, 'อาหาร')
+ * to handle all three cases: new entries, linked DB entries, legacy LLM entries.
+ */
+export async function listWithName(args: { userId: string; startUtc: Date; endUtc: Date }): Promise<FoodLogWithName[]> {
+  return db
+    .select({
+      id: foodLogs.id,
+      nameTh: sql<string>`coalesce(${foodLogs.nameTh}, ${foods.nameTh}, 'อาหาร')`,
+      mealType: foodLogs.mealType,
+      kcal: foodLogs.kcal,
+      kcalLow: foodLogs.kcalLow,
+      kcalHigh: foodLogs.kcalHigh,
+      proteinG: foodLogs.proteinG,
+      carbG: foodLogs.carbG,
+      fatG: foodLogs.fatG,
+      portionG: foodLogs.portionG,
+      loggedAt: foodLogs.loggedAt,
+    })
+    .from(foodLogs)
+    .leftJoin(foods, eq(foodLogs.foodId, foods.id))
+    .where(
+      and(
+        eq(foodLogs.userId, args.userId),
+        gte(foodLogs.loggedAt, args.startUtc),
+        lt(foodLogs.loggedAt, args.endUtc),
+        isNull(foodLogs.deletedAt),
+        isNotNull(foodLogs.confirmedAt),
+      ),
+    )
+    .orderBy(foodLogs.mealType, asc(foodLogs.loggedAt));
+}
+
+/** Edit kcal + macros. Collapses kcalLow/kcalHigh to the exact value (no longer an estimate). */
+export async function updateFoodLog(
+  id: string,
+  userId: string,
+  input: { kcal: number; proteinG: string; carbG: string; fatG: string },
+): Promise<FoodLog | undefined> {
+  const [row] = await db
+    .update(foodLogs)
+    .set({
+      kcal: input.kcal,
+      kcalLow: input.kcal,
+      kcalHigh: input.kcal,
+      proteinG: input.proteinG,
+      carbG: input.carbG,
+      fatG: input.fatG,
+    })
+    .where(
+      and(
+        eq(foodLogs.id, id),
+        eq(foodLogs.userId, userId),
+        isNull(foodLogs.deletedAt),
+        isNotNull(foodLogs.confirmedAt),
+      ),
+    )
+    .returning();
+  return row;
 }

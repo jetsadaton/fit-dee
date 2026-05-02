@@ -190,6 +190,7 @@ export const foodLogs = pgTable(
     proteinG: numeric('protein_g', { precision: 5, scale: 2 }).notNull(),
     carbG: numeric('carb_g', { precision: 5, scale: 2 }).notNull(),
     fatG: numeric('fat_g', { precision: 5, scale: 2 }).notNull(),
+    nameTh: text('name_th'), // display name for the food list; coalesced with foods.name_th for linked items
     source: text('source').notNull(), // 'chat_text'|'photo'|'manual'
     photoId: uuid('photo_id'),
     confirmedAt: timestamp('confirmed_at', { withTimezone: true }),

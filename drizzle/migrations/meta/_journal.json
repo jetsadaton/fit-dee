@@ -43,6 +43,13 @@
       "when": 1777742276964,
       "tag": "0005_harsh_scarecrow",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777745401063,
+      "tag": "0006_tired_skaar",
+      "breakpoints": true
     }
   ]
 }

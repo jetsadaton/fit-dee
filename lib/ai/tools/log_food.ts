@@ -26,6 +26,7 @@ export function createLogFoodTool(userId: string) {
       const row = await createPending({
         userId,
         foodId: foodId ?? null,
+        nameTh,
         mealType,
         portionG: portionG ?? null,
         kcal,
