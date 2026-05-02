@@ -526,12 +526,21 @@ function WorkoutCTA({
   );
 }
 
-function WeightTrend({ latestWeightKg }: { latestWeightKg?: number | null }) {
-  const sparkData = [78.2, 78.0, 77.9, 78.1, 77.8, 77.6, 77.7, 77.5, 77.3, 77.4, 77.2, 77.0, 76.9, 76.8];
+function WeightTrend({
+  latestWeightKg,
+  series,
+}: {
+  latestWeightKg?: number | null;
+  /** Oldest→newest kg values. ≥2 required for sparkline. */
+  series?: number[] | null;
+}) {
   const w = 280;
   const h = 70;
-  const min = Math.min(...sparkData) - 0.3;
-  const max = Math.max(...sparkData) + 0.3;
+  const hasWeight = latestWeightKg != null;
+  const hasSpark = series != null && series.length >= 2;
+  const sparkData = hasSpark ? series : [];
+  const min = hasSpark ? Math.min(...sparkData) - 0.3 : 0;
+  const max = hasSpark ? Math.max(...sparkData) + 0.3 : 1;
   const pts = sparkData.map((v, i) => {
     const x = (i / (sparkData.length - 1)) * w;
     const y = h - ((v - min) / (max - min)) * h;
@@ -539,7 +548,6 @@ function WeightTrend({ latestWeightKg }: { latestWeightKg?: number | null }) {
   });
   const path = pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(' ');
   const area = path + ` L${w},${h} L0,${h} Z`;
-  const hasWeight = latestWeightKg != null;
   return (
     <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 16, padding: 14, gridColumn: 'span 2' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -575,7 +583,7 @@ function WeightTrend({ latestWeightKg }: { latestWeightKg?: number | null }) {
           แจ้งโค้ชได้เลย
         </span>
       </div>
-      {hasWeight && (
+      {hasWeight && hasSpark && (
         <svg width="100%" height={h + 4} viewBox={`0 0 ${w} ${h + 4}`} preserveAspectRatio="none">
           <defs>
             <linearGradient id="wtgrad" x1="0" y1="0" x2="0" y2="1">
@@ -869,6 +877,8 @@ export type TodayScreenProps = {
     month30WeightDeltaKg?: number | null;
     month30DaysHitKcal?: number;
     month30ActivityDays?: { dateIct: string; level: 0 | 1 | 2 | 3 }[];
+    /** Weight readings oldest→newest. ≥2 entries → sparkline shown. Empty = hide. */
+    weightSeriesKg?: number[];
   };
   /** Optional mutation hooks. When supplied, click writes through to the
    * Server Action; if omitted the card falls back to local-only optimistic
@@ -931,6 +941,7 @@ export function TodayScreen({
   const month30WeightDeltaKg = data?.month30WeightDeltaKg ?? null;
   const month30DaysHitKcal = data?.month30DaysHitKcal ?? 0;
   const month30ActivityDays = data?.month30ActivityDays ?? null;
+  const weightSeriesKg = data?.weightSeriesKg ?? null;
   return (
     <div
       style={{
@@ -1084,7 +1095,7 @@ export function TodayScreen({
               <WorkoutCTA workout={todayWorkout} onStart={onStartWorkout} />
               <WaterCard initialMl={waterMl} onAdd={onAddWater} />
               <MoodCard initialMood={moodEnergy} onSelect={onSelectMood} />
-              <WeightTrend latestWeightKg={latestWeightKg} />
+              <WeightTrend latestWeightKg={latestWeightKg} series={weightSeriesKg} />
             </div>
           </>
         )}
@@ -1169,7 +1180,7 @@ export function TodayScreen({
               ]}
             />
             <WeekBars days={week7Days} kcalGoal={kcalGoal} />
-            <WeightTrend latestWeightKg={latestWeightKg} />
+            <WeightTrend latestWeightKg={latestWeightKg} series={weightSeriesKg} />
           </>
         )}
 

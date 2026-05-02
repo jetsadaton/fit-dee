@@ -72,6 +72,8 @@ export type TodaySnapshot = {
   month30DaysHitKcal: number;
   /** Per-day activity level for the month heatmap. Level: 0=none 1=food 2=food+workout 3=food+workout+kcal≥goal */
   month30ActivityDays: { dateIct: string; level: 0 | 1 | 2 | 3 }[];
+  /** Weight readings oldest→newest (past 30d). Empty = no data. ≥2 entries = sparkline eligible. */
+  weightSeriesKg: number[];
 };
 
 const ZEROES: DailyFoodTotals = { kcal: 0, proteinG: 0, carbG: 0, fatG: 0, meals: 0 };
@@ -191,6 +193,9 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
   // Month heatmap: 30 ICT calendar slots, oldest→newest.
   const kcalFloor80 = kcalGoal > 0 ? Math.round(kcalGoal * 0.8) : 0;
   const foodByDate = new Map(month30Food.map((d) => [d.dateIct, d]));
+  // Weight sparkline: month30Weights is desc (newest first) → reverse to oldest→newest.
+  const weightSeriesKg = [...month30Weights].reverse().map((w) => Math.round(Number(w.weightKg) * 10) / 10);
+
   const month30ActivityDays: TodaySnapshot['month30ActivityDays'] = Array.from({ length: 30 }, (_, i) => {
     const ictDateStr = new Date(Date.now() + ICT_OFFSET_MS - (29 - i) * 86400000).toISOString().slice(0, 10);
     const fd = foodByDate.get(ictDateStr);
@@ -231,5 +236,6 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
     month30WeightDeltaKg,
     month30DaysHitKcal: month30HitKcalReal,
     month30ActivityDays,
+    weightSeriesKg,
   };
 }
