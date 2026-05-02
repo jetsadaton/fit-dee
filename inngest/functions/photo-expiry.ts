@@ -1,7 +1,8 @@
 // photo-expiry — daily PDPA cleanup job.
-// Food photos expire after 30 days per pdpa.md; soft-deletes expired rows.
+// Deletes expired attachment Blobs from Vercel Blob storage, then soft-deletes the DB rows.
 
 import { lte, isNull, and } from 'drizzle-orm';
+import { del } from '@vercel/blob';
 import { inngest } from '../client';
 import { db } from '@/lib/db/client';
 import { attachments } from '@/lib/db/schema';
@@ -17,14 +18,22 @@ export const photoExpiry = inngest.createFunction(
 
     const expired = await step.run('find-expired', () =>
       db
-        .select({ id: attachments.id })
+        .select({ id: attachments.id, blobUrl: attachments.blobUrl })
         .from(attachments)
         .where(and(lte(attachments.expiresAt, now), isNull(attachments.deletedAt))),
     );
 
     if (expired.length === 0) return { deleted: 0 };
 
-    const deleted = await step.run('soft-delete', () =>
+    // Delete actual Blob files first (best-effort — DB row cleanup follows regardless).
+    await step.run('delete-blobs', async () => {
+      const urls = expired.map((r) => r.blobUrl).filter(Boolean) as string[];
+      if (urls.length > 0) {
+        await del(urls).catch(() => undefined);
+      }
+    });
+
+    const deleted = await step.run('soft-delete-rows', () =>
       db
         .update(attachments)
         .set({ deletedAt: now })

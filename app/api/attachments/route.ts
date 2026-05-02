@@ -3,7 +3,12 @@
 // Uploads to Vercel Blob, inserts an attachments row, returns { id, url }.
 //
 // Phase 2: public Blob URL (Kimi vision needs direct URL access).
-// Phase 3: migrate to private Blob + signed URL + enforce expiresAt.
+// Phase 3 TODO: migrate to private Blob + signed URL (1d TTL).
+//
+// PDPA rules (topics/pdpa.md):
+//   food_photo     → 30-day retention in Blob
+//   body_photo     → NO blob; Kimi analyses then discards; text-only
+//   equipment_photo → 30-day retention
 
 import { put } from '@vercel/blob';
 import { auth } from '@/lib/auth';
@@ -11,11 +16,10 @@ import { create } from '@/lib/db/repositories/attachments';
 
 export const runtime = 'nodejs';
 
-const ALLOWED_KINDS = ['food_photo', 'body_photo', 'equipment_photo'] as const;
+const ALLOWED_KINDS = ['food_photo', 'equipment_photo'] as const;
 type AttachmentKind = (typeof ALLOWED_KINDS)[number];
 
-// 90-day expiry — owner must confirm in topics/pdpa.md
-const EXPIRY_DAYS = 90;
+const EXPIRY_DAYS = 30; // PDPA: food/equipment photos max 30 days
 
 export async function POST(req: Request) {
   const session = await auth();
