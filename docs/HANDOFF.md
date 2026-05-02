@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: system-v2 shipped; 40 food eval cases; chat UX fixes; BaoWio seeded
+> Last commit: /today all 3 tabs real data (week/month stats, MacroBar, WeightTrend, WorkoutCTA)
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -34,7 +34,7 @@ pnpm dev                              # http://localhost:3000
 | Design tokens + shared components | ✅                                         | 1:1 port จาก design handoff                                                             |
 | Auth.js v5 (LINE + Google)        | ✅                                         | JWT session, signIn callback                                                            |
 | Onboarding flow                   | ✅ /onboarding → /plan-preview → /today    | 9-turn → DB → real targets                                                              |
-| /today RSC                        | ✅ real data                               | kcal/water/mood wired; weight log via weigh_in tool                                     |
+| /today RSC                        | ✅ real data — ทุก tab                     | วันนี้: MacroBar+WeightTrend+WorkoutCTA; สัปดาห์/เดือน: stats จริงทั้งหมด               |
 | /plan RSC                         | ✅ real data                               | findActive() → enriched exercises → buildScreenPlan()                                   |
 | /chat                             | ✅ UX fixed                                | typing bubble in message list; scroll-to-bottom on load+response; food confirm card v2  |
 | **/me page**                      | ✅ **real data**                           | RSC → profile data; avatar initials; macro bars; sign out                               |
@@ -65,28 +65,24 @@ pnpm dev                              # http://localhost:3000
 
 ## Next session — pick up here (in order)
 
-1. **MOPH 2018 seed — ขั้นตอนที่เหลือ**
-   - extraction กำลัง run อยู่ (Kimi K2.6 vision, 97 pages 26–122)
-   - ถ้า extraction ยังไม่เสร็จ:
-     ```bash
-     KIMI_API_KEY=$(grep KIMI_API_KEY .env.local | cut -d= -f2) \
-       scripts/.venv/bin/python scripts/extract_thai_nutrition_pdf.py > /tmp/kimi_extract.log 2>&1 &
-     ```
-
-     - venv อยู่ที่ `scripts/.venv/` (pdf2image + openai installed)
-     - pages 26–31 อาจเป็น intro/legend — ถ้าได้ [] ทุกครั้งถือว่าปกติ
-   - เมื่อ extraction เสร็จ (all_foods.json มีแถว):
-     ```bash
-     pnpm db:seed:moph2018    # seed จาก scripts/extracted/all_foods.json
-     ```
-   - **migration 0002 applied แล้ว** — ไม่ต้อง db:migrate อีก
-
-2. **รัน pnpm eval กับ system-v2** — 57 cases ยังไม่ได้รันหลัง v2 ship
+1. **รัน pnpm eval กับ system-v2** — 57 cases ยังไม่ได้รันหลัง v2 ship
    - `pnpm eval --filter food` → ตรวจ 40 food cases
    - `pnpm eval --filter safety` → ตรวจ 4 safety cases (L1/L2/deload)
    - target: pass rate ≥ 90%
 
-3. **Inngest / PWA / offline** — Phase 3 (deferred)
+2. **AIInsightCard** — ยังเป็น hardcode mockup ทั้ง 3 tab (วันนี้/สัปดาห์/เดือน)
+   - Phase 3: generate จริงจาก AI โดยส่ง snapshot → Kimi → parse insights
+
+3. **MOPH 2018 seed — ขั้นตอนที่เหลือ**
+   - extraction ยังไม่เสร็จ (rate-limited); รัน script ใหม่:
+     ```bash
+     KIMI_API_KEY=$(grep KIMI_API_KEY .env.local | cut -d= -f2) \
+       scripts/.venv/bin/python scripts/extract_thai_nutrition_pdf.py > /tmp/kimi_extract.log 2>&1 &
+     ```
+   - เมื่อ extraction เสร็จ: `pnpm db:seed:moph2018`
+   - migration 0002 applied แล้ว — ไม่ต้อง db:migrate อีก
+
+4. **Inngest / PWA / offline** — Phase 3 (deferred)
 
 ## Critical known bugs / debt
 
