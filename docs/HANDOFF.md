@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: /plan RSC wired to real DB + log_exercise tool (6th tool) + exercises seeded
+> Last commit: fix tabbar Today/Plan + /me profile page + topic interviews complete
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -14,8 +14,6 @@ git pull origin claude/build-coachly-coach-ZBpRx
 # 2. อ่านสามไฟล์นี้ตามลำดับ (15 นาที)
 #    CLAUDE.md                         project guide + rules
 #    docs/HANDOFF.md (this file)       state + next-actions
-#    docs/DESIGN_ANALYSIS.md           design contract
-#    docs/DB_SCHEMA.md                 schema rationale
 #    .claude/rules/working-principles.md, backend.md, frontend.md
 
 # 3. รัน checks ก่อนแก้
@@ -24,314 +22,90 @@ pnpm typecheck && pnpm lint           # ต้องผ่านก่อนเ�
 pnpm dev                              # http://localhost:3000
 ```
 
-## Where we are — status snapshot (Phase 0 complete)
+## Where we are — status snapshot
 
-| Area                                 | Status                                                          | Notes                                                                   |
-| ------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Project guide (CLAUDE.md)            | ✅ committed                                                    | rules + topics referenced                                               |
-| Rule docs (.claude/rules/)           | ✅ working-principles + backend + frontend                      | `types.md` + `git-workflow.md` ยังไม่มี — สร้างเมื่อจำเป็น              |
-| Topic docs (.claude/topics/)         | ❌ ทุกอันยังว่าง                                                | ต้อง interview เจ้าของ — ดู "Domain knowledge — DO NOT GUESS"           |
-| Skills (.claude/skills/)             | ❌ ว่าง                                                         | จะสร้างใน Step 4                                                        |
-| Design analysis                      | ✅ docs/DESIGN_ANALYSIS.md                                      | 7 screens, tokens, interactions, open questions                         |
-| DB schema plan                       | ✅ docs/DB_SCHEMA.md                                            | 19 tables ออกแบบครบ                                                     |
-| Drizzle schema file                  | ✅ lib/db/schema.ts                                             | ตาม DB_SCHEMA.md; migration `0000_extensions` + `0001_init` generated   |
-| Next.js scaffold                     | ✅ ทุก config + globals.css                                     | `pnpm-lock.yaml` committed; smoke (typecheck/lint/build) ผ่าน           |
-| Design tokens                        | ✅ lib/design/tokens.ts + tailwind.config.ts                    | parity กับ design `tokens.js`                                           |
-| Shared components                    | ✅ components/coach/_ + components/chat/_                       | 1:1 port จาก handoff                                                    |
-| 7 screens (A1–E4)                    | ✅ components/screens/_ + app/_/page.tsx                        | static — ไม่มี DB write                                                 |
-| Tab-bar navigation                   | ✅ wired                                                        | /chat ↔ /today ↔ /plan ↔ /me (placeholder); typedRoutes strict ON       |
-| Canvas review page                   | ✅ /canvas                                                      | ทุก S26 frame เรียง                                                     |
-| TanStack Query provider              | ✅ app/providers.tsx + .prettierrc                              | staleTime 30s, offlineFirst; client islands ห้าม `fetch` ดิบ            |
-| DB client (Drizzle/Neon HTTP)        | ✅ lib/db/client.ts                                             | edge-compatible; pool client เพิ่มใน Phase 2 พร้อม chat streaming       |
-| Users repository + types             | ✅ lib/db/repositories/users.ts + types/db                      | findById/byLineSub/byGoogleSub + create + softDelete                    |
-| Query key factory                    | ✅ lib/queries/keys.ts                                          | central registry; กฎใหม่ใน rules/frontend.md ห้าม inline queryKey       |
-| Topics (TDEE / streak)               | ✅ .claude/topics/\*.md                                         | owner-confirmed; AI ห้ามเดาเกินจากนี้                                   |
-| Services (TDEE + streak)             | ✅ lib/services/{tdee,streak}.ts                                | pure, 33 vitest cases pass                                              |
-| Auth.js v5 (LINE + Google)           | ✅ lib/auth.ts + middleware + welcome wired                     | JWT session, signIn callback resolves/creates users row; routes guard   |
-| Profiles repo + DTO + service        | ✅ lib/services/onboarding.ts + Zod                             | upsert pattern; Mifflin/Katch switch; macro scaler                      |
-| Onboarding flow end-to-end           | ✅ /onboarding RSC + action + UI wired                          | 9-turn → DB → /plan-preview (real targets) → /today                     |
-| Plan-preview real data               | ✅ RSC reads user_profiles                                      | dynamic explainer copy per goal; redirects mid-onboarding users         |
-| Logs repos (food/water/mood/weight)  | ✅ lib/db/repositories/\*-logs.ts                               | sumInRange, latest, createPending/Confirmed                             |
-| Logs server actions                  | ✅ app/today/actions.ts                                         | logWater/logMood/logWeight; auth + Zod + revalidatePath                 |
-| /today RSC (read + write loop)       | ✅ loadTodaySnapshot + TodayClient                              | header/kcal real; water + mood click → useMutation → action → RSC       |
-| Workout repos (4 aggregates)         | ✅ lib/db/repositories/{exercises,workout-\*,exercise-logs}     | findActive, three-stage session lifecycle, bulk createMany              |
-| Provisioned services (Phase 2 prep)  | ✅ Neon · Auth · Upstash · Kimi · Vercel Blob                   | all probed end-to-end; Helicone dropped from stack                      |
-| Chat repos (threads/messages/memory) | ✅ lib/db/repositories/{chat-threads,messages,memory-blocks}.ts | getOrCreate, findRecent (DESC then reverse), upsert (1:1)               |
-| Kimi client                          | ✅ lib/ai/kimi.ts                                               | createOpenAI → api.moonshot.ai/v1; lazy throw on missing key            |
-| Memory context builder               | ✅ lib/ai/memory.ts                                             | profile_block (numeric only) + summary_7d + notes; formatMemorySection  |
-| AI SDK installed                     | ✅ ai 6 + @ai-sdk/openai 3 + @ai-sdk/react 3                    | also @upstash/redis + @upstash/ratelimit                                |
-| System prompt v1                     | ✅ lib/ai/prompts/system-v1.ts                                  | identity / style / safety / tool-usage + injects memory                 |
-| Rate limit (Upstash)                 | ✅ lib/ai/rate-limit.ts                                         | sliding window 30/hr/user; Redis key = SHA-256(users.id)                |
-| Chat endpoint (/api/chat)            | ✅ app/api/chat/route.ts                                        | auth + rate + streamText + onFinish persists to messages table          |
-| Chat UI MVP (/chat)                  | ✅ app/chat/{page,chat-client}.tsx                              | minimal useChat; full ChatScreen integration deferred (see Phase 2.5)   |
-| Foods repo (text search)             | ✅ lib/db/repositories/foods.ts + lib/types/db/foods.ts         | ilike on name_th/name_en; vector search deferred to Phase 3             |
-| search_food tool                     | ✅ lib/ai/tools/search_food.ts                                  | factory fn; returns top-5 with semantic_id + per-100g macros            |
-| log_food tool                        | ✅ lib/ai/tools/log_food.ts                                     | factory closes over userId; writes pending row; returns confirm payload |
-| Tool registry                        | ✅ lib/ai/tools/index.ts                                        | createCoachTools(userId) → { search_food, log_food }                    |
-| confirmFoodLogAction                 | ✅ app/chat/actions.ts                                          | Server Action; calls food-logs.confirm(pendingId); revalidates /today   |
-| /api/chat + tools                    | ✅ app/api/chat/route.ts                                        | tools wired + stopWhen stepCountIs(5) + tool_calls jsonb persisted      |
+| Area                              | Status                                     | Notes                                                                |
+| --------------------------------- | ------------------------------------------ | -------------------------------------------------------------------- |
+| Project guide (CLAUDE.md)         | ✅                                         | rules + topics referenced                                            |
+| Rule docs (.claude/rules/)        | ✅ working-principles + backend + frontend | types.md + git-workflow.md สร้างเมื่อจำเป็น                          |
+| **Topic docs (.claude/topics/)**  | ✅ **ครบทุกอัน**                           | owner-confirmed 2026-05-02                                           |
+| Design analysis                   | ✅ docs/DESIGN_ANALYSIS.md                 | 7 screens, tokens, interactions                                      |
+| DB schema                         | ✅ lib/db/schema.ts + migrations applied   | 20 tables, 22 FKs, 43 indexes                                        |
+| Design tokens + shared components | ✅                                         | 1:1 port จาก design handoff                                          |
+| Auth.js v5 (LINE + Google)        | ✅                                         | JWT session, signIn callback                                         |
+| Onboarding flow                   | ✅ /onboarding → /plan-preview → /today    | 9-turn → DB → real targets                                           |
+| /today RSC                        | ✅ real data                               | kcal/water/mood wired; weight log via weigh_in tool                  |
+| /plan RSC                         | ✅ real data                               | findActive() → enriched exercises → buildScreenPlan()                |
+| /chat                             | ✅ Phase 2.5 complete                      | ChatScreen header/chips/composer; useChat + file upload + tool cards |
+| **/me page**                      | ✅ **real data**                           | RSC → profile data; avatar initials; macro bars; sign out            |
+| Tabbar layout                     | ✅ fixed                                   | Today/Plan ใช้ height:100dvh แล้ว; BottomTabBar pin ที่ footer       |
+| AI tools (6 tools)                | ✅                                         | search_food, log_food, log_water, weigh_in, set_mood, log_exercise   |
+| Tool payload types                | ✅ shared-types.ts                         | client-safe; ไม่ pull DB code เข้า browser bundle                    |
+| Eval harness                      | ✅ pnpm eval                               | 22 golden cases (10 food + 12 other incl. exercise)                  |
+| Exercise seed                     | ✅ pnpm db:seed                            | 19 exercises (gym/home_eq/bodyweight)                                |
+| **Thai food seed**                | ✅ **pnpm db:seed:foods**                  | BaoWio 1,005 INMU rows; CC-BY-SA 4.0                                 |
+| USDA_API_KEY                      | ✅ .env.example                            | placeholder — ยังไม่ implement fallback service                      |
+| Workout repos                     | ✅                                         | findActive, session lifecycle, bulk createMany                       |
+| /workout/run                      | ⚠️ mock                                    | WorkoutRunScreen มี UI แต่ hardcode — ยังไม่ wire DB                 |
+| Inngest / PWA / offline           | ❌ Phase 3–4                               | deferred                                                             |
 
-## What's NOT done (เรียงตาม priority)
+## Topic docs — all owner-confirmed ✅
 
-### ✅ Blockers Phase 0 — เสร็จแล้ว
+| File                                     | เนื้อหาหลัก                                                            |
+| ---------------------------------------- | ---------------------------------------------------------------------- |
+| `.claude/topics/tdee-and-macros.md`      | Mifflin-St Jeor, deficit/surplus %, macro split                        |
+| `.claude/topics/streak.md`               | นิยาม active day, reset rule                                           |
+| `.claude/topics/safety-floors.md`        | 1200F/1500M kcal floor; L1/L2 ED triggers; DMH 1323                    |
+| `.claude/topics/progressive-overload.md` | 2-session threshold; 2.5kg/1kg/+1rep; deload on signal                 |
+| `.claude/topics/pdpa.md`                 | single checkbox; food photo 30d; body photo text-only; 30d soft-delete |
+| `.claude/topics/food-db.md`              | precedence user_edit > vision_cache > Thai DB > USDA > LLM             |
 
-1. **`pnpm install` + smoke test** — ✅ done
-   - `pnpm-lock.yaml` committed
-   - `eslint.config.mjs` (flat config, extends `next/core-web-vitals`) committed
-   - `next.config.ts`: ปิด `typedRoutes` ชั่วคราว (ต้องเปิดใหม่ใน Phase 1 พร้อมสร้าง `/me` page)
-   - แก้ `react/no-unescaped-entities` 4 จุดใน `plan-screen.tsx:624`
-   - `pnpm typecheck` / `pnpm lint` / `pnpm build` ✅ ทั้งหมด exit 0
-   - Build รวม 9 routes static (8 หน้าจอ + not-found)
-   - คงเหลือ warning: `@next/next/no-page-custom-font` ใน layout.tsx — แก้ตอน refactor ไป `next/font/google` ใน Phase 1
+## Next session — pick up here (in order)
 
-2. **Drizzle initial migration** — ✅ done
-   - `drizzle/migrations/0000_extensions.sql` (custom) — `CREATE EXTENSION pgcrypto / citext / vector` (ตามลำดับ)
-   - `drizzle/migrations/0001_init.sql` (auto-generated, ห้ามแก้) — 20 tables, 22 FKs, 18 indexes รวม partial unique บน `workout_plans`
-   - `_journal.json` ลำดับถูกต้อง: `0000_extensions` → `0001_init`
-   - Schema source-of-truth: `lib/db/schema.ts` (citext + vector(768) ใช้ผ่าน `customType`)
+1. **`/workout/run` — wire to real DB** (งานใหญ่สุด)
+   - RSC: auth() → findActive() → pass plan exercises to WorkoutRunScreen
+   - WorkoutRunScreen state machine: Working → Resting → Done per set
+   - completeSetAction: write exercise_log row; update session totals
+   - finishSessionAction: workout_sessions.finish() → snapshot totals
 
-3. **Apply migration ลง Neon dev branch** — ✅ done
-   - `dotenv-cli` ติดตั้ง + scripts `db:*` + `eval` prefix `dotenv -e .env.local --` แล้ว
-   - `pnpm db:migrate` apply สำเร็จ → 3 extensions, 20 tables, 22 FKs, 43 indexes
-   - Verify: `users.email` = `citext`, `foods.embedding` = `vector` ✅
-   - ⚠️ DB credentials อยู่ใน `.env.local` (gitignored) — owner ควร rotate password ใน Neon dashboard หลัง dev session เพราะ paste อยู่ใน chat log
+2. **USDA food search fallback** (ต้องมี `USDA_API_KEY` ก่อน)
+   - `lib/services/food-resolver.ts`: Thai DB → USDA → LLM estimate (ตาม food-db.md)
+   - `search_food` tool → เรียก food-resolver แทน direct repo query
 
-4. **`/me` placeholder + เปิด `typedRoutes: true`** — ✅ done
-   - `app/me/page.tsx` placeholder (👤 + "หน้าโปรไฟล์ + ตั้งค่า กำลังจะมาเร็วๆ นี้")
-   - Reuse `BottomTabBar` กับ TabBar คงทำงานครบ 4 tabs
-   - `next.config.ts`: `typedRoutes: true` กลับมา (Next 15 stable, ย้ายออกจาก `experimental`)
-   - Build รวม 10 static routes (เพิ่ม `/me` 714 B)
-   - Phase 1 จะใส่ profile/account screen จริง
+3. **30+ Thai food golden eval cases** (รอ owner supply prompts)
+   - ตอนนี้มี 10 food cases ใน `tests/eval/golden/food.json`
+   - target 40+ รวม edge cases (ambiguous portion, restaurant vs home)
 
-### 🔴 Blocker / next session ต้องทำ
+4. **system prompt v2** — เพิ่ม safety floors + progressive overload instructions
+   - ปัจจุบัน v1 มี ED guardrails บางส่วน แต่ยังไม่ตรงกับ safety-floors.md ที่ confirm แล้ว
+   - update `lib/ai/prompts/system-v1.ts` → `system-v2.ts` หลัง eval cases พร้อม
 
-_Phase 0 ปิดครบ → ก้าวเข้า Phase 1_
+## Critical known bugs / debt
 
-ลำดับแนะนำสำหรับ Phase 1:
+- **`@next/next/no-img-element`** (2x) ใน chat-client.tsx — pre-existing; แก้ตอน refactor ไป `next/image`
+- **`@next/next/no-page-custom-font`** ใน layout.tsx — แก้ตอน migrate ไป `next/font/google`
+- **foods table ยังว่าง** — `pnpm db:seed:foods` รันแล้วจะมี 1,005 แถว แต่ยังไม่รัน (ต้อง `.env.local`)
+- **workout_plans อาจว่าง** สำหรับ user เก่า — plan-generator trigger หลัง onboarding เท่านั้น; `/plan` fallback → DEFAULT_PLAN
+- **body photo** — Kimi วิเคราะห์แล้วเก็บเป็น text ตาม pdpa.md; ยังไม่ implement `attachments` cleanup job
 
-1. **`lib/db/client.ts`** — Neon HTTP/pool client + `getDb()` helper
-2. **`lib/types/db/*.ts`** — `InferSelectModel` exports per aggregate
-3. **`lib/db/repositories/users.ts`** — แรกสุด เพราะทุก service ต้อง resolve user
-4. **Auth.js v5** — `lib/auth.ts` + LINE/Google providers + `app/api/auth/[...nextauth]/route.ts`
-5. **`topics/tdee-and-macros.md`** + **`topics/streak.md`** — interview owner ก่อน implement service
-
-### 🟠 Phase 1 — wire backend (1-2 sprints)
-
-3. **Auth.js v5 setup** — LINE Login + Google
-   - `lib/auth.ts` — Auth.js config
-   - `app/api/auth/[...nextauth]/route.ts`
-   - LINE provider + Google provider env vars (`.env.example` มี placeholders แล้ว)
-   - middleware.ts redirect unauthed → `/`
-4. **Repositories layer** (`lib/db/repositories/`)
-   - `users.ts`, `profiles.ts`, `food-logs.ts`, `water-logs.ts`, `mood-logs.ts`, `weight-logs.ts`, `workout-plans.ts`, `workout-sessions.ts`, `chat.ts`, `daily-summaries.ts`, `goals.ts`
-   - 1 file per aggregate (rules/backend.md)
-5. **Services layer** (`lib/services/`)
-   - `tdee.ts` — TDEE + macro calculator (รอ topics/tdee-and-macros.md)
-   - `plan-generator.ts` — สร้าง weekly plan ตาม goal + equipment + days/wk
-   - `recalibration.ts` — 14-day plan adjust
-   - `streak.ts` — definition pending (ดู open questions)
-6. **Replace mock data → Drizzle queries**
-   - `app/today/page.tsx` → RSC ดึงจาก `daily-summaries`
-   - `app/plan/page.tsx` → RSC ดึง `workout_plans` ของ user
-   - `app/chat/page.tsx` → RSC ดึง `messages` (last 20)
-7. **Server Actions for mutations**
-   - `logWaterAction`, `logMoodAction`, `logWeightAction`, `confirmFoodLogAction`, `completeSetAction`
-   - Zod input validation, `auth()` ภายใน — **ห้ามรับ `userId` จาก request body**
-   - `revalidatePath('/today')` หลังเขียน
-
-### 🟡 Phase 2 — AI tool layer (text-only chat WORKS; tools next)
-
-**Already shipped (commits up through `<this>`)**:
-
-- ✅ AI SDK + Upstash clients installed.
-- ✅ `lib/ai/kimi.ts` (createOpenAI → api.moonshot.ai/v1).
-- ✅ Chat repos + types: `chat-threads`, `messages`, `memory-blocks`, `lib/types/db/chat.ts`.
-- ✅ `lib/ai/memory.ts` — `loadMemoryContext` + `formatMemorySection`. PII-safe.
-- ✅ `lib/ai/prompts/system-v1.ts` — identity / style / safety / tool-usage + memory injection. `PROMPT_VERSION = 'v1'`.
-- ✅ `lib/ai/rate-limit.ts` — sliding window 30/hr/user, SHA-256 keys.
-- ✅ `app/api/chat/route.ts` — Node runtime (not edge yet), auth + rate limit + streamText + onFinish persists user+assistant rows with `kimi_request_id`/`token_in`/`token_out`/`latency_ms`.
-- ✅ `app/chat/{page,chat-client}.tsx` — minimal useChat UI; hydrates initialMessages from DB; Server Component gates on auth + profile.
-
-**Verified e2e flow**: `/` → signIn → `/onboarding` → `/plan-preview` → `/today` → `/chat` (talk to Kimi, see assistant reply stream, message persisted to DB).
-
-**Already shipped this session (2026-05-02)**:
-
-- ✅ `lib/types/db/foods.ts` + `lib/db/repositories/foods.ts` — `searchByName` (ilike text search; vector deferred Phase 3)
-- ✅ `lib/ai/tools/search_food.ts` — factory fn, returns top-5 with semantic_id + per-100g macros
-- ✅ `lib/ai/tools/log_food.ts` — factory closes over userId; writes pending row; returns `FoodLogConfirmPayload`
-- ✅ `lib/ai/tools/index.ts` — `createCoachTools(userId)` registry
-- ✅ `app/chat/actions.ts` — `confirmFoodLogAction` Server Action calls `food-logs.confirm(pendingId)` + revalidates `/today`
-- ✅ `app/api/chat/route.ts` — tools wired + `stopWhen: stepCountIs(5)` + tool_calls jsonb persisted in onFinish
-- ✅ `app/chat/chat-client.tsx` — guards empty text (tool-only messages skip render)
-- ✅ `pnpm build` passes; pushed to remote
-
-**Already shipped this session (2026-05-02 continued)**:
-
-- ✅ Photo upload in chat — resize (768px, JPEG 85%) → `/api/attachments` → Vercel Blob → `FileUIPart` → Kimi vision
-- ✅ `log_water` / `weigh_in` / `set_mood` tools — direct-commit, no pending row; UI cards rendered in chat
-- ✅ `lib/db/seed/exercises.ts` — 20 curated exercises (gym / home_eq / home tiers)
-- ✅ `scripts/seed-exercises.ts` + `pnpm db:seed` — upsert by semanticId
-- ✅ `lib/services/plan-generator.ts` — full-body/upper-lower/PPL split; triggered after onboarding (best-effort)
-- ✅ `tests/eval/run.ts` + `golden/food.json` + `golden/other.json` — 19 cases; `pnpm eval [--filter <id>]`
-
-**Shipped this session (2026-05-02 continued)**:
-
-- ✅ `pnpm db:seed` — 19 exercises upserted (barbell/dumbbell/bodyweight tiers)
-- ✅ `/plan` RSC — auth() → findActive() → findBySemanticIds() enriches tip/formCues → buildScreenPlan() maps DayKey→Thai label → PlanClient (client island)
-- ✅ `log_exercise` tool — factory closes over userId; finds/creates today's workout session; bulk createMany sets; ExerciseLogCard in chat; 3 golden eval cases
-- ✅ `plan-screen.tsx` — export WeekPlan/ExerciseRow/DayPlan types; add `initialPlan` prop
-
-**Next session — pick up here (in order)**:
-
-1. **Full ChatScreen refactor (Phase 2.5)** — replace minimal `ChatClient` with `ChatScreen` component integration + `useChat` wired through proper bubble variants
-2. **Add 30+ Thai food golden cases** — requires owner to supply prompts + expected tool calls; current eval has 10 food + 12 other
-3. **topics/progressive-overload.md** — interview owner; rep-range policy + deload schedule; unblock `plan-generator` hardcoded defaults
-
-**Notes on foods table**: table is empty — `search_food` returns `[]` for any query. LLM falls through to estimate macros from training data and calls `log_food` directly. `food_logs.food_id` is nullable so this is valid. Seed foods data when real Thai food DB content is available.
-
-**Topic gap (BLOCKING before pushing safety-critical changes)**: `topics/safety-floors.md` is empty. System prompt v1 quotes 1500M / 1200F + DMH 1323 — these are owner-confirmed in `topics/tdee-and-macros.md` but ED triggers / escalation flow still need explicit owner sign-off.
-
-**Outstanding gaps from Phase 1 (deferable)**:
-
-- `goals` repo + `attachments` repo (Phase 3 + Phase 2 photo flow respectively).
-- Workout plan/session UI wiring (`/plan` and `/workout/run` still mock).
-- `WeightTrend` Today card — display only; mutation lands when `weigh_in` tool ships.
-
-### 🟢 Phase 3 — background jobs (Inngest)
-
-12. **Weekly insight generator** — `inngest/functions/weekly-insights.ts`
-    - cron Sunday 23:00 ICT
-    - ดึง 7-day summary → generate `ai_insights` row
-13. **Plan recalibration** — every 14 days check weight trend → adjust kcal target
-14. **Photo expiry** — Vercel Blob signed URL refresh + cleanup `attachments WHERE expires_at < now()`
-
-### 🟢 Phase 4 — PWA + offline
-
-15. **next-pwa setup** — manifest.json (Thai), service worker
-16. **Offline queue** — Dexie (IndexedDB) สำหรับ pending logs + chat messages
-17. **Web Push** — VAPID, daily nudges (ต้องมี iOS 16.4+ install-to-home-screen onboarding step)
-
-## Critical conventions (อ่านก่อนเขียน code)
-
-- **Type rules** (rules/types.md จะสร้างทีหลัง — ใช้ตามนี้ก่อน):
-  - `lib/types/db/*.ts` — DB row shape (จาก `InferSelectModel<typeof table>`)
-  - `lib/types/dto/*.ts` — API/UI shape (Zod schemas)
-  - **ห้าม return raw DB row ออก API** — แปลง dto ก่อน
-- **Backend layering** (rules/backend.md):
-  - Route handler: parse + auth + call service + format
-  - Service: business rules
-  - Repository: Drizzle queries
-  - AI tool handler: wrap service into LLM-callable
-  - **ห้าม inline DB queries ใน route handler**
-- **Frontend** (rules/frontend.md):
-  - Forms ต้อง react-hook-form + zodResolver + `<Form>` shadcn (ตอนนี้ยังไม่ได้ลง shadcn — Phase 1 task)
-  - Toast = sonner เท่านั้น (ห้าม alert)
-  - Icons = lucide-react เท่านั้น (ตอนนี้หน้า design ใช้ inline SVG — ค่อย refactor ไป lucide ทีหลัง)
-- **Design fidelity**:
-  - หน้าจอทั้ง 7 ใช้ inline styles ตรงตาม design handoff (1:1 port)
-  - Phase 1+ refactor ไป Tailwind + shadcn ค่อยเป็นค่อยไป — **อย่าทำในคอมมิตเดียวกับ feature work**
-  - Visual output ห้ามเปลี่ยน — ต้อง match `Coachly.html` พิกเซล
-
-## Domain knowledge — DO NOT GUESS (interview owner first)
-
-ทุกหัวข้อต้อง verify กับ **เจ้าของผลิตภัณฑ์** ก่อน implement:
-
-| Topic                      | File (ยังว่าง)                           | ใช้ที่ไหน                                                              | Owner question                                                                            |
-| -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| TDEE formula + adjustments | `.claude/topics/tdee-and-macros.md`      | `lib/services/tdee.ts`, A3 plan preview, A2 onboarding step 4 estimate | ใช้ Mifflin-St Jeor หรือ Katch-McArdle? % deficit/surplus per goal? Macro split per goal? |
-| kcal floors + ED triggers  | `.claude/topics/safety-floors.md`        | system prompt + tool guards                                            | Floor < 1200 F / 1500 M? Trigger keywords? Escalation flow → DMH 1323?                    |
-| PDPA consent               | `.claude/topics/pdpa.md`                 | `users.consents`, retention                                            | Consent versions? Photo retention? Account-delete flow?                                   |
-| Food DB precedence         | `.claude/topics/food-db.md`              | `lib/services/food-resolver.ts`, `foods.source`                        | Order: user_edit > vision_cache > USDA > Thai DB > LLM?                                   |
-| Progressive overload       | `.claude/topics/progressive-overload.md` | `lib/services/recalibration.ts`, E1 plan suggestions                   | กฎเพิ่มน้ำหนัก/reps? Deload schedule?                                                     |
-| Streak definition          | TBD (โผล่ใน design ทุกที่ "🔥 12 วัน")   | `lib/services/streak.ts`                                               | นิยามคืออะไร? Any-log? Workout? Kcal-in-range? Reset rule?                                |
-
-ใช้ command `/fill-topics <slug>` (ยังไม่ได้สร้างจริง — ต้องเป็น slash command ใน `.claude/commands/`) เพื่อสัมภาษณ์.
-
-## Open questions from design (mirror of DESIGN_ANALYSIS.md §6)
-
-1. **Coach avatar** — neutral flat illustration ตอนนี้ (lime headband). ใช้ shipping จริง หรือจ้าง illustrator?
-2. **Exercise videos** — placeholder play buttons. ต้องมี content pipeline (record/license) ก่อน E1/E4 useful จริง
-3. **Photo bbox** — design มี fake bounding box. Kimi vision คืน text/json ไม่มี bbox → ต้อง (a) ตัด bbox UI ทิ้ง หรือ (b) เพิ่ม detection step ก่อน vision describe
-4. **AI swap quick suggestions** — hardcoded ("อยากเล่นไหล่แทน") → ต้อง generate dynamic จาก current day plan
-5. **Onboarding step 4 estimate** — `Math.ceil(|w - target| * 2)` สัปดาห์ — แค่ mock. ต้องคำนวณจาก deficit/surplus ตาม `topics/tdee-and-macros.md`
-
-## Tech debt / known issues
-
-- **Inline styles ทุกหน้าจอ** — visual fidelity ก่อน, refactor ไป Tailwind utility + shadcn ทีหลัง
-- **Hardcoded Thai strings ใน screens** — ต้อง extract → `messages/th.json` (next-intl) ใน Phase 1
-- **No i18n setup** — `<html lang="th">` แค่ static ใน `app/layout.tsx`
-- **No tests** — vitest config ยังไม่มี, eval harness ยังไม่มี
-- **No lockfile** — `pnpm-lock.yaml` ยังไม่ถูก generate (รัน `pnpm install` ครั้งแรก)
-- **No Auth wired** — LINE/Google buttons ใน Welcome screen ยัง dead
-- **No real DB connection** — `lib/db/client.ts` ยังไม่ได้สร้าง; schema ยังไม่ migrate
-- **Photo placeholder** — ทั้ง chat photo bubble และ exercise demo ใช้ gradient/dotted bg (เพราะไม่มีของจริง)
-- **dangerouslySetInnerHTML ใน TodayScreen** — ใช้กับ AI insight bullet ที่มี `<b>` — Phase 1 ต้อง sanitize หรือเปลี่ยนเป็น structured data
-
-## File map (เรื่องสำคัญ)
+## Architecture quick-ref
 
 ```
-fit-dee/
-├── CLAUDE.md                          ← project guide
-├── .claude/
-│   ├── rules/working-principles.md    ← cross-cutting
-│   ├── rules/backend.md               ← layering, schema, LLM tools
-│   ├── rules/frontend.md              ← critical UI rules
-│   ├── topics/                        ← ⚠️ ว่างหมด ต้อง interview
-│   ├── skills/                        ← ⚠️ ว่าง
-│   └── commands/                      ← ⚠️ ว่าง
-├── docs/
-│   ├── HANDOFF.md                     ← (this file)
-│   ├── DESIGN_ANALYSIS.md             ← design contract
-│   └── DB_SCHEMA.md                   ← schema plan
-├── app/
-│   ├── layout.tsx                     ← fonts + metadata
-│   ├── globals.css                    ← Tailwind + cd* keyframes
-│   ├── page.tsx                       ← A1 Welcome
-│   ├── onboarding/page.tsx            ← A2
-│   ├── plan-preview/page.tsx          ← A3
-│   ├── today/page.tsx                 ← C1 (default tab)
-│   ├── chat/page.tsx                  ← B1
-│   ├── plan/page.tsx                  ← E1
-│   ├── workout/run/page.tsx           ← E4
-│   └── canvas/page.tsx                ← all 7 screens for review
-├── components/
-│   ├── coach/primitives.tsx           ← CoachAvatar, KcalRing, MacroBar, RangeBadge, BottomTabBar, PrimaryBtn, GhostBtn, Chip, ProgressBar, StreakFlame
-│   ├── coach/s26-frame.tsx            ← device frame (canvas only)
-│   ├── chat/bubbles.tsx               ← all bubble types
-│   └── screens/*.tsx                  ← 1 per screen
-├── lib/
-│   ├── design/tokens.ts               ← single source of truth for hex
-│   └── db/schema.ts                   ← Drizzle schema
-├── tailwind.config.ts                 ← design tokens → utilities
-├── drizzle.config.ts
-├── package.json                       ← scripts: dev, build, db:*, eval, ...
-└── .env.example
+lib/ai/tools/shared-types.ts   ← payload types + MOOD_LABEL (client-safe, no DB imports)
+lib/ai/tools/index.ts          ← createCoachTools(userId) — server only
+app/chat/chat-client.tsx       ← import types จาก shared-types โดยตรง
+app/me/{page,me-client,actions}.tsx  ← RSC + client island + signOut action
+components/screens/today-screen.tsx  ← height:100dvh (tabbar fixed)
+components/screens/plan-screen.tsx   ← height:100dvh (tabbar fixed)
+scripts/seed-thai-foods.ts     ← pnpm db:seed:foods (BaoWio HuggingFace API)
 ```
 
-## Git state
+## ห้าม (hard rules)
 
-- Branch: `claude/build-coachly-coach-ZBpRx` (pushed to GitHub)
-- Commits:
-  - `4a87f5a` — chore: scaffold Coachly project guide and rule docs
-  - `79de014` — feat(coachly): port design handoff to Next.js scaffold + plan DB schema
-- Remote (production): `https://github.com/jetsadaton/fit-dee.git`
-- Remote (sandbox proxy): blocked HTTP 403 — push ตรง github ผ่าน PAT (token ใช้ครั้งเดียวแล้วต้อง revoke — ดู previous session)
-- **No PR opened yet** — เปิด PR เมื่อ Phase 0 ผ่าน CI
-
-## Quick prompts for next session
-
-> "อ่าน docs/HANDOFF.md แล้วเริ่ม blocker #1 (pnpm install + smoke test) ให้หน่อย"
-
-> "อ่าน docs/HANDOFF.md + .claude/topics/tdee-and-macros.md (ที่เพิ่ง fill มา) แล้ว implement lib/services/tdee.ts ตาม phase 1 #5"
-
-> "อ่าน docs/HANDOFF.md แล้ว start phase 2 #8 — Kimi client + first 2 tools (search_food + log_food) พร้อม golden tests"
-
-## ห้าม
-
-- ห้ามเริ่ม implement business logic จนกว่าจะมี `topics/*.md` ที่ตรงกัน
+- ห้าม implement business logic จนกว่าจะมี `topics/*.md` ที่ confirm — **ตอนนี้ครบแล้ว**
 - ห้าม drive-by refactor inline styles → Tailwind ในคอมมิตเดียวกับ feature
 - ห้าม return raw DB row จาก API
-- ห้ามเดาชื่อ column / FK — เปิดอ่าน `lib/db/schema.ts` ก่อน
-- ห้าม inline tool name ใน LLM call — ต้องอ้าง `lib/ai/tools/*` ที่มีอยู่จริง
-- ห้าม send PII (email, real name, phone) ไป Kimi — ใช้ user_id_hash + numeric profile เท่านั้น
+- ห้ามเดาชื่อ column/FK — เปิดอ่าน `lib/db/schema.ts` ก่อน
+- ห้าม import จาก `lib/ai/tools` ใน client components — ใช้ `lib/ai/tools/shared-types` แทน
+- ห้าม send PII ไป Kimi — ใช้ user_id_hash + numeric profile เท่านั้น
 - ห้ามแก้ auto-generated: `drizzle/migrations/*.sql`, `*.generated.ts`, `next-env.d.ts`
