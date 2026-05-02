@@ -12,6 +12,7 @@
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { completeOnboarding } from '@/lib/services/onboarding';
+import { generatePlan } from '@/lib/services/plan-generator';
 import { onboardingInputSchema } from '@/lib/types/dto/onboarding';
 
 export type OnboardingActionResult =
@@ -35,6 +36,8 @@ export async function completeOnboardingAction(rawInput: unknown): Promise<Onboa
 
   try {
     const result = await completeOnboarding({ userId: session.user.id, input: parsed.data });
+    // Generate workout plan from the new profile (best-effort — don't fail onboarding if exercises table is empty).
+    await generatePlan({ userId: session.user.id, profile: result.profile }).catch(() => undefined);
     // Today / plan / plan-preview all read user_profiles — bust their RSC caches.
     revalidatePath('/today');
     revalidatePath('/plan');

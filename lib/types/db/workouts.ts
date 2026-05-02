@@ -4,6 +4,7 @@ import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import type { exerciseLogs, exercises, workoutPlans, workoutSessions } from '@/lib/db/schema';
 
 export type Exercise = InferSelectModel<typeof exercises>;
+export type NewExercise = InferInsertModel<typeof exercises>;
 
 export type WorkoutPlan = InferSelectModel<typeof workoutPlans>;
 export type NewWorkoutPlan = InferInsertModel<typeof workoutPlans>;
