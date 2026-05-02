@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: feat(heatmap): MonthHeatmap real activity data from DB
+> Last commit: fix(eval): eval 97% (57/59) — exercise schema, mood/deload, safety keywords
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -43,7 +43,7 @@ pnpm dev                              # http://localhost:3000
 | Tabbar layout                     | ✅ fixed                                   | Today/Plan ใช้ height:100dvh แล้ว; BottomTabBar pin ที่ footer                                    |
 | AI tools (6 tools)                | ✅                                         | search_food, log_food, log_water, weigh_in, set_mood, log_exercise                                |
 | Tool payload types                | ✅ shared-types.ts                         | client-safe; ไม่ pull DB code เข้า browser bundle                                                 |
-| **Eval harness**                  | ✅ **57 golden cases + claude harness**    | food 95% (claude-haiku sim); Kimi eval pending credits; pnpm eval:claude / pnpm eval              |
+| **Eval harness**                  | ✅ **57/59 = 97% (claude-haiku sim)**      | 2 remaining = simulator artifacts (food_021/038); system-v2.1; pnpm eval:claude / pnpm eval       |
 | Exercise seed                     | ✅ pnpm db:seed                            | 19 exercises (gym/home_eq/bodyweight)                                                             |
 | **Thai food seed**                | ✅ **323 rows seeded**                     | BaoWio 1,005 fetched → 323 complete rows; CC-BY-SA 4.0                                            |
 | USDA food resolver                | ✅ lib/services/food-resolver.ts           | Thai DB → USDA chain; 3s timeout; missing key → skip silently                                     |
@@ -66,16 +66,11 @@ pnpm dev                              # http://localhost:3000
 
 ## Next session — pick up here (in order)
 
-1. **Eval 88% (52/59)** — failures: exercise x3, safety_002, deload_001 (+ 1 unknown)
-   - exercise_001/002/003 ทั้ง 3 fail → น่าจะ prompt/tool schema issue
-   - safety_002 (L1 อดข้าว) + deload_001 fail → prompt ต้อง tune
-   - target: ≥ 90% (ขาดอีก 1–2 case)
+1. **WeightTrend sparkline** — real weight series (weight_logs 30d → SVG path)
 
-2. **WeightTrend sparkline** — real weight series (ข้อมูลจาก weight_logs, 30d)
+2. **Inngest / PWA / offline** — Phase 3–4 (deferred)
 
-3. **Fix eval exercise/safety/deload failures** — tune system prompt v2
-
-4. **Inngest / PWA / offline** — Phase 3–4 (deferred)
+3. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
 
 > หมายเหตุ: `pnpm eval` (Kimi real) ยัง pending credits — รัน `pnpm eval:claude` แทนได้
 
