@@ -36,7 +36,35 @@ type GoalId = (typeof goals)[number]['id'];
 type ActivityId = (typeof activities)[number]['id'];
 type EquipmentId = (typeof equipments)[number]['id'];
 
-export function OnboardingChat({ onDone }: { onDone?: () => void }) {
+/**
+ * Frontend shape — kebab-case for `equipment` mirrors the design's IDs.
+ * Caller (Server Action) maps `home-eq` → `home_eq` before validating with Zod.
+ */
+export type OnboardingFormData = {
+  displayName: string;
+  goal: GoalId;
+  age: number;
+  sex: 'm' | 'f' | 'o';
+  heightCm: number;
+  weightKg: number;
+  targetWeightKg: number;
+  daysPerWeek: number;
+  activityLevel: ActivityId;
+  equipment: EquipmentId;
+  injuries: string[];
+};
+
+export function OnboardingChat({
+  onDone,
+  onComplete,
+}: {
+  onDone?: () => void;
+  /**
+   * Persist the form. Returns null on success (caller handles navigation),
+   * or an error message to display inline.
+   */
+  onComplete?: (data: OnboardingFormData) => Promise<string | null>;
+}) {
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
   const [goal, setGoal] = useState<GoalId | null>(null);
@@ -57,6 +85,41 @@ export function OnboardingChat({ onDone }: { onDone?: () => void }) {
 
   const pct = (step / TOTAL) * 100;
   const advance = () => setStep((s) => s + 1);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleFinish = async () => {
+    if (!onComplete) {
+      onDone?.();
+      return;
+    }
+    if (!goal || !sex || !activity || !equipment) return; // unreachable on step 9
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const err = await onComplete({
+        displayName: name,
+        goal,
+        age,
+        sex,
+        heightCm: height,
+        weightKg: weight,
+        targetWeightKg: targetWeight,
+        daysPerWeek,
+        activityLevel: activity,
+        equipment,
+        injuries,
+      });
+      if (err) {
+        setSubmitError(err);
+        return;
+      }
+      onDone?.();
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: T.bg }}>
@@ -530,18 +593,35 @@ export function OnboardingChat({ onDone }: { onDone?: () => void }) {
           </div>
         )}
         {step >= 9 && (
-          <PrimaryBtn
-            full
-            size="lg"
-            onClick={onDone}
-            icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            }
-          >
-            ดูแผนของเรา
-          </PrimaryBtn>
+          <>
+            {submitError && (
+              <div
+                style={{
+                  marginBottom: 8,
+                  padding: '10px 12px',
+                  borderRadius: 12,
+                  background: 'rgba(255,82,82,0.1)',
+                  color: T.danger,
+                  fontSize: 13,
+                  fontFamily: 'Inter,"Noto Sans Thai"',
+                }}
+              >
+                {submitError}
+              </div>
+            )}
+            <PrimaryBtn
+              full
+              size="lg"
+              onClick={handleFinish}
+              icon={
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              }
+            >
+              {submitting ? 'กำลังบันทึก…' : 'ดูแผนของเรา'}
+            </PrimaryBtn>
+          </>
         )}
       </div>
     </div>
