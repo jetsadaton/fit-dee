@@ -52,3 +52,42 @@ export const MOOD_LABEL: Record<number, string> = {
   4: 'โอเค 🙂',
   5: 'พลังเต็ม 🔥',
 };
+
+export type UpdateProfileConfirmPayload = {
+  type: 'update_profile_confirm';
+  changes: {
+    goal?: 'lose' | 'gain' | 'fit';
+    activityLevel?: 'sit' | 'walk' | 'move' | 'active';
+    targetWeightKg?: number;
+    daysPerWeek?: number;
+    equipment?: 'gym' | 'home_eq' | 'home';
+  };
+  /** Preview values for UI — server recomputes before writing. */
+  preview: {
+    kcalTarget: number;
+    proteinG: number;
+    carbG: number;
+    fatG: number;
+    tdeeKcal: number;
+    flooredAt: number | null;
+  };
+};
+
+export const GOAL_LABEL: Record<string, string> = {
+  lose: 'ลดน้ำหนัก',
+  gain: 'เพิ่มกล้าม',
+  fit: 'รักษาฟิต',
+};
+
+export const ACTIVITY_LABEL: Record<string, string> = {
+  sit: 'นั่งโต๊ะ ไม่ออกกำลัง',
+  walk: 'เดินบ่อย / 1-3 วัน/สัปดาห์',
+  move: 'ออก 3-5 วัน/สัปดาห์',
+  active: 'ออก 6-7 วัน/สัปดาห์',
+};
+
+export const EQUIPMENT_LABEL: Record<string, string> = {
+  gym: 'ยิม',
+  home_eq: 'อุปกรณ์ที่บ้าน',
+  home: 'bodyweight เท่านั้น',
+};

@@ -192,5 +192,41 @@
       "minSteps": 1,
       "mustContainOneOf": ["พัก", "ฟื้นตัว", "rest", "deload"]
     }
+  },
+  {
+    "id": "update_profile_001",
+    "description": "เปลี่ยนเป้าหมายจาก lose เป็น gain — call update_profile",
+    "userMessage": "อยากเปลี่ยนเป้าหมายเป็น gain กล้ามแทนลดน้ำหนักได้เลย",
+    "expect": {
+      "toolsCalled": ["update_profile"],
+      "minSteps": 1,
+      "toolArgs": {
+        "update_profile": { "goal": "gain" }
+      }
+    }
+  },
+  {
+    "id": "update_profile_002",
+    "description": "สมัครยิมแล้ว เปลี่ยน equipment — call update_profile",
+    "userMessage": "เพิ่งสมัครสมาชิกยิมแล้ว อยากเปลี่ยน equipment เป็น gym",
+    "expect": {
+      "toolsCalled": ["update_profile"],
+      "minSteps": 1,
+      "toolArgs": {
+        "update_profile": { "equipment": "gym" }
+      }
+    }
+  },
+  {
+    "id": "update_profile_003",
+    "description": "เปลี่ยนน้ำหนักเป้าหมาย — call update_profile",
+    "userMessage": "อยากลดน้ำหนักเป้าลงเป็น 58 กิโลแทน",
+    "expect": {
+      "toolsCalled": ["update_profile"],
+      "minSteps": 1,
+      "toolArgs": {
+        "update_profile": { "targetWeightKg": 58 }
+      }
+    }
   }
 ]

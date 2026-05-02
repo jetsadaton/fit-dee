@@ -42,9 +42,9 @@ pnpm dev                              # http://localhost:3000
 | /chat                             | ✅ UX fixed                                | typing bubble in message list; scroll-to-bottom on load+response; food confirm card v2               |
 | **/me page**                      | ✅ **real data**                           | RSC → profile data; avatar initials; macro bars; sign out                                            |
 | Tabbar layout                     | ✅ fixed                                   | Today/Plan ใช้ height:100dvh แล้ว; BottomTabBar pin ที่ footer                                       |
-| AI tools (6 tools)                | ✅                                         | search_food, log_food, log_water, weigh_in, set_mood, log_exercise                                   |
+| AI tools (7 tools)                | ✅                                         | search_food, log_food, log_water, weigh_in, set_mood, log_exercise, **update_profile**               |
 | Tool payload types                | ✅ shared-types.ts                         | client-safe; ไม่ pull DB code เข้า browser bundle                                                    |
-| **Eval harness**                  | ✅ **57/59 = 97% (claude-haiku sim)**      | 2 remaining = simulator artifacts (food_021/038); system-v2.1; pnpm eval:claude / pnpm eval          |
+| **Eval harness**                  | ✅ **60/62 target (claude-haiku sim)**     | +3 update_profile cases added; system-v2.1+update_profile; pnpm eval:claude / pnpm eval              |
 | Exercise seed                     | ✅ pnpm db:seed                            | 19 exercises (gym/home_eq/bodyweight)                                                                |
 | **Thai food seed**                | ✅ **323 rows seeded**                     | BaoWio 1,005 fetched → 323 complete rows; CC-BY-SA 4.0                                               |
 | USDA food resolver                | ✅ lib/services/food-resolver.ts           | Thai DB → USDA chain; 3s timeout; missing key → skip silently                                        |
@@ -76,9 +76,8 @@ pnpm dev                              # http://localhost:3000
 
 1. **เทส Phase 3–4 บน device จริง** — install PWA, offline queue, push
 2. **LINE OA setup** — กรอก LINE_CHANNEL_SECRET + LINE_CHANNEL_ACCESS_TOKEN ใน .env.local
-3. **`update_profile` AI tool** — ให้ user บอก AI ว่าอยากเปลี่ยนเป้าหมาย (ยัง TODO จาก tdee-and-macros.md)
-4. **pgvector food search** — embedding pipeline สำหรับ semantic food search (deferred, complex)
-5. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
+3. **pgvector food search** — embedding pipeline สำหรับ semantic food search (deferred, complex)
+4. `pnpm eval` (Kimi real) — เมื่อ Kimi credits กลับมา
 
 > Inngest local dev: `npx inngest-cli@latest dev` แล้วเปิด http://localhost:8288
 > SW disabled ใน dev — `pnpm build && pnpm start` เพื่อทดสอบ service worker จริง
@@ -92,9 +91,11 @@ pnpm dev                              # http://localhost:3000
 ## Architecture quick-ref
 
 ```
-lib/ai/prompts/system-v2.ts         ← ACTIVE system prompt (v2); v1 preserved แต่ไม่ใช้
-lib/ai/tools/shared-types.ts        ← payload types + MOOD_LABEL (client-safe, no DB imports)
-lib/ai/tools/index.ts               ← createCoachTools(userId) — server only
+lib/ai/prompts/system-v2.ts         ← ACTIVE system prompt (v2+update_profile); v1 preserved แต่ไม่ใช้
+lib/ai/tools/shared-types.ts        ← payload types + MOOD/GOAL/ACTIVITY/EQUIPMENT labels (client-safe)
+lib/ai/tools/index.ts               ← createCoachTools(userId) — server only (7 tools)
+lib/ai/tools/update_profile.ts      ← update_profile tool — reads profile+latest weight, computes TDEE preview
+lib/db/repositories/profiles.ts     ← findByUserId, upsert, updatePlanFields (plan fields only, not identity)
 lib/services/food-resolver.ts       ← Thai DB → USDA fallback chain
 lib/services/insights.ts            ← generateInsights(snapshot, range) — moonshot-v1-8k, 25s timeout
 lib/types/dto/insights.ts           ← Insight / InsightRange shared types

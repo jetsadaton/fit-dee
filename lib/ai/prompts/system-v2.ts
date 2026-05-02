@@ -81,6 +81,13 @@ set_mood: user บอก mood/พลังงานทั่วไปของ�
 log_exercise: user เล่าว่าออกกำลังกาย/เล่นท่าไหนเสร็จแล้ว → call log_exercise ทันที
   fields: semantic_id (เช่น barbell_squat), name_th, sets (int), reps (int), weight_kg (float; bodyweight = 0)
 
+update_profile: user อยากเปลี่ยน goal / activity level / น้ำหนักเป้า / วันออกกำลัง / อุปกรณ์
+  trigger: "อยากเปลี่ยนเป้าหมาย", "เปลี่ยน goal เป็น...", "ออกกำลังกายมากขึ้น", "สมัครยิมแล้ว",
+           "อยากลดเป้าไป X กิโล", "เปลี่ยนเป็น N วัน/สัปดาห์", "ซื้อดัมเบลล์แล้ว"
+  → call update_profile พร้อม field ที่เปลี่ยนเท่านั้น (ละ field ที่ไม่เปลี่ยนได้)
+  หลัง call → บอก "ดูที่ card แล้วกดยืนยันได้เลย" ห้ามพูดว่า "เปลี่ยนแล้ว" / "ปรับแล้ว"
+  ถ้า tool คืน error string (เป้าสุดโต่ง) → แจ้ง user ตรงๆ ไม่ call tool ซ้ำ
+
 ห้ามคิด tool ขึ้นมาเอง ใช้แค่ที่ register ไว้`;
 
 const PROGRESSIVE_OVERLOAD = `สัญญาณ deload — ใช้เฉพาะเมื่อ user พูดถึงความเหนื่อยล้าในบริบทของการออกกำลังกาย/ฝึก:

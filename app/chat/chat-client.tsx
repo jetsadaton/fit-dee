@@ -9,10 +9,10 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type FileUIPart, type UIMessage } from 'ai';
 import { BottomTabBar, CoachAvatar, KcalRing, StreakFlame, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
-import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload } from '@/lib/ai/tools/shared-types';
-import { MOOD_LABEL } from '@/lib/ai/tools/shared-types';
+import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload, UpdateProfileConfirmPayload } from '@/lib/ai/tools/shared-types';
+import { MOOD_LABEL, GOAL_LABEL, ACTIVITY_LABEL, EQUIPMENT_LABEL } from '@/lib/ai/tools/shared-types';
 import { resizeImage } from '@/lib/utils/resize-image';
-import { confirmFoodLogAction, cancelFoodLogAction } from './actions';
+import { confirmFoodLogAction, cancelFoodLogAction, confirmUpdateProfileAction } from './actions';
 
 const MEAL_LABEL: Record<string, string> = {
   breakfast: 'เช้า',
@@ -198,6 +198,119 @@ function ExerciseLogCard({ payload }: { payload: ExerciseLogDonePayload }) {
           {payload.exerciseNameTh} · {payload.sets} เซต × {payload.reps} ครั้ง
           {payload.weightKg > 0 ? ` @ ${payload.weightKg} kg` : ' (bodyweight)'}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function UpdateProfileConfirmCard({ payload }: { payload: UpdateProfileConfirmPayload }) {
+  const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>('idle');
+
+  const handleConfirm = async () => {
+    setState('loading');
+    await confirmUpdateProfileAction(payload.changes);
+    setState('confirmed');
+  };
+
+  const { changes, preview } = payload;
+
+  const changeRows: { label: string; value: string }[] = [];
+  if (changes.goal) changeRows.push({ label: 'เป้าหมาย', value: GOAL_LABEL[changes.goal] ?? changes.goal });
+  if (changes.activityLevel) changeRows.push({ label: 'กิจกรรม', value: ACTIVITY_LABEL[changes.activityLevel] ?? changes.activityLevel });
+  if (changes.targetWeightKg !== undefined) changeRows.push({ label: 'น้ำหนักเป้า', value: `${changes.targetWeightKg} kg` });
+  if (changes.daysPerWeek !== undefined) changeRows.push({ label: 'วันออกกำลัง', value: `${changes.daysPerWeek} วัน/สัปดาห์` });
+  if (changes.equipment) changeRows.push({ label: 'อุปกรณ์', value: EQUIPMENT_LABEL[changes.equipment] ?? changes.equipment });
+
+  if (state === 'confirmed') {
+    return (
+      <div style={{ background: T.bg3, borderRadius: 12, padding: '10px 14px', fontSize: 13, color: T.textDim }}>
+        ✓ อัปเดตโปรไฟล์แล้ว · เป้าใหม่ <strong style={{ color: T.text }}>{preview.kcalTarget} kcal/วัน</strong>
+      </div>
+    );
+  }
+  if (state === 'cancelled') {
+    return (
+      <div style={{ background: T.bg3, borderRadius: 12, padding: '10px 14px', fontSize: 13, color: T.textDim }}>
+        ไม่ได้เปลี่ยน
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        background: T.bg3,
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
+        padding: '12px 14px',
+        fontSize: 13,
+        fontFamily: 'Inter,"Noto Sans Thai"',
+      }}
+    >
+      <div style={{ fontSize: 11, color: T.textMute, fontWeight: 600, marginBottom: 8, letterSpacing: 0.2 }}>
+        ⚙️ โค้ชแนะนำให้อัปเดตแผน · ยังไม่บันทึก
+      </div>
+
+      {changeRows.map((r) => (
+        <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+          <span style={{ color: T.textDim }}>{r.label}</span>
+          <span style={{ fontWeight: 700, color: T.text }}>{r.value}</span>
+        </div>
+      ))}
+
+      <div style={{ borderTop: `1px solid ${T.border}`, margin: '10px 0 8px' }} />
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <span style={{ color: T.textDim }}>เป้า kcal ใหม่</span>
+        <span style={{ fontWeight: 800, fontSize: 16, color: T.coral }}>{preview.kcalTarget}</span>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: preview.flooredAt ? 6 : 12 }}>
+        <MacroPill label="โปรตีน" value={preview.proteinG} unit="g" color="#6EE7B7" />
+        <MacroPill label="คาร์บ" value={preview.carbG} unit="g" color="#93C5FD" />
+        <MacroPill label="ไขมัน" value={preview.fatG} unit="g" color="#FCA5A5" />
+      </div>
+
+      {preview.flooredAt && (
+        <div style={{ fontSize: 11, color: T.textMute, marginBottom: 10 }}>
+          ใช้ค่าขั้นต่ำความปลอดภัย {preview.flooredAt} kcal
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => { void handleConfirm(); }}
+          disabled={state === 'loading'}
+          style={{
+            flex: 1,
+            padding: '8px 0',
+            borderRadius: 999,
+            border: 'none',
+            background: state === 'loading' ? T.bg4 : T.coral,
+            color: state === 'loading' ? T.textMute : '#0E0F12',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: state === 'loading' ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {state === 'loading' ? '…' : 'ยืนยัน'}
+        </button>
+        <button
+          onClick={() => setState('cancelled')}
+          disabled={state === 'loading'}
+          style={{
+            flex: 1,
+            padding: '8px 0',
+            borderRadius: 999,
+            border: `1px solid ${T.border}`,
+            background: 'transparent',
+            color: T.textDim,
+            fontSize: 13,
+            cursor: state === 'loading' ? 'not-allowed' : 'pointer',
+          }}
+        >
+          ไม่เปลี่ยน
+        </button>
       </div>
     </div>
   );
@@ -416,6 +529,12 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
                 bubbles.push(
                   <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
                     <ExerciseLogCard payload={out as unknown as ExerciseLogDonePayload} />
+                  </div>
+                );
+              } else if (p.type === 'tool-update_profile' && out?.type === 'update_profile_confirm') {
+                bubbles.push(
+                  <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
+                    <UpdateProfileConfirmCard payload={out as unknown as UpdateProfileConfirmPayload} />
                   </div>
                 );
               }

@@ -4,6 +4,7 @@ import { createLogWaterTool } from './log_water';
 import { createWeighInTool } from './weigh_in';
 import { createSetMoodTool } from './set_mood';
 import { createLogExerciseTool } from './log_exercise';
+import { createUpdateProfileTool } from './update_profile';
 
 // Re-export shared types + constants from the client-safe module.
 // Server code may import from here; client code must import from './shared-types' directly.
@@ -13,8 +14,9 @@ export type {
   WeighInDonePayload,
   MoodLogDonePayload,
   ExerciseLogDonePayload,
+  UpdateProfileConfirmPayload,
 } from './shared-types';
-export { MOOD_LABEL } from './shared-types';
+export { MOOD_LABEL, GOAL_LABEL, ACTIVITY_LABEL, EQUIPMENT_LABEL } from './shared-types';
 
 // Factory closes over userId — never include userId in any tool's inputSchema.
 export function createCoachTools(userId: string) {
@@ -25,6 +27,7 @@ export function createCoachTools(userId: string) {
     weigh_in: createWeighInTool(userId),
     set_mood: createSetMoodTool(userId),
     log_exercise: createLogExerciseTool(userId),
+    update_profile: createUpdateProfileTool(userId),
   };
 }
 
