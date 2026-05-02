@@ -4,7 +4,7 @@
 //   set    → exercise-logs.create
 //   finish → finish()              ended_at + total_volume + reps + elapsed
 
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, between, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { workoutSessions } from '@/lib/db/schema';
 import type { NewWorkoutSession, WorkoutSession } from '@/lib/types/db/workouts';
@@ -66,6 +66,22 @@ export async function finish(args: {
     .where(and(eq(workoutSessions.id, args.id), isNull(workoutSessions.endedAt)))
     .returning();
   return row;
+}
+
+/** Count of completed (ended) sessions in a UTC time range. */
+export async function countInRange(args: { userId: string; startUtc: Date; endUtc: Date }): Promise<number> {
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(workoutSessions)
+    .where(
+      and(
+        eq(workoutSessions.userId, args.userId),
+        isNotNull(workoutSessions.endedAt),
+        between(workoutSessions.startedAt, args.startUtc, args.endUtc),
+        isLive,
+      ),
+    );
+  return Number(rows[0]?.n ?? 0);
 }
 
 export async function softDelete(id: string): Promise<void> {

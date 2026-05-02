@@ -81,6 +81,53 @@ export async function confirm(id: string): Promise<FoodLog | undefined> {
   return row;
 }
 
+/**
+ * Per-day kcal totals for a date range, grouped by ICT calendar day.
+ * Returns an array of { dateIct: 'YYYY-MM-DD', kcal, proteinG } sorted ascending.
+ */
+export async function dailyTotalsInRange(args: {
+  userId: string;
+  startUtc: Date;
+  endUtc: Date;
+}): Promise<{ dateIct: string; kcal: number; proteinG: number; waterMl?: number }[]> {
+  const rows = await db
+    .select({
+      dateIct: sql<string>`to_char(${foodLogs.loggedAt} AT TIME ZONE 'Asia/Bangkok', 'YYYY-MM-DD')`,
+      kcal: sql<number>`coalesce(sum(${foodLogs.kcal}), 0)`,
+      proteinG: sql<number>`coalesce(sum(${foodLogs.proteinG}), 0)`,
+    })
+    .from(foodLogs)
+    .where(and(eq(foodLogs.userId, args.userId), between(foodLogs.loggedAt, args.startUtc, args.endUtc), isLive))
+    .groupBy(sql`to_char(${foodLogs.loggedAt} AT TIME ZONE 'Asia/Bangkok', 'YYYY-MM-DD')`)
+    .orderBy(sql`to_char(${foodLogs.loggedAt} AT TIME ZONE 'Asia/Bangkok', 'YYYY-MM-DD')`);
+  return rows.map((r) => ({ dateIct: r.dateIct, kcal: Number(r.kcal), proteinG: Number(r.proteinG) }));
+}
+
+/**
+ * Count of days where kcal ≥ floor within the range (ICT calendar days).
+ * Used by the month tab "วันถึงเป้าแคล" stat.
+ */
+export async function countDaysHitKcal(args: {
+  userId: string;
+  startUtc: Date;
+  endUtc: Date;
+  floorKcal: number;
+}): Promise<number> {
+  const rows = await db.select({ n: sql<number>`count(*)` }).from(
+    db
+      .select({
+        dateIct: sql<string>`to_char(${foodLogs.loggedAt} AT TIME ZONE 'Asia/Bangkok', 'YYYY-MM-DD')`,
+        kcal: sql<number>`sum(${foodLogs.kcal})`,
+      })
+      .from(foodLogs)
+      .where(and(eq(foodLogs.userId, args.userId), between(foodLogs.loggedAt, args.startUtc, args.endUtc), isLive))
+      .groupBy(sql`to_char(${foodLogs.loggedAt} AT TIME ZONE 'Asia/Bangkok', 'YYYY-MM-DD')`)
+      .having(sql`sum(${foodLogs.kcal}) >= ${args.floorKcal}`)
+      .as('days_hit'),
+  );
+  return Number(rows[0]?.n ?? 0);
+}
+
 export async function softDelete(id: string): Promise<void> {
   await db
     .update(foodLogs)

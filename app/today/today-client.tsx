@@ -47,6 +47,7 @@ export function TodayClient({ data }: { data: TodayData }) {
       activeTab="today"
       onAddWater={(ml) => water.mutate(ml)}
       onSelectMood={(energy) => mood.mutate(energy)}
+      onStartWorkout={() => router.push('/workout/run')}
     />
   );
 }
