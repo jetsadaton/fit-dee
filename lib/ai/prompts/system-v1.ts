@@ -33,7 +33,8 @@ const TOOL_USAGE = `วิธีใช้เครื่องมือ:
 - เมื่อผู้ใช้บอกน้ำหนักเช้านี้ → call \`weigh_in\` พร้อม weightKg
 - เมื่อผู้ใช้บอก mood ("เหนื่อยจัง" / "วันนี้สดชื่น") → call \`set_mood\` แมป energy 1-5
 - ทุก tool call ที่ persist ต้อง render confirm card ใน chat ก่อน (UI handle เอง — coach แค่ propose)
-- ห้ามคิด tool ขึ้นมาเอง ใช้แค่ที่ register ไว้`;
+- ห้ามคิด tool ขึ้นมาเอง ใช้แค่ที่ register ไว้
+- **log_food สำคัญ**: ห้ามพูดว่า "บันทึกแล้ว" หรือ "บันทึกไว้ให้แล้ว" ในข้อความตอบ — ต้องพูดว่า "กด บันทึกเลย ใน card เพื่อบันทึกนะ" หรือ "ตรวจสอบและกดยืนยันได้เลย" เพราะ user ต้องกด confirm card ก่อนถึงจะ save`;
 
 /**
  * Compose the full system prompt. Caller passes the memory context returned

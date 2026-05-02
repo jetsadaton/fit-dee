@@ -109,5 +109,359 @@
       "toolsCalled": ["search_food", "log_food"],
       "minSteps": 2
     }
+  },
+  {
+    "id": "food_011",
+    "description": "หมูปิ้ง + ข้าวเหนียว — street food combo",
+    "userMessage": "กินหมูปิ้ง 3 ไม้ กับข้าวเหนียว 1 ห่อตอนเช้า",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "breakfast" }
+      }
+    }
+  },
+  {
+    "id": "food_012",
+    "description": "แกงเขียวหวานไก่ — curry with rice",
+    "userMessage": "มื้อเย็นกินแกงเขียวหวานไก่กับข้าว",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_013",
+    "description": "ลาบหมู — northeastern dish",
+    "userMessage": "กินลาบหมูกับข้าวเหนียวตอนกลางวัน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_014",
+    "description": "กาแฟ + โดนัท — snack with drink",
+    "userMessage": "กินโดนัทกลาโซ 1 ชิ้น กับกาแฟ latte ตอนบ่าย",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_015",
+    "description": "ก๋วยเตี๋ยวเส้นใหญ่ผัดซีอิ๊ว — street noodle",
+    "userMessage": "มื้อเที่ยงกินผัดซีอิ๊วเส้นใหญ่หมูครึ่งจาน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_016",
+    "description": "ข้าวราดแกง — canteen rice",
+    "userMessage": "กินข้าวราดแกงมัสมั่นไก่ตอนเย็น",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_017",
+    "description": "ต้มข่าไก่ — coconut soup",
+    "userMessage": "สั่งต้มข่าไก่มากินเป็นมื้อกลางวัน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_018",
+    "description": "ผัดกะเพราเนื้อ — ไม่ระบุมื้อ coach ถามหรือ default snack",
+    "userMessage": "กินผัดกะเพราเนื้อมาแล้ว",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2
+    }
+  },
+  {
+    "id": "food_019",
+    "description": "ไก่ย่าง + น้ำจิ้มแจ่ว — grilled chicken",
+    "userMessage": "มื้อเย็นกินไก่ย่างครึ่งตัว กับข้าวเหนียว",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_020",
+    "description": "ข้าวต้มหมู — congee breakfast",
+    "userMessage": "เช้านี้กินข้าวต้มหมูหนึ่งชาม",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "breakfast" }
+      }
+    }
+  },
+  {
+    "id": "food_021",
+    "description": "บะหมี่เย็นตาโฟ — noodle soup",
+    "userMessage": "กินเย็นตาโฟบะหมี่น้ำตอนกลางวัน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_022",
+    "description": "โยเกิร์ต + กราโนล่า — healthy snack",
+    "userMessage": "ของว่างกินโยเกิร์ตกรีก 1 ถ้วย กับกราโนล่า 2 ช้อนโต๊ะ",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_023",
+    "description": "แซลมอนย่าง — restaurant dish with portion",
+    "userMessage": "กินแซลมอนย่าง 200g กับผักสลัดมื้อเย็น",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_024",
+    "description": "ชานมไข่มุก — bubble tea",
+    "userMessage": "สั่งชานมไข่มุกหวานน้อยมากินตอนบ่าย",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_025",
+    "description": "มาม่าต้ม — instant noodle",
+    "userMessage": "กินมาม่าต้มรสหมูสับก่อนนอน",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_026",
+    "description": "ข้าวหน้าเป็ด — duck rice",
+    "userMessage": "กินข้าวหน้าเป็ดตอนเที่ยง เป็ดครึ่งตัว",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_027",
+    "description": "ขนมปังทาเนย + นม — breakfast",
+    "userMessage": "เช้านี้กินขนมปังทาเนย 2 แผ่น กับนมจืด 1 กล่อง",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "breakfast" }
+      }
+    }
+  },
+  {
+    "id": "food_028",
+    "description": "ก๋วยจั๊บ — clear broth noodle",
+    "userMessage": "มื้อเย็นสั่งก๋วยจั๊บน้ำใสหมูสับ",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_029",
+    "description": "ambiguous portion — เพียงนิดหน่อย coach should ask or use estimate",
+    "userMessage": "กินข้าวกะเพรานิดหน่อยมื้อกลางวัน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_030",
+    "description": "multiple items — log as one entry or multiple",
+    "userMessage": "มื้อเย็นกินข้าวผัดกระเทียมหมู กับไข่เจียวหมูสับ กับต้มจืดเต้าหู้",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_031",
+    "description": "ปลาทูต้มมะนาว — fish dish",
+    "userMessage": "กินปลาทูต้มมะนาวกับข้าวมื้อเที่ยง",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_032",
+    "description": "น้ำผลไม้คั้น — fresh juice",
+    "userMessage": "ดื่มน้ำส้มคั้นสด 1 แก้วตอนเช้า",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "breakfast" }
+      }
+    }
+  },
+  {
+    "id": "food_033",
+    "description": "ร้านอาหาร context — restaurant portion",
+    "userMessage": "ไปกินอาหารญี่ปุ่น สั่งข้าวหน้าปลาแซลมอนดิบ มื้อเย็น",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_034",
+    "description": "เนื้อย่างเกาหลี — Korean BBQ",
+    "userMessage": "ไปกินบุฟเฟ่ต์เนื้อย่างเกาหลีมื้อเย็น กินไปเยอะมาก",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_035",
+    "description": "ไม่ระบุอาหาร — coach must ask clarifying",
+    "userMessage": "เพิ่งกินข้าวมา",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 1
+    }
+  },
+  {
+    "id": "food_036",
+    "description": "แอปเปิ้ล + เนยถั่ว — pre-workout snack",
+    "userMessage": "กินแอปเปิ้ล 1 ลูก กับเนยถั่ว 1 ช้อนโต๊ะก่อนออกกำลังกาย",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_037",
+    "description": "ขนมจีนน้ำยา — rice noodle",
+    "userMessage": "กินขนมจีนน้ำยาปลา 2 จับ มื้อกลางวัน",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "lunch" }
+      }
+    }
+  },
+  {
+    "id": "food_038",
+    "description": "ผัดผักรวม + ข้าว — mixed vegetables",
+    "userMessage": "กินผัดผักรวมกับข้าวสวยมื้อเย็น",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "dinner" }
+      }
+    }
+  },
+  {
+    "id": "food_039",
+    "description": "เค้กวันเกิด — cake slice",
+    "userMessage": "กินเค้กช็อกโกแลตไป 1 ชิ้น งานวันเกิดเพื่อน",
+    "expect": {
+      "toolsCalled": ["log_food"],
+      "minSteps": 1,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
+  },
+  {
+    "id": "food_040",
+    "description": "ถั่วเขียวต้มน้ำตาล — Thai dessert",
+    "userMessage": "กินถั่วเขียวต้มน้ำตาลครึ่งถ้วยตอนบ่าย",
+    "expect": {
+      "toolsCalled": ["search_food", "log_food"],
+      "minSteps": 2,
+      "toolArgs": {
+        "log_food": { "mealType": "snack" }
+      }
+    }
   }
 ]

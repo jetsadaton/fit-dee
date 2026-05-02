@@ -17,7 +17,7 @@ import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from 
 import { auth } from '@/lib/auth';
 import { kimi, DEFAULT_MODEL } from '@/lib/ai/kimi';
 import { loadMemoryContext } from '@/lib/ai/memory';
-import { buildSystemPrompt, PROMPT_VERSION } from '@/lib/ai/prompts/system-v1';
+import { buildSystemPrompt, PROMPT_VERSION } from '@/lib/ai/prompts/system-v2';
 import { checkChatLimit } from '@/lib/ai/rate-limit';
 import { createCoachTools } from '@/lib/ai/tools';
 import { getOrCreate as getOrCreateThread, touch as touchThread } from '@/lib/db/repositories/chat-threads';

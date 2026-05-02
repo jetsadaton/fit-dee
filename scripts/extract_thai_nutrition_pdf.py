@@ -59,26 +59,30 @@ def extract_page(page_num: int, img) -> list[dict]:
 
     print(f"  [api]   page {page_num}", flush=True)
 
-    response = client.chat.completions.create(
-        model="kimi-k2.6",
-        max_tokens=4096,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{img_to_b64(img)}"
+    try:
+        response = client.chat.completions.create(
+            model="kimi-k2.6",
+            max_tokens=4096,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{img_to_b64(img)}"
+                            },
                         },
-                    },
-                    {"type": "text", "text": EXTRACT_PROMPT},
-                ],
-            }
-        ],
-    )
-
-    raw = response.choices[0].message.content.strip()
+                        {"type": "text", "text": EXTRACT_PROMPT},
+                    ],
+                }
+            ],
+        )
+        raw = response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"  [warn] API error page {page_num}: {e}", flush=True)
+        time.sleep(2)
+        return []
 
     # strip markdown code fences if present
     if raw.startswith("```"):
@@ -86,16 +90,25 @@ def extract_page(page_num: int, img) -> list[dict]:
         if raw.startswith("json"):
             raw = raw[4:]
 
+    # Don't cache on parse errors — let next run retry the page
+    if not raw.strip():
+        print(f"  [warn] empty response page {page_num}, will retry", flush=True)
+        time.sleep(2)
+        return []
+
     try:
         rows = json.loads(raw.strip())
         if not isinstance(rows, list):
-            rows = []
+            print(f"  [warn] non-list response page {page_num}: {raw[:60]!r}, will retry", flush=True)
+            time.sleep(1)
+            return []
     except json.JSONDecodeError:
-        print(f"  [warn] parse error page {page_num}, saving empty")
-        rows = []
+        print(f"  [warn] parse error page {page_num}: {raw[:80]!r}, will retry", flush=True)
+        time.sleep(1)
+        return []
 
     cache_file.write_text(json.dumps(rows, ensure_ascii=False, indent=2))
-    time.sleep(0.3)
+    time.sleep(0.5)
     return rows
 
 

@@ -13,7 +13,7 @@
 import { generateText, stepCountIs, tool } from 'ai';
 import { z } from 'zod';
 import { kimi, DEFAULT_MODEL } from '@/lib/ai/kimi';
-import { buildSystemPrompt } from '@/lib/ai/prompts/system-v1';
+import { buildSystemPrompt } from '@/lib/ai/prompts/system-v2';
 import type { MemoryContext } from '@/lib/ai/memory';
 import type { GoldenCase, EvalResult } from './types';
 
@@ -158,6 +158,24 @@ async function runCase(gc: GoldenCase): Promise<EvalResult> {
               }
             }
           }
+        }
+      }
+    }
+
+    // Check response text assertions (safety / deload cases)
+    const finalText = result.text ?? '';
+    if (gc.expect.mustContainOneOf) {
+      const found = gc.expect.mustContainOneOf.some((s) => finalText.includes(s));
+      if (!found) {
+        failures.push(
+          `response must contain one of [${gc.expect.mustContainOneOf.join(' | ')}], got: "${finalText.slice(0, 120)}"`,
+        );
+      }
+    }
+    if (gc.expect.notInResponse) {
+      for (const forbidden of gc.expect.notInResponse) {
+        if (finalText.includes(forbidden)) {
+          failures.push(`response must NOT contain "${forbidden}", but it did`);
         }
       }
     }

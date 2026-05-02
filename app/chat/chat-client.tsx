@@ -47,7 +47,7 @@ function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
   if (state === 'cancelled') {
     return (
       <div style={{ background: T.bg3, borderRadius: 12, padding: '10px 14px', fontSize: 13, color: T.textDim }}>
-        ยกเลิกแล้ว
+        ไม่ได้บันทึก
       </div>
     );
   }
@@ -63,6 +63,11 @@ function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
         fontFamily: 'Inter,"Noto Sans Thai"',
       }}
     >
+      {/* Header — makes it clear this is a proposal, not a saved record */}
+      <div style={{ fontSize: 11, color: T.textMute, fontWeight: 600, marginBottom: 8, letterSpacing: 0.2 }}>
+        📋 โค้ชแนะนำให้บันทึก · ยังไม่บันทึก
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
         <div>
           <div style={{ fontWeight: 700, fontSize: 14, color: T.text }}>{payload.nameTh}</div>
@@ -101,7 +106,7 @@ function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
             cursor: state === 'loading' ? 'not-allowed' : 'pointer',
           }}
         >
-          {state === 'loading' ? '…' : 'ยืนยัน'}
+          {state === 'loading' ? '…' : 'บันทึกเลย'}
         </button>
         <button
           onClick={handleCancel}
@@ -117,7 +122,7 @@ function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
             cursor: state === 'loading' ? 'not-allowed' : 'pointer',
           }}
         >
-          ยกเลิก
+          ไม่บันทึก
         </button>
       </div>
     </div>
@@ -229,12 +234,18 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
   const busy = streaming || uploading;
   const canSend = !busy && (input.trim().length > 0 || pendingFile !== null);
 
+  // Scroll to bottom on initial load (instant, no animation)
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView();
+  }, []);
+
+  // Scroll to bottom when messages arrive or AI is responding
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
     if (nearBottom) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, busy]);
+  }, [messages, streaming]);
 
   const pickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -290,14 +301,11 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
     setInput('');
   };
 
-  const statusText = uploading
-    ? 'กำลังอัปโหลด…'
-    : streaming
-    ? 'กำลังพิมพ์…'
-    : 'ออนไลน์ · ตอบทันที';
+  const statusText = uploading ? 'กำลังอัปโหลด…' : 'ออนไลน์ · ตอบทันที';
 
   return (
     <div style={{ height: '100dvh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+      <style>{`@keyframes typingDot{0%,60%,100%{opacity:.2;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}`}</style>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px 12px', borderBottom: `1px solid ${T.border}`, background: T.bg, flexShrink: 0 }}>
@@ -415,6 +423,25 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
           if (bubbles.length === 0) return null;
           return <div key={m.id} style={{ marginBottom: 4 }}>{bubbles}</div>;
         })}
+        {streaming && (
+          <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ padding: '10px 16px', borderRadius: 16, background: T.bg3, display: 'flex', gap: 5, alignItems: 'center' }}>
+              {([0, 1, 2] as const).map((i) => (
+                <span
+                  key={i}
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    background: T.textMute,
+                    display: 'inline-block',
+                    animation: `typingDot 1.2s ${i * 0.2}s ease-in-out infinite`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
