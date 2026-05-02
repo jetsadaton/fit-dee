@@ -10,6 +10,9 @@ import { create as createWater } from '@/lib/db/repositories/water-logs';
 import { create as createMood } from '@/lib/db/repositories/mood-logs';
 import { create as createWeight } from '@/lib/db/repositories/weight-logs';
 import { logMoodInputSchema, logWaterInputSchema, logWeightInputSchema } from '@/lib/types/dto/logs';
+import { loadTodaySnapshot } from '@/lib/services/today';
+import { generateInsights } from '@/lib/services/insights';
+import type { Insight, InsightRange } from '@/lib/types/dto/insights';
 
 export type LogActionResult =
   | { ok: true }
@@ -90,5 +93,17 @@ export async function logWeightAction(rawInput: unknown): Promise<LogActionResul
     return { ok: true };
   } catch (err) {
     return { ok: false, error: 'unknown', message: err instanceof Error ? err.message : 'unknown error' };
+  }
+}
+
+export async function fetchInsightsAction(range: InsightRange): Promise<Insight[]> {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  try {
+    const snapshot = await loadTodaySnapshot(session.user.id);
+    return await generateInsights(snapshot, range);
+  } catch {
+    return [];
   }
 }

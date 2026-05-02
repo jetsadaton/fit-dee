@@ -34,6 +34,12 @@ export const queryKeys = {
     all: ['daily-dashboard'] as const,
     today: () => [...queryKeys.dailyDashboard.all, 'today'] as const,
   },
+  // AI-generated insights keyed by range + ICT date so they refresh at midnight.
+  // staleTime: Infinity — fetched once per (range, day) pair, never auto-refetched.
+  insights: {
+    all: ['insights'] as const,
+    byRange: (range: string, dateIct: string) => [...queryKeys.insights.all, range, dateIct] as const,
+  },
   // Add aggregates as services land:
   // foodLogs:       { all: ['food-logs']       as const, today: () => [...]      }
   // workoutPlans:   { all: ['workout-plans']   as const, current: () => [...]    }

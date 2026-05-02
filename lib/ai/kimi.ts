@@ -27,3 +27,7 @@ export const DEFAULT_MODEL = 'kimi-k2.6';
 
 /** Used by the vision pipeline (Phase 2 photo flow). K2.5 = multimodal variant. */
 export const VISION_MODEL = 'kimi-k2.5';
+
+/** Lightweight model for non-interactive server-side generation (insights, summaries).
+ *  Much faster than K2.6 — no thinking mode, no vision required. */
+export const FAST_MODEL = 'moonshot-v1-8k';

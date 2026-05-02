@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { BottomTabBar, MacroBar, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
+import type { Insight, InsightRange } from '@/lib/types/dto/insights';
 
-type Range = 'today' | 'week' | 'month';
-type InsightTone = 'warn' | 'good' | 'info';
-type Insight = { tone: InsightTone; text: string };
+type Range = InsightRange;
 
 function TripleRing({
   size = 220,
@@ -127,7 +126,15 @@ function RingLegend({ eaten = 1450, burned = 320, goal = 1820 }: { eaten?: numbe
   );
 }
 
-function AIInsightCard({ items, range = 'today' }: { items: Insight[]; range?: Range }) {
+function AIInsightCard({
+  items,
+  range = 'today',
+  loading = false,
+}: {
+  items: Insight[];
+  range?: Range;
+  loading?: boolean;
+}) {
   return (
     <div
       style={{
@@ -184,6 +191,16 @@ function AIInsightCard({ items, range = 'today' }: { items: Insight[]; range?: R
           {range === 'today' ? 'วันนี้' : range === 'week' ? '7 วัน' : '30 วัน'}
         </span>
       </div>
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
+          {[70, 90, 55].map((w, i) => (
+            <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ flexShrink: 0, width: 22, height: 22, borderRadius: 7, background: T.bg4 }} />
+              <div style={{ height: 13, borderRadius: 6, background: T.bg4, width: `${w}%`, opacity: 0.6 }} />
+            </div>
+          ))}
+        </div>
+      ) : (
       <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
         {items.map((it, i) => (
           <li key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
@@ -219,6 +236,7 @@ function AIInsightCard({ items, range = 'today' }: { items: Insight[]; range?: R
           </li>
         ))}
       </ul>
+      )}
       <button
         type="button"
         style={{
@@ -855,6 +873,12 @@ export type TodayScreenProps = {
   onAddWater?: (ml: number) => void;
   onSelectMood?: (energy: number) => void;
   onStartWorkout?: () => void;
+  /** Controlled range from parent. When omitted, TodayScreen manages its own range state. */
+  range?: Range;
+  onRangeChange?: (r: Range) => void;
+  /** AI-generated insights for the current range. Undefined = not yet fetched (show hardcoded fallback). */
+  insights?: Insight[];
+  insightsLoading?: boolean;
 };
 
 export function TodayScreen({
@@ -864,8 +888,17 @@ export function TodayScreen({
   onAddWater,
   onSelectMood,
   onStartWorkout,
+  range: controlledRange,
+  onRangeChange,
+  insights: insightsProp,
+  insightsLoading = false,
 }: TodayScreenProps) {
-  const [range, setRange] = useState<Range>('today');
+  const [internalRange, setInternalRange] = useState<Range>('today');
+  const range = controlledRange ?? internalRange;
+  const setRange = (r: Range) => {
+    setInternalRange(r);
+    onRangeChange?.(r);
+  };
   const waterMl = data?.waterMl ?? 1250;
   const moodEnergy = data?.moodEnergy ?? null;
   const displayName = data?.displayName ?? 'โบ้';
@@ -1038,7 +1071,11 @@ export function TodayScreen({
                 f={{ eaten: fatEaten, goal: fatGoal }}
               />
             </div>
-            <AIInsightCard items={insights.today} range="today" />
+            <AIInsightCard
+              items={insightsLoading ? [] : (insightsProp?.length ? insightsProp : insights.today)}
+              range="today"
+              loading={insightsLoading}
+            />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
               <WorkoutCTA workout={todayWorkout} onStart={onStartWorkout} />
               <WaterCard initialMl={waterMl} onAdd={onAddWater} />
@@ -1090,7 +1127,11 @@ export function TodayScreen({
                 </div>
               )}
             </div>
-            <AIInsightCard items={insights.week} range="week" />
+            <AIInsightCard
+              items={insightsLoading ? [] : (insightsProp?.length ? insightsProp : insights.week)}
+              range="week"
+              loading={insightsLoading}
+            />
             <BigStatsGrid
               stats={[
                 {
@@ -1176,7 +1217,11 @@ export function TodayScreen({
                 />
               )}
             </div>
-            <AIInsightCard items={insights.month} range="month" />
+            <AIInsightCard
+              items={insightsLoading ? [] : (insightsProp?.length ? insightsProp : insights.month)}
+              range="month"
+              loading={insightsLoading}
+            />
             <BigStatsGrid
               stats={[
                 {
