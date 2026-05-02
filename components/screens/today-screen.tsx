@@ -201,6 +201,10 @@ function AIInsightCard({
             </div>
           ))}
         </div>
+      ) : items.length === 0 ? (
+        <div style={{ color: T.textMute, fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', textAlign: 'center', padding: '8px 0', position: 'relative' }}>
+          ยังไม่มีข้อมูลพอวิเคราะห์ · บันทึกอาหารและออกกำลังกายเพิ่มเติม
+        </div>
       ) : (
       <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative' }}>
         {items.map((it, i) => (
@@ -828,25 +832,6 @@ function BigStatsGrid({ stats }: { stats: { label: string; value: string; sub?: 
   );
 }
 
-const insights: Record<Range, Insight[]> = {
-  today: [
-    { tone: 'warn', text: 'นาย<b>ขาดโปรตีน 30g</b> — ลองเพิ่มไก่ต้มหรือไข่ขาวอีก 1 มื้อ' },
-    { tone: 'warn', text: '<b>ดื่มน้ำน้อยไป 2 แก้ว</b> เหลือเวลาอีกแค่ 4 ชม. ก่อนนอน' },
-    { tone: 'good', text: 'แคลอรี่อยู่ในเป้า · ออกกำลังเสร็จเรียบร้อย ✓' },
-  ],
-  week: [
-    { tone: 'good', text: 'น้ำหนัก<b>ลงไป 0.6 kg</b> ในสัปดาห์นี้ — pace กำลังดี' },
-    { tone: 'warn', text: 'วันศุกร์<b>เกินเป้า 280 kcal</b> (กินนอกบ้าน) ลองวางแผนล่วงหน้า' },
-    { tone: 'warn', text: '<b>โปรตีนเฉลี่ย 95g/วัน</b> ต่ำกว่าเป้า 25g — เพิ่มมื้อเช้าได้' },
-    { tone: 'good', text: 'เล่นได้ 4/4 วันตามแผน · streak ไม่ขาด' },
-  ],
-  month: [
-    { tone: 'good', text: 'น้ำหนัก<b>ลง 2.4 kg ใน 30 วัน</b> — เร็วกว่าเป้า 20%' },
-    { tone: 'warn', text: '<b>วันศุกร์-เสาร์เกินเป้าบ่อย</b> 6 ใน 8 ครั้ง — pattern ชัด' },
-    { tone: 'good', text: 'เล่น 18/30 วัน เกินเป้า 15 วัน 💪' },
-    { tone: 'warn', text: 'นอนเฉลี่ย <b>6.2 ชม./คืน</b> ต่ำไป — กระทบฟื้นตัว' },
-  ],
-};
 
 // ─── Food Log List ───────────────────────────────────────────────────
 
@@ -1439,7 +1424,7 @@ export function TodayScreen({
               onUpdate={onUpdateFoodLog}
             />
             <AIInsightCard
-              items={insightsLoading ? [] : (insightsProp?.length ? insightsProp : insights.today)}
+              items={insightsLoading ? [] : (insightsProp ?? [])}
               range="today"
               loading={insightsLoading}
             />
@@ -1495,7 +1480,7 @@ export function TodayScreen({
               )}
             </div>
             <AIInsightCard
-              items={insightsLoading ? [] : (insightsProp?.length ? insightsProp : insights.week)}
+              items={insightsLoading ? [] : (insightsProp ?? [])}
               range="week"
               loading={insightsLoading}
             />
@@ -1585,7 +1570,7 @@ export function TodayScreen({
               )}
             </div>
             <AIInsightCard
-              items={insightsLoading ? [] : (insightsProp?.length ? insightsProp : insights.month)}
+              items={insightsLoading ? [] : (insightsProp ?? [])}
               range="month"
               loading={insightsLoading}
             />
