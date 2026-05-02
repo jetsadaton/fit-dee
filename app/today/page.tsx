@@ -1,16 +1,32 @@
-'use client';
+// Server Component — gathers Today dashboard data via the service layer
+// (RSC reads RPM directly per rules/backend.md), passes a serializable
+// snapshot to the client wrapper.
 
-import { useRouter } from 'next/navigation';
-import { TodayScreen } from '@/components/screens/today-screen';
-import type { TabId } from '@/components/coach/primitives';
+import { redirect } from 'next/navigation';
+import { auth } from '@/lib/auth';
+import { findByUserId as findProfile } from '@/lib/db/repositories/profiles';
+import { loadTodaySnapshot } from '@/lib/services/today';
+import { TodayClient } from './today-client';
 
-export default function TodayPage() {
-  const router = useRouter();
-  const onTab = (t: TabId) => {
-    if (t === 'today') return;
-    if (t === 'chat') router.push('/chat');
-    else if (t === 'plan') router.push('/plan');
-    else router.push('/me');
-  };
-  return <TodayScreen onTab={onTab} activeTab="today" />;
+export default async function TodayPage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect('/');
+
+  // First-time users need to onboard before /today is meaningful.
+  const profile = await findProfile(session.user.id);
+  if (!profile?.kcalTarget) redirect('/onboarding');
+
+  const data = await loadTodaySnapshot(session.user.id);
+
+  return (
+    <TodayClient
+      data={{
+        displayName: data.displayName,
+        streak: data.streakCurrent,
+        kcalEaten: data.kcalEaten,
+        kcalGoal: data.kcalGoal,
+        kcalBurned: data.kcalBurned,
+      }}
+    />
+  );
 }

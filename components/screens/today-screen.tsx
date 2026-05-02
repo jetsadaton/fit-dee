@@ -92,8 +92,7 @@ function TripleRing({
   );
 }
 
-function RingLegend({ eaten = 1450, burned = 320 }: { eaten?: number; burned?: number }) {
-  const goal = 1820;
+function RingLegend({ eaten = 1450, burned = 320, goal = 1820 }: { eaten?: number; burned?: number; goal?: number }) {
   const Item = ({ color, label, value, unit }: { color: string; label: string; value: number; unit: string }) => (
     <div style={{ flex: 1, textAlign: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginBottom: 2 }}>
@@ -753,8 +752,26 @@ const insights: Record<Range, Insight[]> = {
   ],
 };
 
-export function TodayScreen({ onTab, activeTab = 'today' as TabId }: { onTab?: (t: TabId) => void; activeTab?: TabId }) {
+export type TodayScreenProps = {
+  onTab?: (t: TabId) => void;
+  activeTab?: TabId;
+  /** Live data from RSC. Falls back to design defaults for /canvas review. */
+  data?: {
+    displayName?: string;
+    streak?: number;
+    kcalEaten?: number;
+    kcalGoal?: number;
+    kcalBurned?: number;
+  };
+};
+
+export function TodayScreen({ onTab, activeTab = 'today' as TabId, data }: TodayScreenProps) {
   const [range, setRange] = useState<Range>('today');
+  const displayName = data?.displayName ?? 'โบ้';
+  const streak = data?.streak ?? 12;
+  const kcalEaten = data?.kcalEaten ?? 1450;
+  const kcalGoal = data?.kcalGoal ?? 1820;
+  const kcalBurned = data?.kcalBurned ?? 320;
   return (
     <div
       style={{
@@ -790,7 +807,7 @@ export function TodayScreen({ onTab, activeTab = 'today' as TabId }: { onTab?: (
             สวัสดีตอนเช้า
           </div>
           <h1 style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 900, fontSize: 22, color: T.text, margin: '2px 0 0' }}>
-            โบ้ 👋
+            {displayName} 👋
           </h1>
         </div>
         <div
@@ -805,7 +822,7 @@ export function TodayScreen({ onTab, activeTab = 'today' as TabId }: { onTab?: (
           }}
         >
           <span style={{ fontSize: 13 }}>🔥</span>
-          <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 900, color: T.lime }}>12</span>
+          <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 900, color: T.lime }}>{streak}</span>
           <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 10, fontWeight: 700, color: T.lime, opacity: 0.85 }}>
             วัน
           </span>
@@ -868,8 +885,8 @@ export function TodayScreen({ onTab, activeTab = 'today' as TabId }: { onTab?: (
                 alignItems: 'center',
               }}
             >
-              <TripleRing size={210} eaten={1450} goal={1820} burned={320} />
-              <RingLegend eaten={1450} burned={320} />
+              <TripleRing size={210} eaten={kcalEaten} goal={kcalGoal || 1820} burned={kcalBurned} />
+              <RingLegend eaten={kcalEaten} burned={kcalBurned} goal={kcalGoal || 1820} />
             </div>
             <AIInsightCard items={insights.today} range="today" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
