@@ -16,7 +16,7 @@ export function UserBubble({ children }: { children: ReactNode }) {
           color: T.text,
           padding: '10px 14px',
           borderRadius: '18px 18px 4px 18px',
-          fontFamily: 'Inter, "Noto Sans Thai", system-ui',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai), system-ui',
           fontSize: 14.5,
           lineHeight: 1.5,
           fontWeight: 500,
@@ -43,7 +43,7 @@ export function CoachBubble({ children, withAvatar = true }: { children: ReactNo
           padding: '10px 14px',
           borderRadius: '18px 18px 18px 4px',
           border: `1px solid ${T.border}`,
-          fontFamily: 'Inter, "Noto Sans Thai", system-ui',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai), system-ui',
           fontSize: 14.5,
           lineHeight: 1.5,
           fontWeight: 500,
@@ -115,7 +115,7 @@ export function FoodLogCard({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai",system-ui',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai), system-ui',
                 fontWeight: 800,
                 color: T.text,
                 fontSize: 14.5,
@@ -144,7 +144,7 @@ export function FoodLogCard({
                 <span style={{ width: 6, height: 6, borderRadius: 999, background: m.c }} />
                 <span style={{ fontSize: 9.5, fontWeight: 700, color: T.textDim, letterSpacing: 0.6 }}>{m.l}</span>
               </div>
-              <div style={{ fontFamily: 'Inter', fontWeight: 800, fontSize: 13, color: T.text }}>
+              <div style={{ fontFamily: 'var(--font-inter)', fontWeight: 800, fontSize: 13, color: T.text }}>
                 {m.v}
                 <span style={{ color: T.textMute, fontWeight: 500 }}>g</span>
               </div>
@@ -163,7 +163,7 @@ export function FoodLogCard({
               background: 'none',
               border: 'none',
               color: T.textMute,
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 700,
               fontSize: 13,
               cursor: 'pointer',
@@ -181,7 +181,7 @@ export function FoodLogCard({
               background: 'none',
               border: 'none',
               color: T.text,
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 700,
               fontSize: 13,
               cursor: 'pointer',
@@ -199,7 +199,7 @@ export function FoodLogCard({
               background: T.coral,
               border: 'none',
               color: '#0E0F12',
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 800,
               fontSize: 13,
               cursor: 'pointer',
@@ -217,7 +217,7 @@ export function FoodLogCard({
             color: T.lime,
             fontSize: 12,
             fontWeight: 700,
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
@@ -280,14 +280,14 @@ export function WorkoutCardBubble({
               letterSpacing: 1.2,
               color: T.coral,
               textTransform: 'uppercase',
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
             }}
           >
             วันนี้
           </div>
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 800,
               color: T.text,
               fontSize: 18,
@@ -303,7 +303,7 @@ export function WorkoutCardBubble({
           padding: '10px 14px 14px',
           display: 'flex',
           gap: 12,
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: T.textDim, fontSize: 12, fontWeight: 600 }}>
@@ -329,7 +329,7 @@ export function WorkoutCardBubble({
           background: T.coral,
           color: '#0E0F12',
           border: 'none',
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontWeight: 800,
           fontSize: 14,
           cursor: 'pointer',
@@ -393,7 +393,7 @@ export function ExerciseDemoBubble({
             borderRadius: 4,
             background: 'rgba(0,0,0,0.6)',
             color: '#fff',
-            fontFamily: 'Inter',
+            fontFamily: 'var(--font-inter)',
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: 0.4,
@@ -403,8 +403,8 @@ export function ExerciseDemoBubble({
         </div>
       </div>
       <div style={{ padding: '12px 14px' }}>
-        <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 14 }}>{name}</div>
-        <div style={{ fontSize: 12, color: T.textDim, marginTop: 2, fontFamily: 'Inter,"Noto Sans Thai"' }}>{subtitle}</div>
+        <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, color: T.text, fontSize: 14 }}>{name}</div>
+        <div style={{ fontSize: 12, color: T.textDim, marginTop: 2, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)' }}>{subtitle}</div>
       </div>
     </div>
   );
@@ -455,7 +455,7 @@ export function PhotoAnalysisBubble({
               color: '#0E0F12',
               fontSize: 9,
               fontWeight: 800,
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
               borderRadius: 3,
             }}
           >
@@ -483,7 +483,7 @@ export function PhotoAnalysisBubble({
               color: '#0E0F12',
               fontSize: 9,
               fontWeight: 800,
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
               borderRadius: 3,
             }}
           >
@@ -499,7 +499,7 @@ export function PhotoAnalysisBubble({
             color: T.textDim,
             letterSpacing: 0.6,
             textTransform: 'uppercase',
-            fontFamily: 'Inter',
+            fontFamily: 'var(--font-inter)',
             marginBottom: 8,
           }}
         >
@@ -516,10 +516,10 @@ export function PhotoAnalysisBubble({
               borderTop: i === 0 ? 'none' : `1px solid ${T.border}`,
             }}
           >
-            <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, fontWeight: 600, color: T.text }}>{it.name}</span>
+            <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, fontWeight: 600, color: T.text }}>{it.name}</span>
             <span
               style={{
-                fontFamily: 'Inter',
+                fontFamily: 'var(--font-inter)',
                 fontSize: 11,
                 fontWeight: 700,
                 color: it.conf > 0.85 ? T.lime : T.warn,
@@ -559,7 +559,7 @@ export function WeeklyInsightBubble() {
             <path d="M14 7h7v7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 13 }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, color: T.text, fontSize: 13 }}>
           สรุปสัปดาห์ที่ผ่านมา
         </span>
       </div>
@@ -595,7 +595,7 @@ export function WeeklyInsightBubble() {
             style={{
               display: 'flex',
               gap: 8,
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 12.5,
               color: T.text,
               lineHeight: 1.5,
@@ -617,7 +617,7 @@ export function WeighInPromptBubble({ onLog }: { onLog?: () => void }) {
     <div style={{ background: T.bg3, borderRadius: 16, border: `1px solid ${T.border}`, padding: 14 }}>
       <div
         style={{
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontWeight: 700,
           color: T.text,
           fontSize: 14,
@@ -630,7 +630,7 @@ export function WeighInPromptBubble({ onLog }: { onLog?: () => void }) {
         style={{
           fontSize: 12,
           color: T.textDim,
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           marginBottom: 12,
         }}
       >
@@ -646,7 +646,7 @@ export function WeighInPromptBubble({ onLog }: { onLog?: () => void }) {
           border: `1px dashed ${T.borderHi}`,
           borderRadius: 12,
           color: T.text,
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontWeight: 700,
           fontSize: 14,
           cursor: 'pointer',
@@ -678,7 +678,7 @@ export function WaterChipsBubble({ onAdd }: { onAdd?: (ml: number) => void }) {
             strokeLinejoin="round"
           />
         </svg>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 700, color: T.text, fontSize: 13 }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 700, color: T.text, fontSize: 13 }}>
           เพิ่มน้ำเร็ว
         </span>
       </div>
@@ -695,7 +695,7 @@ export function WaterChipsBubble({ onAdd }: { onAdd?: (ml: number) => void }) {
               background: T.bg4,
               border: `1px solid ${T.border}`,
               color: T.text,
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
               fontWeight: 800,
               fontSize: 13,
               cursor: 'pointer',
@@ -713,7 +713,7 @@ export function WaterChipsBubble({ onAdd }: { onAdd?: (ml: number) => void }) {
             background: T.bg4,
             border: `1px dashed ${T.borderHi}`,
             color: T.textDim,
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 700,
             fontSize: 13,
             cursor: 'pointer',

@@ -1,0 +1,27 @@
+- generic [ref=e2]:
+  - img [ref=e3]
+  - generic [ref=e7]:
+    - generic [ref=e8]: โ
+    - generic [ref=e9]: Coachly
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - img [ref=e14]
+      - generic [ref=e25]: โค้ชดี
+    - generic [ref=e26]: โค้ช AI ส่วนตัว
+    - heading "โค้ช ส่วนตัว ในมือคุณ" [level=1] [ref=e27]:
+      - text: โค้ช
+      - text: ส่วนตัว
+      - text: ในมือคุณ
+    - paragraph [ref=e28]: แชทกับโค้ชดี บอกว่ากินอะไร เราจัดแผนกินและออกกำลังให้พอดีตัว
+  - generic [ref=e29]:
+    - button "เริ่มเลย" [ref=e30] [cursor=pointer]:
+      - img [ref=e31]
+      - text: เริ่มเลย
+    - generic [ref=e33]:
+      - button "L LINE" [ref=e34] [cursor=pointer]:
+        - generic [ref=e35]: L
+        - text: LINE
+      - button "Google" [ref=e36] [cursor=pointer]:
+        - img [ref=e37]
+        - text: Google
+    - generic [ref=e42]: มีบัญชีอยู่แล้ว? เข้าสู่ระบบ

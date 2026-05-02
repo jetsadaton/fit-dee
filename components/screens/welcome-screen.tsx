@@ -48,13 +48,13 @@ export function WelcomeScreen({
             justifyContent: 'center',
             color: '#0E0F12',
             fontWeight: 900,
-            fontFamily: 'Inter',
+            fontFamily: 'var(--font-inter)',
             fontSize: 16,
           }}
         >
           โ
         </div>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 16, letterSpacing: 0.3 }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, color: T.text, fontSize: 16, letterSpacing: 0.3 }}>
           Coachly
         </span>
       </div>
@@ -85,7 +85,7 @@ export function WelcomeScreen({
               borderRadius: 999,
               background: T.lime,
               color: '#0E0F12',
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 800,
               fontSize: 11,
               boxShadow: '0 8px 20px rgba(198,255,77,0.3)',
@@ -97,7 +97,7 @@ export function WelcomeScreen({
 
         <div
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 800,
             color: T.textMute,
             fontSize: 13,
@@ -110,7 +110,7 @@ export function WelcomeScreen({
         </div>
         <h1
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 900,
             fontSize: 38,
             lineHeight: 1.05,
@@ -127,7 +127,7 @@ export function WelcomeScreen({
         </h1>
         <p
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 14.5,
             lineHeight: 1.55,
             color: T.textDim,
@@ -164,7 +164,7 @@ export function WelcomeScreen({
               color: '#fff',
               border: 'none',
               cursor: 'pointer',
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 800,
               fontSize: 14,
               display: 'flex',
@@ -173,7 +173,7 @@ export function WelcomeScreen({
               gap: 6,
             }}
           >
-            <span style={{ fontFamily: 'Inter', fontWeight: 900, fontSize: 16 }}>L</span>
+            <span style={{ fontFamily: 'var(--font-inter)', fontWeight: 900, fontSize: 16 }}>L</span>
             LINE
           </button>
           <button
@@ -187,7 +187,7 @@ export function WelcomeScreen({
               color: T.text,
               border: `1px solid ${T.border}`,
               cursor: 'pointer',
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 700,
               fontSize: 14,
               display: 'flex',
@@ -221,7 +221,7 @@ export function WelcomeScreen({
           style={{
             textAlign: 'center',
             marginTop: 4,
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 11,
             color: T.textMute,
           }}

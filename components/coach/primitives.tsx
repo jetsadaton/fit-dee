@@ -87,7 +87,7 @@ export function StreakFlame({ count = 12, size = 'sm' as 'sm' | 'lg' }) {
       </svg>
       <span
         style={{
-          fontFamily: 'Inter, system-ui',
+          fontFamily: 'var(--font-inter), system-ui',
           fontWeight: 800,
           fontSize: big ? 16 : 13,
           color: T.coral,
@@ -163,7 +163,7 @@ export function KcalRing({
           justifyContent: 'center',
         }}
       >
-        <div style={{ fontSize: size * 0.22, fontWeight: 800, color: T.text, lineHeight: 1, fontFamily: 'Inter' }}>
+        <div style={{ fontSize: size * 0.22, fontWeight: 800, color: T.text, lineHeight: 1, fontFamily: 'var(--font-inter)' }}>
           {(goal - eaten).toLocaleString()}
         </div>
         <div
@@ -171,7 +171,7 @@ export function KcalRing({
             fontSize: size * 0.08,
             color: T.textDim,
             marginTop: 2,
-            fontFamily: 'Inter',
+            fontFamily: 'var(--font-inter)',
             fontWeight: 600,
             letterSpacing: 1,
             textTransform: 'uppercase',
@@ -209,12 +209,12 @@ export function MacroBar({
               color: T.textDim,
               letterSpacing: 0.4,
               textTransform: 'uppercase',
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
             }}
           >
             {label}
           </span>
-          <span style={{ fontSize: compact ? 11 : 13, fontWeight: 700, color: T.text, fontFamily: 'Inter' }}>
+          <span style={{ fontSize: compact ? 11 : 13, fontWeight: 700, color: T.text, fontFamily: 'var(--font-inter)' }}>
             {eaten}
             <span style={{ color: T.textMute, fontWeight: 500 }}>/{goal}g</span>
           </span>
@@ -255,7 +255,7 @@ export function RangeBadge({ low, high, unit = 'kcal' }: { low: number; high: nu
         borderRadius: 999,
         background: T.bg4,
         border: `1px solid ${T.border}`,
-        fontFamily: 'Inter',
+        fontFamily: 'var(--font-inter)',
         fontSize: 12,
         fontWeight: 700,
         color: T.text,
@@ -360,7 +360,7 @@ export function BottomTabBar({ active = 'chat', onTab }: { active?: TabId; onTab
             <Icon kind={t.icon} on={on} />
             <span
               style={{
-                fontFamily: 'Inter, system-ui',
+                fontFamily: 'var(--font-inter), system-ui',
                 fontSize: 10.5,
                 fontWeight: on ? 800 : 600,
                 color: on ? T.coral : T.textMute,
@@ -403,7 +403,7 @@ export function PrimaryBtn({ children, onClick, full = false, size = 'md', icon,
         color: '#0E0F12',
         border: 'none',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily: 'Inter, system-ui',
+        fontFamily: 'var(--font-inter), system-ui',
         fontWeight: 800,
         fontSize: size === 'lg' ? 17 : 15,
         letterSpacing: 0.2,
@@ -438,7 +438,7 @@ export function GhostBtn({ children, onClick, full = false, size = 'md', icon, d
         color: T.text,
         border: `1px solid ${T.border}`,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily: 'Inter, system-ui',
+        fontFamily: 'var(--font-inter), system-ui',
         fontWeight: 700,
         fontSize: size === 'lg' ? 16 : 14,
         width: full ? '100%' : 'auto',
@@ -484,7 +484,7 @@ export function Chip({
         background: selected ? T.coralBg : T.bg3,
         color: selected ? T.coral : T.text,
         border: `1px solid ${selected ? T.coral + '66' : T.border}`,
-        fontFamily: 'Inter, system-ui',
+        fontFamily: 'var(--font-inter), system-ui',
         fontWeight: 700,
         fontSize: large ? 14 : 13,
         cursor: 'pointer',
@@ -523,7 +523,7 @@ export const stepperBtnStyle: CSSProperties = {
   background: T.bg3,
   border: `1px solid ${T.border}`,
   color: T.text,
-  fontFamily: 'Inter',
+  fontFamily: 'var(--font-inter)',
   fontWeight: 800,
   fontSize: 20,
   cursor: 'pointer',

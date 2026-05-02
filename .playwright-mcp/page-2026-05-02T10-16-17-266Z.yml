@@ -1,0 +1,129 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: สวัสดีตอนเช้า
+      - heading "ต้น 👋" [level=1] [ref=e6]
+    - generic [ref=e7]:
+      - generic [ref=e8]: 🔥
+      - generic [ref=e9]: "0"
+      - generic [ref=e10]: วัน
+  - generic [ref=e12]:
+    - button "วันนี้" [ref=e13] [cursor=pointer]
+    - button "สัปดาห์" [ref=e14] [cursor=pointer]
+    - button "เดือน" [ref=e15] [cursor=pointer]
+  - generic [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - generic [ref=e26]:
+          - generic [ref=e27]: เหลือกินได้
+          - generic [ref=e28]: "0"
+          - generic [ref=e29]: kcal · จากเป้า 1648
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e34]: กิน
+          - generic [ref=e35]: 1705kcal
+        - generic [ref=e37]:
+          - generic [ref=e40]: เผา
+          - generic [ref=e41]: 0kcal
+        - generic [ref=e43]:
+          - generic [ref=e46]: เหลือ
+          - generic [ref=e47]: "-57kcal"
+    - generic [ref=e48]:
+      - generic [ref=e49]: แมครอวันนี้
+      - generic [ref=e50]:
+        - generic [ref=e52]:
+          - generic [ref=e53]: โปรตีน
+          - generic [ref=e54]:
+            - text: "49"
+            - generic [ref=e55]: /158g
+        - generic [ref=e59]:
+          - generic [ref=e60]: คาร์บ
+          - generic [ref=e61]:
+            - text: "155"
+            - generic [ref=e62]: /112g
+        - generic [ref=e66]:
+          - generic [ref=e67]: ไขมัน
+          - generic [ref=e68]:
+            - text: "82"
+            - generic [ref=e69]: /63g
+    - generic [ref=e72]:
+      - generic [ref=e74]:
+        - img [ref=e76]
+        - generic [ref=e78]: โค้ชดีวิเคราะห์ให้
+        - generic [ref=e79]: วันนี้
+      - list [ref=e80]:
+        - listitem [ref=e81]:
+          - generic [ref=e82]: "!"
+          - generic [ref=e83]: นายขาดโปรตีน 30g — ลองเพิ่มไก่ต้มหรือไข่ขาวอีก 1 มื้อ
+        - listitem [ref=e84]:
+          - generic [ref=e85]: "!"
+          - generic [ref=e86]: ดื่มน้ำน้อยไป 2 แก้ว เหลือเวลาอีกแค่ 4 ชม. ก่อนนอน
+        - listitem [ref=e87]:
+          - generic [ref=e88]: ✓
+          - generic [ref=e89]: แคลอรี่อยู่ในเป้า · ออกกำลังเสร็จเรียบร้อย ✓
+      - button "ถามโค้ชต่อ" [ref=e90] [cursor=pointer]:
+        - text: ถามโค้ชต่อ
+        - img [ref=e91]
+    - generic [ref=e93]:
+      - generic [ref=e94]:
+        - img [ref=e96]
+        - generic [ref=e98]:
+          - generic [ref=e99]: วันนี้ · ออกกำลังกาย
+          - generic [ref=e100]: ยังไม่มีแผน — บอกโค้ชเลย
+          - generic [ref=e101]: ยังไม่ได้เริ่ม
+        - button "เริ่ม" [ref=e102] [cursor=pointer]:
+          - text: เริ่ม
+          - img [ref=e103]
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - generic [ref=e107]:
+            - generic [ref=e108]: 💧
+            - generic [ref=e109]: น้ำดื่ม
+          - generic [ref=e110]:
+            - text: "5"
+            - generic [ref=e111]: /8
+            - text: แก้ว
+        - generic [ref=e112]:
+          - button "แก้วที่ 1" [ref=e113] [cursor=pointer]
+          - button "แก้วที่ 2" [ref=e114] [cursor=pointer]
+          - button "แก้วที่ 3" [ref=e115] [cursor=pointer]
+          - button "แก้วที่ 4" [ref=e116] [cursor=pointer]
+          - button "แก้วที่ 5" [ref=e117] [cursor=pointer]
+          - button "แก้วที่ 6" [ref=e118] [cursor=pointer]
+          - button "แก้วที่ 7" [ref=e119] [cursor=pointer]
+          - button "แก้วที่ 8" [ref=e120] [cursor=pointer]
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - generic [ref=e123]: ⚡
+          - generic [ref=e124]: พลังงานวันนี้
+          - generic [ref=e125]: ดี
+        - generic [ref=e126]:
+          - button "หมดแรง" [ref=e127] [cursor=pointer]: 😩
+          - button "พอไหว" [ref=e128] [cursor=pointer]: 😐
+          - button "ดี" [ref=e129] [cursor=pointer]: 🙂
+          - button "สดชื่น" [ref=e130] [cursor=pointer]: 😊
+          - button "แรงเต็ม" [ref=e131] [cursor=pointer]: 🔥
+      - generic [ref=e133]:
+        - generic [ref=e134]:
+          - generic [ref=e135]:
+            - generic [ref=e136]: ⚖️
+            - generic [ref=e137]: น้ำหนัก
+          - generic [ref=e138]:
+            - generic [ref=e139]: —
+            - generic [ref=e140]: kg
+            - generic [ref=e141]: ยังไม่ได้บันทึก
+        - generic [ref=e142]: แจ้งโค้ชได้เลย
+  - generic [ref=e144]:
+    - button "แชท" [ref=e145] [cursor=pointer]:
+      - img [ref=e146]
+      - generic [ref=e148]: แชท
+    - button "วันนี้" [ref=e149] [cursor=pointer]:
+      - img [ref=e150]
+      - generic [ref=e154]: วันนี้
+    - button "แผน" [ref=e155] [cursor=pointer]:
+      - img [ref=e156]
+      - generic [ref=e159]: แผน
+    - button "ฉัน" [ref=e160] [cursor=pointer]:
+      - img [ref=e161]
+      - generic [ref=e164]: ฉัน

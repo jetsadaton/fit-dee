@@ -61,7 +61,7 @@ function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
         borderRadius: 14,
         padding: '12px 14px',
         fontSize: 13,
-        fontFamily: 'Inter,"Noto Sans Thai"',
+        fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
       }}
     >
       {/* Header — makes it clear this is a proposal, not a saved record */}
@@ -149,7 +149,7 @@ function MacroPill({ label, value, unit, color }: { label: string; value: number
 
 function WaterLogCard({ payload }: { payload: WaterLogDonePayload }) {
   return (
-    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', display: 'flex', alignItems: 'center', gap: 10 }}>
       <span style={{ fontSize: 22 }}>💧</span>
       <div>
         <div style={{ fontWeight: 700, color: T.text }}>บันทึกน้ำแล้ว</div>
@@ -161,7 +161,7 @@ function WaterLogCard({ payload }: { payload: WaterLogDonePayload }) {
 
 function WeighInCard({ payload }: { payload: WeighInDonePayload }) {
   return (
-    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', display: 'flex', alignItems: 'center', gap: 10 }}>
       <span style={{ fontSize: 22 }}>⚖️</span>
       <div>
         <div style={{ fontWeight: 700, color: T.text }}>บันทึกน้ำหนักแล้ว</div>
@@ -175,7 +175,7 @@ function WeighInCard({ payload }: { payload: WeighInDonePayload }) {
 
 function MoodLogCard({ payload }: { payload: MoodLogDonePayload }) {
   return (
-    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', display: 'flex', alignItems: 'center', gap: 10 }}>
       <span style={{ fontSize: 22 }}>🎯</span>
       <div>
         <div style={{ fontWeight: 700, color: T.text }}>บันทึกพลังงานแล้ว</div>
@@ -190,7 +190,7 @@ function MoodLogCard({ payload }: { payload: MoodLogDonePayload }) {
 
 function ExerciseLogCard({ payload }: { payload: ExerciseLogDonePayload }) {
   return (
-    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: '10px 14px', fontSize: 13, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', display: 'flex', alignItems: 'center', gap: 10 }}>
       <span style={{ fontSize: 22 }}>💪</span>
       <div>
         <div style={{ fontWeight: 700, color: T.text }}>บันทึกท่าออกกำลังแล้ว</div>
@@ -244,7 +244,7 @@ function UpdateProfileConfirmCard({ payload }: { payload: UpdateProfileConfirmPa
         borderRadius: 14,
         padding: '12px 14px',
         fontSize: 13,
-        fontFamily: 'Inter,"Noto Sans Thai"',
+        fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
       }}
     >
       <div style={{ fontSize: 11, color: T.textMute, fontWeight: 600, marginBottom: 8, letterSpacing: 0.2 }}>
@@ -426,12 +426,12 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
         <CoachAvatar size={38} online thinking={streaming} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, fontSize: 15, color: T.text }}>
+            <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, fontSize: 15, color: T.text }}>
               โค้ชดี
             </span>
             <div style={{ width: 6, height: 6, borderRadius: 999, background: T.lime }} />
           </div>
-          <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textDim, fontWeight: 600 }}>
+          <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textDim, fontWeight: 600 }}>
             {statusText}
           </div>
         </div>
@@ -489,7 +489,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
                       lineHeight: 1.5,
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
-                      fontFamily: 'Inter,"Noto Sans Thai"',
+                      fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                     }}
                   >
                     {p.text}
@@ -581,7 +581,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
               background: T.bg3,
               border: `1px solid ${T.border}`,
               color: busy ? T.textMute : T.text,
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 700,
               fontSize: 12,
               cursor: busy ? 'not-allowed' : 'pointer',
@@ -668,7 +668,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
           style={{
             flex: 1, height: 40, padding: '0 14px', borderRadius: 999,
             border: `1px solid ${T.border}`, background: T.bg3,
-            color: T.text, fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 14,
+            color: T.text, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 14,
             outline: 'none',
           }}
         />

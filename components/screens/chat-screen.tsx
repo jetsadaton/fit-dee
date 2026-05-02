@@ -64,7 +64,7 @@ export function ChatScreen({ onTab, activeTab = 'chat' as TabId }: { onTab?: (t:
           <div style={{ flex: 1, height: 1, background: T.border }} />
           <span
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 700,
               color: T.textMute,
@@ -156,12 +156,12 @@ export function ChatScreen({ onTab, activeTab = 'chat' as TabId }: { onTab?: (t:
         <CoachAvatar size={38} online />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, fontSize: 15, color: T.text }}>
+            <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, fontSize: 15, color: T.text }}>
               โค้ชดี
             </span>
             <div style={{ width: 6, height: 6, borderRadius: 999, background: T.lime }} />
           </div>
-          <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textDim, fontWeight: 600 }}>
+          <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textDim, fontWeight: 600 }}>
             ออนไลน์ · ตอบทันที
           </div>
         </div>
@@ -193,7 +193,7 @@ export function ChatScreen({ onTab, activeTab = 'chat' as TabId }: { onTab?: (t:
               background: T.bg3,
               border: `1px solid ${T.border}`,
               color: T.text,
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 700,
               fontSize: 12,
               cursor: 'pointer',
@@ -248,7 +248,7 @@ export function ChatScreen({ onTab, activeTab = 'chat' as TabId }: { onTab?: (t:
             border: `1px solid ${T.border}`,
             display: 'flex',
             alignItems: 'center',
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 14,
             color: T.textMute,
           }}

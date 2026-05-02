@@ -32,7 +32,7 @@ export function SyncQueueMonitor() {
       <span style={{ fontSize: 10 }}>🔄</span>
       <span
         style={{
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontSize: 11,
           fontWeight: 700,
           color: T.textDim,

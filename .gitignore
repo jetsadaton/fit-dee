@@ -40,3 +40,4 @@ scripts/extracted/
 
 # vercel
 .vercel
+scripts/.venv/

@@ -43,7 +43,7 @@ export function PlanPreview({
           <div style={{ width: 22 }} />
           <span
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 700,
               color: T.textDim,
@@ -63,7 +63,7 @@ export function PlanPreview({
           <CoachAvatar size={56} />
           <h2
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 900,
               fontSize: 22,
               color: T.text,
@@ -75,7 +75,7 @@ export function PlanPreview({
             <br />
             นี่คือแผนของเรา
           </h2>
-          <p style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, color: T.textDim, margin: 0 }}>
+          <p style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, color: T.textDim, margin: 0 }}>
             ทุก 14 วันเราปรับให้ตามผลจริง
           </p>
         </div>
@@ -92,7 +92,7 @@ export function PlanPreview({
         >
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 800,
               color: T.textDim,
@@ -105,7 +105,7 @@ export function PlanPreview({
           </div>
           <div
             style={{
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
               fontWeight: 900,
               fontSize: 56,
               color: T.coral,
@@ -117,7 +117,7 @@ export function PlanPreview({
           </div>
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 13,
               color: T.textDim,
               fontWeight: 700,
@@ -175,7 +175,7 @@ export function PlanPreview({
               <path d="M12 8v4M12 16v.01" strokeLinecap="round" />
             </svg>
           </div>
-          <span style={{ flex: 1, fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 700, fontSize: 13.5 }}>
+          <span style={{ flex: 1, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 700, fontSize: 13.5 }}>
             ทำไมต้อง {kcalTarget.toLocaleString()} kcal?
           </span>
           <svg
@@ -192,7 +192,7 @@ export function PlanPreview({
         </button>
         {exp && (
           <div style={{ background: T.bg2, borderRadius: 14, padding: 14, marginBottom: 12, border: `1px solid ${T.border}` }}>
-            <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12.5, color: T.textDim, lineHeight: 1.6 }}>
+            <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 12.5, color: T.textDim, lineHeight: 1.6 }}>
               <p style={{ margin: '0 0 8px' }}>
                 <b style={{ color: T.text }}>TDEE</b> (พลังงานเผาผลาญต่อวัน) ของนาย ≈ {tdee.toLocaleString()} kcal
               </p>
@@ -234,10 +234,10 @@ export function PlanPreview({
                 {it.i}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 13.5 }}>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, color: T.text, fontSize: 13.5 }}>
                   {it.t}
                 </div>
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', color: T.textDim, fontSize: 11.5, marginTop: 2 }}>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', color: T.textDim, fontSize: 11.5, marginTop: 2 }}>
                   {it.s}
                 </div>
               </div>

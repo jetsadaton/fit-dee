@@ -71,7 +71,7 @@ function TripleRing({
       >
         <div
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 10,
             fontWeight: 800,
             letterSpacing: 1.4,
@@ -81,10 +81,10 @@ function TripleRing({
         >
           เหลือกินได้
         </div>
-        <div style={{ fontFamily: 'Inter', fontSize: 44, fontWeight: 900, color: T.text, lineHeight: 1, marginTop: 2 }}>
+        <div style={{ fontFamily: 'var(--font-inter)', fontSize: 44, fontWeight: 900, color: T.text, lineHeight: 1, marginTop: 2 }}>
           {left}
         </div>
-        <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, fontWeight: 700, color: T.textDim, marginTop: 4 }}>
+        <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, fontWeight: 700, color: T.textDim, marginTop: 4 }}>
           kcal · จากเป้า {goal}
         </div>
       </div>
@@ -99,7 +99,7 @@ function RingLegend({ eaten = 1450, burned = 320, goal = 1820 }: { eaten?: numbe
         <span style={{ width: 8, height: 8, borderRadius: 999, background: color }} />
         <span
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 10,
             fontWeight: 800,
             letterSpacing: 0.6,
@@ -110,7 +110,7 @@ function RingLegend({ eaten = 1450, burned = 320, goal = 1820 }: { eaten?: numbe
           {label}
         </span>
       </div>
-      <div style={{ fontFamily: 'Inter', fontSize: 18, fontWeight: 800, color: T.text }}>
+      <div style={{ fontFamily: 'var(--font-inter)', fontSize: 18, fontWeight: 800, color: T.text }}>
         {value}
         <span style={{ fontSize: 10, fontWeight: 600, color: T.textMute, marginLeft: 2 }}>{unit}</span>
       </div>
@@ -174,13 +174,13 @@ function AIInsightCard({
             <path d="M12 2 L13.5 8 L20 9.5 L13.5 11 L12 17 L10.5 11 L4 9.5 L10.5 8 Z" />
           </svg>
         </div>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 13 }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, color: T.text, fontSize: 13 }}>
           โค้ชดีวิเคราะห์ให้
         </span>
         <span
           style={{
             marginLeft: 'auto',
-            fontFamily: 'Inter',
+            fontFamily: 'var(--font-inter)',
             fontSize: 10,
             fontWeight: 700,
             color: T.textMute,
@@ -202,7 +202,7 @@ function AIInsightCard({
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div style={{ color: T.textMute, fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', textAlign: 'center', padding: '8px 0', position: 'relative' }}>
+        <div style={{ color: T.textMute, fontSize: 13, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', textAlign: 'center', padding: '8px 0', position: 'relative' }}>
           ยังไม่มีข้อมูลพอวิเคราะห์ · บันทึกอาหารและออกกำลังกายเพิ่มเติม
         </div>
       ) : (
@@ -220,7 +220,7 @@ function AIInsightCard({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: 'Inter',
+                fontFamily: 'var(--font-inter)',
                 fontSize: 11,
                 fontWeight: 800,
                 color: it.tone === 'warn' ? T.coral : it.tone === 'good' ? T.lime : T.textDim,
@@ -230,7 +230,7 @@ function AIInsightCard({
             </div>
             <div
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontSize: 13,
                 color: T.text,
                 lineHeight: 1.5,
@@ -252,7 +252,7 @@ function AIInsightCard({
           border: `1px solid ${T.border}`,
           borderRadius: 10,
           color: T.text,
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontWeight: 700,
           fontSize: 12,
           cursor: 'pointer',
@@ -318,7 +318,7 @@ function WaterCard({
           <span style={{ fontSize: 14 }}>💧</span>
           <span
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: 0.6,
@@ -329,7 +329,7 @@ function WaterCard({
             น้ำดื่ม
           </span>
         </div>
-        <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 800, color: T.text }}>
+        <span style={{ fontFamily: 'var(--font-inter)', fontSize: 13, fontWeight: 800, color: T.text }}>
           {drunk}
           <span style={{ color: T.textMute, fontWeight: 600 }}>/{goal}</span>{' '}
           <span style={{ fontSize: 10, color: T.textMute, fontWeight: 600 }}>แก้ว</span>
@@ -390,7 +390,7 @@ function MoodCard({
         <span style={{ fontSize: 14 }}>⚡</span>
         <span
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 10,
             fontWeight: 800,
             letterSpacing: 0.6,
@@ -403,7 +403,7 @@ function MoodCard({
         <span
           style={{
             marginLeft: 'auto',
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 12,
             fontWeight: 700,
             color: T.text,
@@ -487,7 +487,7 @@ function WorkoutCTA({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 10,
             fontWeight: 800,
             letterSpacing: 0.8,
@@ -497,10 +497,10 @@ function WorkoutCTA({
         >
           วันนี้ · {label}
         </div>
-        <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 15, marginTop: 2 }}>
+        <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, color: T.text, fontSize: 15, marginTop: 2 }}>
           {detail}
         </div>
-        <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textDim, marginTop: 2 }}>
+        <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textDim, marginTop: 2 }}>
           ยังไม่ได้เริ่ม
         </div>
       </div>
@@ -515,7 +515,7 @@ function WorkoutCTA({
             background: T.coral,
             border: 'none',
             color: '#0E0F12',
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 800,
             fontSize: 13,
             cursor: 'pointer',
@@ -566,7 +566,7 @@ function WeightTrend({
             <span style={{ fontSize: 14 }}>⚖️</span>
             <span
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontSize: 10,
                 fontWeight: 800,
                 letterSpacing: 0.6,
@@ -578,18 +578,18 @@ function WeightTrend({
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-            <span style={{ fontFamily: 'Inter', fontSize: 26, fontWeight: 900, color: hasWeight ? T.text : T.textMute, lineHeight: 1 }}>
+            <span style={{ fontFamily: 'var(--font-inter)', fontSize: 26, fontWeight: 900, color: hasWeight ? T.text : T.textMute, lineHeight: 1 }}>
               {hasWeight ? latestWeightKg : '—'}
             </span>
-            <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textMute, fontWeight: 600 }}>kg</span>
+            <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textMute, fontWeight: 600 }}>kg</span>
             {!hasWeight && (
-              <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textMute, fontWeight: 600 }}>
+              <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textMute, fontWeight: 600 }}>
                 ยังไม่ได้บันทึก
               </span>
             )}
           </div>
         </div>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 10, fontWeight: 700, color: T.textMute }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 10, fontWeight: 700, color: T.textMute }}>
           แจ้งโค้ชได้เลย
         </span>
       </div>
@@ -633,8 +633,8 @@ function GoalProgress({
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, fontWeight: 700, color: T.text }}>{label}</span>
-        <span style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 700, color: T.textDim }}>{pct.toFixed(0)}%</span>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, fontWeight: 700, color: T.text }}>{label}</span>
+        <span style={{ fontFamily: 'var(--font-inter)', fontSize: 11, fontWeight: 700, color: T.textDim }}>{pct.toFixed(0)}%</span>
       </div>
       <div style={{ position: 'relative', height: 10, borderRadius: 999, background: T.bg4, overflow: 'hidden', marginBottom: 6 }}>
         <div
@@ -653,7 +653,7 @@ function GoalProgress({
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          fontFamily: 'Inter',
+          fontFamily: 'var(--font-inter)',
           fontSize: 10,
           fontWeight: 700,
           color: T.textMute,
@@ -680,10 +680,10 @@ function MonthHeatmap({ days }: { days: { dateIct: string; level: 0 | 1 | 2 | 3 
   return (
     <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 16, padding: 14, marginBottom: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, fontWeight: 800, color: T.text }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, fontWeight: 800, color: T.text }}>
           กิจกรรมเดือนนี้
         </span>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, fontWeight: 700, color: T.textDim }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, fontWeight: 700, color: T.textDim }}>
           {activeDays}/30 วัน
         </span>
       </div>
@@ -696,11 +696,11 @@ function MonthHeatmap({ days }: { days: { dateIct: string; level: 0 | 1 | 2 | 3 
         ))}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 10, justifyContent: 'flex-end' }}>
-        <span style={{ fontFamily: 'Inter', fontSize: 9, fontWeight: 700, color: T.textMute }}>น้อย</span>
+        <span style={{ fontFamily: 'var(--font-inter)', fontSize: 9, fontWeight: 700, color: T.textMute }}>น้อย</span>
         {[0, 1, 2, 3].map((v) => (
           <div key={v} style={{ width: 10, height: 10, borderRadius: 3, background: colorFor(v) }} />
         ))}
-        <span style={{ fontFamily: 'Inter', fontSize: 9, fontWeight: 700, color: T.textMute }}>มาก</span>
+        <span style={{ fontFamily: 'var(--font-inter)', fontSize: 9, fontWeight: 700, color: T.textMute }}>มาก</span>
       </div>
     </div>
   );
@@ -725,10 +725,10 @@ function WeekBars({ days = [], kcalGoal = 0 }: { days?: { dateIct: string; kcal:
   return (
     <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 16, padding: 14, marginBottom: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, fontWeight: 800, color: T.text }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, fontWeight: 800, color: T.text }}>
           กินเทียบเป้า
         </span>
-        <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, fontWeight: 700, color: T.textDim }}>
+        <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, fontWeight: 700, color: T.textDim }}>
           {avgKcal > 0 ? `เฉลี่ย ${avgKcal.toLocaleString()} kcal/วัน` : 'ยังไม่มีข้อมูล'}
         </span>
       </div>
@@ -773,7 +773,7 @@ function WeekBars({ days = [], kcalGoal = 0 }: { days?: { dateIct: string; kcal:
                   minHeight: day.kcal ? 4 : 0,
                 }}
               />
-              <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 10, fontWeight: 700, color: T.textDim }}>
+              <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 10, fontWeight: 700, color: T.textDim }}>
                 {day.label}
               </span>
             </div>
@@ -791,7 +791,7 @@ function BigStatsGrid({ stats }: { stats: { label: string; value: string; sub?: 
         <div key={i} style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 14, padding: 14 }}>
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: 0.6,
@@ -804,7 +804,7 @@ function BigStatsGrid({ stats }: { stats: { label: string; value: string; sub?: 
           </div>
           <div
             style={{
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
               fontSize: 24,
               fontWeight: 900,
               color: s.color || T.text,
@@ -816,7 +816,7 @@ function BigStatsGrid({ stats }: { stats: { label: string; value: string; sub?: 
           {s.sub && (
             <div
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontSize: 11,
                 fontWeight: 600,
                 color: T.textMute,
@@ -896,7 +896,7 @@ function FoodLogList({
     background: T.bg,
     color: T.text,
     fontSize: 13,
-    fontFamily: 'Inter,"Noto Sans Thai"',
+    fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
     outline: 'none',
     textAlign: 'center',
   };
@@ -913,7 +913,7 @@ function FoodLogList({
     >
       <div
         style={{
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontSize: 10,
           fontWeight: 800,
           letterSpacing: 0.6,
@@ -926,14 +926,14 @@ function FoodLogList({
       </div>
 
       {grouped.length === 0 && (
-        <div style={{ color: T.textMute, fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', textAlign: 'center', padding: '8px 0' }}>
+        <div style={{ color: T.textMute, fontSize: 13, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', textAlign: 'center', padding: '8px 0' }}>
           ยังไม่มีรายการ · บอกโค้ชได้เลยว่ากินอะไร
         </div>
       )}
 
       {grouped.map(({ meal, rows }, gi) => (
         <div key={meal} style={{ marginBottom: gi < grouped.length - 1 ? 12 : 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: T.textDim, marginBottom: 6, fontFamily: 'Inter,"Noto Sans Thai"' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.textDim, marginBottom: 6, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)' }}>
             {MEAL_LABEL_TH[meal]}
           </div>
           {rows.map((item) => {
@@ -955,7 +955,7 @@ function FoodLogList({
                     gap: 8,
                   }}
                 >
-                  <span style={{ fontSize: 12, color: T.textDim, fontFamily: 'Inter,"Noto Sans Thai"' }}>
+                  <span style={{ fontSize: 12, color: T.textDim, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)' }}>
                     ลบ <strong style={{ color: T.text }}>{item.nameTh}</strong>?
                   </span>
                   <div style={{ display: 'flex', gap: 6 }}>
@@ -987,24 +987,24 @@ function FoodLogList({
                     marginBottom: 6,
                   }}
                 >
-                  <div style={{ fontSize: 11, color: T.textDim, fontFamily: 'Inter,"Noto Sans Thai"', marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: T.textDim, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', marginBottom: 8 }}>
                     ✎ แก้ไข · {item.nameTh}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 6, marginBottom: 8 }}>
                     <div>
-                      <div style={{ fontSize: 10, color: T.textMute, marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>kcal</div>
+                      <div style={{ fontSize: 10, color: T.textMute, marginBottom: 3, fontFamily: 'var(--font-inter)', textAlign: 'center' }}>kcal</div>
                       <input style={inputStyle} type="number" value={editValues.kcal} onChange={(e) => setEditValues((v) => ({ ...v, kcal: e.target.value }))} min={0} max={5000} />
                     </div>
                     <div>
-                      <div style={{ fontSize: 10, color: '#6EE7B7', marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>P(g)</div>
+                      <div style={{ fontSize: 10, color: '#6EE7B7', marginBottom: 3, fontFamily: 'var(--font-inter)', textAlign: 'center' }}>P(g)</div>
                       <input style={inputStyle} type="number" value={editValues.proteinG} onChange={(e) => setEditValues((v) => ({ ...v, proteinG: e.target.value }))} min={0} max={500} step={0.1} />
                     </div>
                     <div>
-                      <div style={{ fontSize: 10, color: '#93C5FD', marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>C(g)</div>
+                      <div style={{ fontSize: 10, color: '#93C5FD', marginBottom: 3, fontFamily: 'var(--font-inter)', textAlign: 'center' }}>C(g)</div>
                       <input style={inputStyle} type="number" value={editValues.carbG} onChange={(e) => setEditValues((v) => ({ ...v, carbG: e.target.value }))} min={0} max={500} step={0.1} />
                     </div>
                     <div>
-                      <div style={{ fontSize: 10, color: '#FCA5A5', marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>F(g)</div>
+                      <div style={{ fontSize: 10, color: '#FCA5A5', marginBottom: 3, fontFamily: 'var(--font-inter)', textAlign: 'center' }}>F(g)</div>
                       <input style={inputStyle} type="number" value={editValues.fatG} onChange={(e) => setEditValues((v) => ({ ...v, fatG: e.target.value }))} min={0} max={500} step={0.1} />
                     </div>
                   </div>
@@ -1048,16 +1048,16 @@ function FoodLogList({
                   />
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {item.nameTh}
                   </div>
-                  <div style={{ fontSize: 11, color: T.textMute, fontFamily: 'Inter', marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: T.textMute, fontFamily: 'var(--font-inter)', marginTop: 2 }}>
                     P{item.proteinG}·C{item.carbG}·F{item.fatG}g
                     {item.portionG ? ` · ${item.portionG}g` : ''}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 800, color: T.coral }}>
+                  <div style={{ fontFamily: 'var(--font-inter)', fontSize: 13, fontWeight: 800, color: T.coral }}>
                     {item.kcalLow && item.kcalHigh && item.kcalLow !== item.kcalHigh
                       ? `${item.kcalLow}–${item.kcalHigh}`
                       : item.kcal}
@@ -1256,7 +1256,7 @@ export function TodayScreen({
         <div>
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 700,
               color: T.textDim,
@@ -1266,7 +1266,7 @@ export function TodayScreen({
           >
             สวัสดีตอนเช้า
           </div>
-          <h1 style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 900, fontSize: 22, color: T.text, margin: '2px 0 0' }}>
+          <h1 style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 900, fontSize: 22, color: T.text, margin: '2px 0 0' }}>
             {displayName} 👋
           </h1>
         </div>
@@ -1282,8 +1282,8 @@ export function TodayScreen({
           }}
         >
           <span style={{ fontSize: 13 }}>🔥</span>
-          <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 900, color: T.lime }}>{streak}</span>
-          <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 10, fontWeight: 700, color: T.lime, opacity: 0.85 }}>
+          <span style={{ fontFamily: 'var(--font-inter)', fontSize: 13, fontWeight: 900, color: T.lime }}>{streak}</span>
+          <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 10, fontWeight: 700, color: T.lime, opacity: 0.85 }}>
             วัน
           </span>
         </div>
@@ -1317,7 +1317,7 @@ export function TodayScreen({
                 background: range === t.id ? T.coral : 'transparent',
                 border: 'none',
                 color: range === t.id ? '#0E0F12' : T.textDim,
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontWeight: 800,
                 fontSize: 13,
                 cursor: 'pointer',
@@ -1347,7 +1347,7 @@ export function TodayScreen({
               <button
                 type="button"
                 onClick={() => calendarRef.current?.showPicker?.() ?? calendarRef.current?.click()}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, border: `1px solid ${T.border}`, background: isToday ? T.coralBg : T.bg3, color: isToday ? T.coral : T.text, fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, border: `1px solid ${T.border}`, background: isToday ? T.coralBg : T.bg3, color: isToday ? T.coral : T.text, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
               >
                 {fmtDateThai(curDate, isToday)}
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -1401,7 +1401,7 @@ export function TodayScreen({
             >
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 10,
                   fontWeight: 800,
                   letterSpacing: 0.6,
@@ -1451,7 +1451,7 @@ export function TodayScreen({
             >
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 11,
                   fontWeight: 800,
                   letterSpacing: 1.4,
@@ -1464,17 +1464,17 @@ export function TodayScreen({
               {week7WeightDeltaKg != null ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 8, marginTop: 6 }}>
-                    <span style={{ fontFamily: 'Inter', fontSize: 44, fontWeight: 900, color: T.text, lineHeight: 1 }}>
+                    <span style={{ fontFamily: 'var(--font-inter)', fontSize: 44, fontWeight: 900, color: T.text, lineHeight: 1 }}>
                       {week7WeightDeltaKg > 0 ? '↑' : '↓'} {Math.abs(week7WeightDeltaKg)}
                     </span>
-                    <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 14, color: T.textDim, fontWeight: 700 }}>kg</span>
+                    <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 14, color: T.textDim, fontWeight: 700 }}>kg</span>
                   </div>
-                  <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12, color: T.textDim, marginTop: 4, fontWeight: 600 }}>
+                  <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 12, color: T.textDim, marginTop: 4, fontWeight: 600 }}>
                     น้ำหนักเปลี่ยนจาก 7 วันที่แล้ว
                   </div>
                 </>
               ) : (
-                <div style={{ marginTop: 12, fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 14, color: T.textMute, fontWeight: 600 }}>
+                <div style={{ marginTop: 12, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 14, color: T.textMute, fontWeight: 600 }}>
                   ยังไม่มีข้อมูลน้ำหนัก — แจ้งโค้ชได้เลย
                 </div>
               )}
@@ -1534,7 +1534,7 @@ export function TodayScreen({
             >
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 11,
                   fontWeight: 800,
                   letterSpacing: 1.4,
@@ -1554,7 +1554,7 @@ export function TodayScreen({
                   invert={targetWeightKg < weightKgInitial}
                 />
               ) : (
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, color: T.textMute, marginBottom: 12 }}>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, color: T.textMute, marginBottom: 12 }}>
                   ยังไม่มีข้อมูลน้ำหนัก
                 </div>
               )}
@@ -1607,7 +1607,7 @@ export function TodayScreen({
             <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 16, padding: 14, marginBottom: 14 }}>
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 13,
                   fontWeight: 800,
                   color: T.text,
@@ -1633,7 +1633,7 @@ export function TodayScreen({
                   >
                     <div
                       style={{
-                        fontFamily: 'Inter,"Noto Sans Thai"',
+                        fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                         fontSize: 10,
                         fontWeight: 800,
                         letterSpacing: 0.6,
@@ -1643,7 +1643,7 @@ export function TodayScreen({
                     >
                       {s.label}
                     </div>
-                    <div style={{ fontFamily: 'Inter', fontSize: 22, fontWeight: 900, color: T.text, marginTop: 4 }}>
+                    <div style={{ fontFamily: 'var(--font-inter)', fontSize: 22, fontWeight: 900, color: T.text, marginTop: 4 }}>
                       {s.wt}
                       <span style={{ fontSize: 11, color: T.textMute, fontWeight: 600 }}> kg</span>
                     </div>

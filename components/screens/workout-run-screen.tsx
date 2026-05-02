@@ -90,7 +90,7 @@ const bigStepBtn: CSSProperties = {
   background: T.bg4,
   border: `1px solid ${T.borderHi}`,
   color: T.text,
-  fontFamily: 'Inter',
+  fontFamily: 'var(--font-inter)',
   fontWeight: 800,
   fontSize: 24,
   cursor: 'pointer',
@@ -207,7 +207,7 @@ export function WorkoutRun({
         <div style={{ flex: 1, textAlign: 'center' }}>
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: 1.2,
@@ -217,7 +217,7 @@ export function WorkoutRun({
           >
             {sessionName ?? 'Workout'} · {fmt(elapsed)}
           </div>
-          <div style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 800, color: T.text, marginTop: 2 }}>
+          <div style={{ fontFamily: 'var(--font-inter)', fontSize: 13, fontWeight: 800, color: T.text, marginTop: 2 }}>
             ท่า {exIdx + 1}/{plan.length} · เซ็ต {setIdx + 1}/{ex.sets}
           </div>
         </div>
@@ -285,7 +285,7 @@ export function WorkoutRun({
           >
             <h3
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontWeight: 900,
                 color: T.text,
                 fontSize: 18,
@@ -296,7 +296,7 @@ export function WorkoutRun({
             </h3>
             <p
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 color: T.textDim,
                 fontSize: 13,
                 margin: '0 0 16px',
@@ -316,7 +316,7 @@ export function WorkoutRun({
                   background: T.bg4,
                   border: `1px solid ${T.border}`,
                   color: T.text,
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: 'pointer',
@@ -334,7 +334,7 @@ export function WorkoutRun({
                   background: T.danger,
                   border: 'none',
                   color: '#fff',
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontWeight: 800,
                   fontSize: 13,
                   cursor: 'pointer',
@@ -374,7 +374,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
       >
         <div
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 11,
             fontWeight: 800,
             letterSpacing: 1.4,
@@ -386,7 +386,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
         </div>
         <h1
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 900,
             fontSize: 30,
             color: T.text,
@@ -396,7 +396,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
         >
           {ex.name}
         </h1>
-        <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 14, color: T.textDim, fontWeight: 600 }}>
+        <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 14, color: T.textDim, fontWeight: 600 }}>
           เป้า {ex.reps} reps · {ex.weight} kg
         </div>
       </div>
@@ -404,7 +404,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
       <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 18, padding: '18px 16px' }}>
         <div
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 11,
             fontWeight: 800,
             letterSpacing: 0.8,
@@ -424,7 +424,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
             style={{
               minWidth: 110,
               textAlign: 'center',
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
               fontSize: 64,
               fontWeight: 900,
               color: reps === '' ? T.textMute : T.lime,
@@ -450,7 +450,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
                 background: T.bg4,
                 border: `1px solid ${T.border}`,
                 color: T.text,
-                fontFamily: 'Inter',
+                fontFamily: 'var(--font-inter)',
                 fontWeight: 700,
                 fontSize: 12,
                 cursor: 'pointer',
@@ -466,7 +466,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <span
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 800,
               letterSpacing: 0.8,
@@ -476,7 +476,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
           >
             น้ำหนัก
           </span>
-          <span style={{ fontFamily: 'Inter', fontSize: 22, fontWeight: 900, color: T.text }}>
+          <span style={{ fontFamily: 'var(--font-inter)', fontSize: 22, fontWeight: 900, color: T.text }}>
             {weight}
             <span style={{ fontSize: 11, color: T.textMute, fontWeight: 700, marginLeft: 4 }}>kg</span>
           </span>
@@ -494,7 +494,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
                 background: T.bg4,
                 border: `1px solid ${T.border}`,
                 color: T.text,
-                fontFamily: 'Inter',
+                fontFamily: 'var(--font-inter)',
                 fontWeight: 700,
                 fontSize: 11,
                 cursor: 'pointer',
@@ -511,7 +511,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
           <span style={{ fontSize: 14 }}>💡</span>
           <span
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 800,
               letterSpacing: 0.8,
@@ -527,7 +527,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
             <li
               key={i}
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontSize: 13,
                 color: T.text,
                 lineHeight: 1.6,
@@ -552,7 +552,7 @@ function WorkingPhase({ ex, setIdx, onComplete }: { ex: Ex; setIdx: number; onCo
           background: reps !== '' ? T.coral : T.coral + '55',
           border: 'none',
           color: '#0E0F12',
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontWeight: 900,
           fontSize: 17,
           cursor: reps !== '' ? 'pointer' : 'not-allowed',
@@ -596,7 +596,7 @@ function RestingPhase({
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0' }}>
       <div
         style={{
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontSize: 11,
           fontWeight: 800,
           letterSpacing: 1.6,
@@ -610,7 +610,7 @@ function RestingPhase({
       </div>
       <h2
         style={{
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontWeight: 700,
           fontSize: 14,
           color: T.textDim,
@@ -647,7 +647,7 @@ function RestingPhase({
         >
           <div
             style={{
-              fontFamily: 'Inter',
+              fontFamily: 'var(--font-inter)',
               fontSize: 70,
               fontWeight: 900,
               color: T.text,
@@ -659,7 +659,7 @@ function RestingPhase({
           </div>
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: 1,
@@ -683,7 +683,7 @@ function RestingPhase({
             background: T.bg3,
             border: `1px solid ${T.border}`,
             color: T.text,
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 800,
             fontSize: 14,
             cursor: 'pointer',
@@ -706,7 +706,7 @@ function RestingPhase({
             background: T.coral,
             border: 'none',
             color: '#0E0F12',
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 900,
             fontSize: 14,
             cursor: 'pointer',
@@ -756,7 +756,7 @@ function RestingPhase({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontSize: 10,
                 fontWeight: 800,
                 letterSpacing: 0.8,
@@ -766,10 +766,10 @@ function RestingPhase({
             >
               ต่อไป
             </div>
-            <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, color: T.text, fontSize: 15, marginTop: 2 }}>
+            <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, color: T.text, fontSize: 15, marginTop: 2 }}>
               {nextEx.name}
             </div>
-            <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textDim, marginTop: 1 }}>
+            <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textDim, marginTop: 1 }}>
               {nextEx.reps} reps · {nextEx.weight} kg
             </div>
           </div>
@@ -839,7 +839,7 @@ function WorkoutDone({
         </div>
         <h1
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 900,
             fontSize: 28,
             color: T.text,
@@ -851,7 +851,7 @@ function WorkoutDone({
         </h1>
         <p
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontSize: 14,
             color: T.textDim,
             margin: '0 0 24px',
@@ -879,7 +879,7 @@ function WorkoutDone({
             >
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 10,
                   fontWeight: 800,
                   letterSpacing: 0.6,
@@ -890,7 +890,7 @@ function WorkoutDone({
               >
                 {s.l}
               </div>
-              <div style={{ fontFamily: 'Inter', fontSize: 22, fontWeight: 900, color: s.c, lineHeight: 1 }}>{s.v}</div>
+              <div style={{ fontFamily: 'var(--font-inter)', fontSize: 22, fontWeight: 900, color: s.c, lineHeight: 1 }}>{s.v}</div>
             </div>
           ))}
         </div>
@@ -907,7 +907,7 @@ function WorkoutDone({
         >
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 800,
               letterSpacing: 0.8,
@@ -929,7 +929,7 @@ function WorkoutDone({
                 borderBottom: i < plan.length - 1 ? `1px solid ${T.border}` : 'none',
               }}
             >
-              <div style={{ flex: 1, fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 700, color: T.text, fontSize: 13 }}>
+              <div style={{ flex: 1, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 700, color: T.text, fontSize: 13 }}>
                 {ex.name}
               </div>
               <div style={{ display: 'flex', gap: 4 }}>
@@ -944,7 +944,7 @@ function WorkoutDone({
                         background: log ? T.limeBg : T.bg4,
                         border: `1px solid ${log ? T.lime + '55' : T.border}`,
                         color: log ? T.lime : T.textMute,
-                        fontFamily: 'Inter',
+                        fontFamily: 'var(--font-inter)',
                         fontSize: 10,
                         fontWeight: 800,
                       }}
@@ -969,7 +969,7 @@ function WorkoutDone({
             background: saving ? T.coral + '88' : T.coral,
             border: 'none',
             color: '#0E0F12',
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 900,
             fontSize: 15,
             cursor: saving ? 'not-allowed' : 'pointer',

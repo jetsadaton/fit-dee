@@ -1,0 +1,91 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: สวัสดีตอนเช้า
+        - heading "ต้น 👋" [level=1] [ref=e6]
+      - generic [ref=e7]:
+        - generic [ref=e8]: 🔥
+        - generic [ref=e9]: "0"
+        - generic [ref=e10]: วัน
+    - generic [ref=e12]:
+      - button "วันนี้" [ref=e13] [cursor=pointer]
+      - button "สัปดาห์" [ref=e14] [cursor=pointer]
+      - button "เดือน" [active] [ref=e15] [cursor=pointer]
+    - generic [ref=e16]:
+      - generic [ref=e274]:
+        - generic [ref=e275]: ความคืบหน้าเป้าหมาย
+        - generic [ref=e276]: ยังไม่มีข้อมูลน้ำหนัก
+        - generic [ref=e277]:
+          - generic [ref=e278]:
+            - generic [ref=e279]: โปรตีนเฉลี่ย 7 วัน → 158g
+            - generic [ref=e280]: 31%
+          - generic [ref=e283]:
+            - generic [ref=e284]: เริ่ม 0g
+            - generic [ref=e285]: ตอนนี้ 49g
+            - generic [ref=e286]: เป้า 158g
+      - generic [ref=e287]:
+        - generic [ref=e289]:
+          - img [ref=e291]
+          - generic [ref=e293]: โค้ชดีวิเคราะห์ให้
+          - generic [ref=e294]: 30 วัน
+        - list [ref=e295]:
+          - listitem [ref=e296]:
+            - generic [ref=e297]: ✓
+            - generic [ref=e298]: น้ำหนักลง 2.4 kg ใน 30 วัน — เร็วกว่าเป้า 20%
+          - listitem [ref=e299]:
+            - generic [ref=e300]: "!"
+            - generic [ref=e301]: วันศุกร์-เสาร์เกินเป้าบ่อย 6 ใน 8 ครั้ง — pattern ชัด
+          - listitem [ref=e302]:
+            - generic [ref=e303]: ✓
+            - generic [ref=e304]: เล่น 18/30 วัน เกินเป้า 15 วัน 💪
+          - listitem [ref=e305]:
+            - generic [ref=e306]: "!"
+            - generic [ref=e307]: นอนเฉลี่ย 6.2 ชม./คืน ต่ำไป — กระทบฟื้นตัว
+        - button "ถามโค้ชต่อ" [ref=e308] [cursor=pointer]:
+          - text: ถามโค้ชต่อ
+          - img [ref=e309]
+      - generic [ref=e311]:
+        - generic [ref=e312]:
+          - generic [ref=e313]: เล่นไปทั้งหมด
+          - generic [ref=e314]: "0"
+          - generic [ref=e315]: จาก 30 วัน
+        - generic [ref=e316]:
+          - generic [ref=e317]: น้ำหนักเปลี่ยน
+          - generic [ref=e318]: —
+          - generic [ref=e319]: kg ใน 30 วัน
+        - generic [ref=e320]:
+          - generic [ref=e321]: Streak ยาวสุด
+          - generic [ref=e322]: "0"
+          - generic [ref=e323]: วันต่อเนื่อง
+        - generic [ref=e324]:
+          - generic [ref=e325]: วันถึงเป้าแคล
+          - generic [ref=e326]: "1"
+          - generic [ref=e327]: / 30 วัน · 3%
+      - generic [ref=e328]:
+        - generic [ref=e329]:
+          - generic [ref=e330]: กิจกรรมเดือนนี้
+          - generic [ref=e331]: 1/30 วัน
+        - generic [ref=e363]:
+          - generic [ref=e364]: น้อย
+          - generic [ref=e369]: มาก
+    - generic [ref=e144]:
+      - button "แชท" [ref=e145] [cursor=pointer]:
+        - img [ref=e370]
+        - generic [ref=e148]: แชท
+      - button "วันนี้" [ref=e149] [cursor=pointer]:
+        - img [ref=e372]
+        - generic [ref=e154]: วันนี้
+      - button "แผน" [ref=e155] [cursor=pointer]:
+        - img [ref=e376]
+        - generic [ref=e159]: แผน
+      - button "ฉัน" [ref=e160] [cursor=pointer]:
+        - img [ref=e379]
+        - generic [ref=e164]: ฉัน
+  - generic [ref=e165]:
+    - img [ref=e167]
+    - button "Open Tanstack query devtools" [ref=e215] [cursor=pointer]:
+      - img [ref=e216]
+  - button "Open Next.js Dev Tools" [ref=e269] [cursor=pointer]:
+    - img [ref=e270]
+  - alert [ref=e273]

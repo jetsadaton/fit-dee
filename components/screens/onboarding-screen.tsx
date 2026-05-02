@@ -137,7 +137,7 @@ export function OnboardingChat({
           </button>
           <span
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 700,
               color: T.textDim,
@@ -240,7 +240,7 @@ export function OnboardingChat({
                 background: T.bg3,
                 border: `1px solid ${T.border}`,
                 color: T.text,
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontSize: 15,
                 outline: 'none',
               }}
@@ -288,7 +288,7 @@ export function OnboardingChat({
                   border: `1px solid ${goal === g.id ? T.coral + '66' : T.border}`,
                   color: T.text,
                   cursor: 'pointer',
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontWeight: 700,
                   fontSize: 15,
                   display: 'flex',
@@ -308,7 +308,7 @@ export function OnboardingChat({
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 13,
                   color: T.textDim,
                   fontWeight: 700,
@@ -324,7 +324,7 @@ export function OnboardingChat({
                 style={{
                   flex: 1,
                   textAlign: 'center',
-                  fontFamily: 'Inter',
+                  fontFamily: 'var(--font-inter)',
                   fontWeight: 800,
                   fontSize: 22,
                   color: T.text,
@@ -358,13 +358,13 @@ export function OnboardingChat({
         {step === 3 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, color: T.textDim, fontWeight: 700, width: 60 }}>
+              <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, color: T.textDim, fontWeight: 700, width: 60 }}>
                 ส่วนสูง
               </span>
               <button type="button" onClick={() => setHeight((h) => h - 1)} style={stepperBtnStyle}>
                 −
               </button>
-              <div style={{ flex: 1, textAlign: 'center', fontFamily: 'Inter', fontWeight: 800, fontSize: 22, color: T.text }}>
+              <div style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-inter)', fontWeight: 800, fontSize: 22, color: T.text }}>
                 {height}
                 <span style={{ fontSize: 12, color: T.textMute, marginLeft: 4 }}>ซม.</span>
               </div>
@@ -373,13 +373,13 @@ export function OnboardingChat({
               </button>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, color: T.textDim, fontWeight: 700, width: 60 }}>
+              <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, color: T.textDim, fontWeight: 700, width: 60 }}>
                 น้ำหนัก
               </span>
               <button type="button" onClick={() => setWeight((w) => +(w - 0.5).toFixed(1))} style={stepperBtnStyle}>
                 −
               </button>
-              <div style={{ flex: 1, textAlign: 'center', fontFamily: 'Inter', fontWeight: 800, fontSize: 22, color: T.text }}>
+              <div style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-inter)', fontWeight: 800, fontSize: 22, color: T.text }}>
                 {weight}
                 <span style={{ fontSize: 12, color: T.textMute, marginLeft: 4 }}>กก.</span>
               </div>
@@ -395,13 +395,13 @@ export function OnboardingChat({
         {step === 4 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, color: T.textDim, fontWeight: 700, width: 70 }}>
+              <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, color: T.textDim, fontWeight: 700, width: 70 }}>
                 เป้าหมาย
               </span>
               <button type="button" onClick={() => setTargetWeight((w) => +(w - 0.5).toFixed(1))} style={stepperBtnStyle}>
                 −
               </button>
-              <div style={{ flex: 1, textAlign: 'center', fontFamily: 'Inter', fontWeight: 800, fontSize: 22, color: T.coral }}>
+              <div style={{ flex: 1, textAlign: 'center', fontFamily: 'var(--font-inter)', fontWeight: 800, fontSize: 22, color: T.coral }}>
                 {targetWeight}
                 <span style={{ fontSize: 12, color: T.textMute, marginLeft: 4, fontWeight: 600 }}>กก.</span>
               </div>
@@ -423,7 +423,7 @@ export function OnboardingChat({
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.lime} strokeWidth="2.5">
                 <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12.5, color: T.lime, fontWeight: 700 }}>
+              <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 12.5, color: T.lime, fontWeight: 700 }}>
                 {weight > targetWeight
                   ? `ลด ${(weight - targetWeight).toFixed(1)} กก.`
                   : weight < targetWeight
@@ -453,7 +453,7 @@ export function OnboardingChat({
                     border: `1px solid ${daysPerWeek === d ? T.coral + '66' : T.border}`,
                     color: daysPerWeek === d ? T.coral : T.text,
                     cursor: 'pointer',
-                    fontFamily: 'Inter',
+                    fontFamily: 'var(--font-inter)',
                     fontWeight: 800,
                     fontSize: 18,
                   }}
@@ -462,7 +462,7 @@ export function OnboardingChat({
                 </button>
               ))}
             </div>
-            <div style={{ textAlign: 'center', fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12, color: T.textDim }}>
+            <div style={{ textAlign: 'center', fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 12, color: T.textDim }}>
               {daysPerWeek <= 3
                 ? 'เริ่มแบบสบายๆ — ดีสำหรับมือใหม่'
                 : daysPerWeek === 4
@@ -495,8 +495,8 @@ export function OnboardingChat({
                   textAlign: 'left',
                 }}
               >
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, fontSize: 14 }}>{a.label}</div>
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 500, fontSize: 12, color: T.textDim, marginTop: 2 }}>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, fontSize: 14 }}>{a.label}</div>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 500, fontSize: 12, color: T.textDim, marginTop: 2 }}>
                   {a.sub}
                 </div>
               </button>
@@ -529,10 +529,10 @@ export function OnboardingChat({
               >
                 <span style={{ fontSize: 26 }}>{e.icon}</span>
                 <div>
-                  <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, fontSize: 14 }}>{e.label}</div>
+                  <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, fontSize: 14 }}>{e.label}</div>
                   <div
                     style={{
-                      fontFamily: 'Inter,"Noto Sans Thai"',
+                      fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                       fontWeight: 500,
                       fontSize: 12,
                       color: T.textDim,
@@ -603,7 +603,7 @@ export function OnboardingChat({
                   background: 'rgba(255,82,82,0.1)',
                   color: T.danger,
                   fontSize: 13,
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 }}
               >
                 {submitError}

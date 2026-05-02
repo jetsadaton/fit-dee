@@ -40,7 +40,7 @@ function MacroRow({ label, value, unit, color, max }: { label: string; value: nu
   const pct = value && max ? Math.min(1, value / max) : 0;
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 12 }}>
         <span style={{ color: T.textDim }}>{label}</span>
         <span style={{ color: T.text, fontWeight: 700 }}>{value ?? '–'} {unit}</span>
       </div>
@@ -54,8 +54,8 @@ function MacroRow({ label, value, unit, color, max }: { label: string; value: nu
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ flex: 1, background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 12, padding: '10px 12px', textAlign: 'center' }}>
-      <div style={{ fontFamily: 'Inter', fontWeight: 800, fontSize: 18, color: T.text }}>{value}</div>
-      <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textDim, marginTop: 2 }}>{label}</div>
+      <div style={{ fontFamily: 'var(--font-inter)', fontWeight: 800, fontSize: 18, color: T.text }}>{value}</div>
+      <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textDim, marginTop: 2 }}>{label}</div>
     </div>
   );
 }
@@ -75,7 +75,7 @@ export function MeClient(props: MeClientProps) {
   const maxMacro = Math.max(props.proteinGTarget ?? 0, props.carbGTarget ?? 0, props.fatGTarget ?? 0, 1);
 
   return (
-    <div style={{ minHeight: '100dvh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column', fontFamily: 'Inter,"Noto Sans Thai"' }}>
+    <div style={{ minHeight: '100dvh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)' }}>
 
       {/* Header */}
       <div style={{ padding: '24px 20px 16px', borderBottom: `1px solid ${T.border}` }}>
@@ -165,7 +165,7 @@ export function MeClient(props: MeClientProps) {
                   border: 'none',
                   background: pushState === 'subscribed' ? T.bg4 : T.coral,
                   color: pushState === 'subscribed' ? T.textDim : '#0E0F12',
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontWeight: 700,
                   fontSize: 12,
                   cursor: 'pointer',
@@ -185,7 +185,7 @@ export function MeClient(props: MeClientProps) {
             style={{
               width: '100%', padding: '14px', borderRadius: 999,
               border: `1px solid ${T.border}`, background: 'transparent',
-              color: T.textDim, fontFamily: 'Inter,"Noto Sans Thai"',
+              color: T.textDim, fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 700, fontSize: 14, cursor: 'pointer',
             }}
           >

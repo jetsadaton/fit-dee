@@ -128,7 +128,7 @@ export function InstallPrompt() {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 800,
             fontSize: 14,
             color: T.text,
@@ -141,7 +141,7 @@ export function InstallPrompt() {
         {platform === 'ios' ? (
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 12,
               color: T.textDim,
               lineHeight: 1.5,
@@ -158,7 +158,7 @@ export function InstallPrompt() {
         ) : (
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 12,
               color: T.textDim,
             }}
@@ -179,7 +179,7 @@ export function InstallPrompt() {
               border: 'none',
               borderRadius: 10,
               color: '#0E0F12',
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontWeight: 800,
               fontSize: 12,
               cursor: 'pointer',
@@ -198,7 +198,7 @@ export function InstallPrompt() {
             border: `1px solid ${T.border}`,
             borderRadius: 10,
             color: T.textDim,
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 700,
             fontSize: 12,
             cursor: 'pointer',

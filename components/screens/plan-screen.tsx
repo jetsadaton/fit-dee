@@ -220,7 +220,7 @@ export function PlanScreen({
         <div>
           <div
             style={{
-              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
               fontSize: 11,
               fontWeight: 700,
               color: T.textDim,
@@ -230,7 +230,7 @@ export function PlanScreen({
           >
             แผนสัปดาห์นี้
           </div>
-          <h1 style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 900, fontSize: 22, color: T.text, margin: '2px 0 0' }}>
+          <h1 style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 900, fontSize: 22, color: T.text, margin: '2px 0 0' }}>
             Push / Pull / Legs
           </h1>
         </div>
@@ -243,7 +243,7 @@ export function PlanScreen({
             background: T.coralBg,
             border: `1px solid ${T.coral}66`,
             color: T.coral,
-            fontFamily: 'Inter,"Noto Sans Thai"',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
             fontWeight: 800,
             fontSize: 12,
             display: 'flex',
@@ -292,7 +292,7 @@ export function PlanScreen({
             >
               <span
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 10,
                   fontWeight: 800,
                   letterSpacing: 0.4,
@@ -302,7 +302,7 @@ export function PlanScreen({
               >
                 {d}
               </span>
-              <span style={{ fontFamily: 'Inter', fontSize: 18, fontWeight: 900 }}>
+              <span style={{ fontFamily: 'var(--font-inter)', fontSize: 18, fontWeight: 900 }}>
                 {['25', '26', '27', '28', '29', '30', '1'][days.indexOf(d)]}
               </span>
               <span
@@ -334,7 +334,7 @@ export function PlanScreen({
             <div style={{ fontSize: 48 }}>☕</div>
             <h2
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontWeight: 900,
                 color: T.text,
                 fontSize: 22,
@@ -343,7 +343,7 @@ export function PlanScreen({
             >
               วันพัก
             </h2>
-            <p style={{ fontFamily: 'Inter,"Noto Sans Thai"', color: T.textDim, fontSize: 13, margin: 0 }}>
+            <p style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', color: T.textDim, fontSize: 13, margin: 0 }}>
               กล้ามโตตอนพัก ไม่ใช่ตอนเล่น 💪
             </p>
           </div>
@@ -361,7 +361,7 @@ export function PlanScreen({
               <div>
                 <div
                   style={{
-                    fontFamily: 'Inter,"Noto Sans Thai"',
+                    fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                     fontSize: 10,
                     fontWeight: 800,
                     letterSpacing: 1.4,
@@ -373,7 +373,7 @@ export function PlanScreen({
                 </div>
                 <h2
                   style={{
-                    fontFamily: 'Inter,"Noto Sans Thai"',
+                    fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                     fontWeight: 900,
                     color: T.text,
                     fontSize: 26,
@@ -382,13 +382,13 @@ export function PlanScreen({
                 >
                   {cur.name}
                 </h2>
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 12, color: T.textDim, fontWeight: 600 }}>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 12, color: T.textDim, fontWeight: 600 }}>
                   {cur.focus}
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
                 <RangeBadge low={(cur.mins ?? 45) - 5} high={(cur.mins ?? 45) + 5} unit="นาที" />
-                <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 10, fontWeight: 700, color: T.textMute }}>
+                <span style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 10, fontWeight: 700, color: T.textMute }}>
                   {cur.exercises?.length ?? 0} ท่า
                 </span>
               </div>
@@ -403,7 +403,7 @@ export function PlanScreen({
                 background: T.coral,
                 border: 'none',
                 color: '#0E0F12',
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontWeight: 800,
                 fontSize: 16,
                 display: 'flex',
@@ -426,7 +426,7 @@ export function PlanScreen({
           <>
             <div
               style={{
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontSize: 11,
                 fontWeight: 800,
                 letterSpacing: 0.8,
@@ -468,7 +468,7 @@ export function PlanScreen({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontFamily: 'Inter',
+                        fontFamily: 'var(--font-inter)',
                         fontWeight: 800,
                         color: done ? '#0E0F12' : T.textDim,
                         fontSize: 13,
@@ -486,7 +486,7 @@ export function PlanScreen({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
                         style={{
-                          fontFamily: 'Inter,"Noto Sans Thai"',
+                          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                           fontWeight: 700,
                           color: T.text,
                           fontSize: 14,
@@ -499,7 +499,7 @@ export function PlanScreen({
                       </div>
                       <div
                         style={{
-                          fontFamily: 'Inter,"Noto Sans Thai"',
+                          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                           color: T.textDim,
                           fontSize: 11,
                           marginTop: 1,
@@ -537,7 +537,7 @@ export function PlanScreen({
                 border: `1px dashed ${T.borderHi}`,
                 borderRadius: 14,
                 color: T.text,
-                fontFamily: 'Inter,"Noto Sans Thai"',
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                 fontWeight: 700,
                 fontSize: 13,
                 cursor: 'pointer',
@@ -600,10 +600,10 @@ export function PlanScreen({
             >
               <CoachAvatar size={32} online />
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, fontSize: 14, color: T.text }}>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 800, fontSize: 14, color: T.text }}>
                   ปรับแผนกับโค้ชดี
                 </div>
-                <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textDim }}>
+                <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 11, color: T.textDim }}>
                   {dayLabel[selected]} · {cur.name}
                 </div>
               </div>
@@ -636,7 +636,7 @@ export function PlanScreen({
                         <div style={{ background: T.bg3, border: `1px solid ${T.coral}66`, borderRadius: 14, padding: 12 }}>
                           <div
                             style={{
-                              fontFamily: 'Inter,"Noto Sans Thai"',
+                              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                               fontSize: 10,
                               fontWeight: 800,
                               letterSpacing: 1.2,
@@ -649,7 +649,7 @@ export function PlanScreen({
                           </div>
                           <div
                             style={{
-                              fontFamily: 'Inter,"Noto Sans Thai"',
+                              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                               fontWeight: 800,
                               color: T.text,
                               fontSize: 16,
@@ -661,7 +661,7 @@ export function PlanScreen({
                           {!m.plan[selected]!.rest && m.plan[selected]!.exercises && (
                             <div
                               style={{
-                                fontFamily: 'Inter,"Noto Sans Thai"',
+                                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                                 color: T.textDim,
                                 fontSize: 12,
                                 marginBottom: 10,
@@ -682,7 +682,7 @@ export function PlanScreen({
                                 background: T.bg4,
                                 border: `1px solid ${T.border}`,
                                 color: T.textDim,
-                                fontFamily: 'Inter,"Noto Sans Thai"',
+                                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                                 fontWeight: 700,
                                 fontSize: 12,
                                 cursor: 'pointer',
@@ -700,7 +700,7 @@ export function PlanScreen({
                                 background: T.coral,
                                 border: 'none',
                                 color: '#0E0F12',
-                                fontFamily: 'Inter,"Noto Sans Thai"',
+                                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                                 fontWeight: 800,
                                 fontSize: 12,
                                 cursor: 'pointer',
@@ -730,7 +730,7 @@ export function PlanScreen({
                       background: T.bg3,
                       border: `1px solid ${T.border}`,
                       color: T.text,
-                      fontFamily: 'Inter,"Noto Sans Thai"',
+                      fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                       fontWeight: 700,
                       fontSize: 12,
                       cursor: 'pointer',
@@ -757,7 +757,7 @@ export function PlanScreen({
                   background: T.bg3,
                   border: `1px solid ${T.border}`,
                   color: T.text,
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 14,
                   outline: 'none',
                 }}
@@ -847,7 +847,7 @@ function ExerciseDetailSheet({
     background: T.bg4,
     border: `1px solid ${T.border}`,
     color: T.text,
-    fontFamily: 'Inter',
+    fontFamily: 'var(--font-inter)',
     fontWeight: 700,
     fontSize: 12,
     cursor: 'pointer',
@@ -888,12 +888,12 @@ function ExerciseDetailSheet({
         <div style={{ padding: '4px 16px 12px', flexShrink: 0, borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <h2 style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 900, fontSize: 22, color: T.text, margin: 0 }}>
+              <h2 style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontWeight: 900, fontSize: 22, color: T.text, margin: 0 }}>
                 {exercise.name}
               </h2>
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 12,
                   color: T.textDim,
                   fontWeight: 600,
@@ -951,7 +951,7 @@ function ExerciseDetailSheet({
                   background: tab === t.id ? T.coral : 'transparent',
                   border: 'none',
                   color: tab === t.id ? '#0E0F12' : T.textDim,
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontWeight: 800,
                   fontSize: 13,
                   cursor: 'pointer',
@@ -1012,7 +1012,7 @@ function ExerciseDetailSheet({
                     position: 'absolute',
                     bottom: 10,
                     left: 12,
-                    fontFamily: 'Inter,"Noto Sans Thai"',
+                    fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                     fontSize: 10,
                     fontWeight: 700,
                     color: T.text,
@@ -1039,7 +1039,7 @@ function ExerciseDetailSheet({
                   }}
                 >
                   <span style={{ fontSize: 18 }}>💡</span>
-                  <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, color: T.text, lineHeight: 1.5 }}>
+                  <div style={{ fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)', fontSize: 13, color: T.text, lineHeight: 1.5 }}>
                     {exercise.tip}
                   </div>
                 </div>
@@ -1047,7 +1047,7 @@ function ExerciseDetailSheet({
 
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 11,
                   fontWeight: 800,
                   letterSpacing: 0.8,
@@ -1082,7 +1082,7 @@ function ExerciseDetailSheet({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontFamily: 'Inter',
+                        fontFamily: 'var(--font-inter)',
                         fontSize: 11,
                         fontWeight: 800,
                         color: T.lime,
@@ -1092,7 +1092,7 @@ function ExerciseDetailSheet({
                     </div>
                     <div
                       style={{
-                        fontFamily: 'Inter,"Noto Sans Thai"',
+                        fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                         fontSize: 13,
                         color: T.text,
                         lineHeight: 1.5,
@@ -1115,7 +1115,7 @@ function ExerciseDetailSheet({
                   border: `1px dashed ${T.borderHi}`,
                   borderRadius: 14,
                   color: T.text,
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: 'pointer',
@@ -1146,7 +1146,7 @@ function ExerciseDetailSheet({
               >
                 <div
                   style={{
-                    fontFamily: 'Inter,"Noto Sans Thai"',
+                    fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                     fontSize: 11,
                     fontWeight: 800,
                     letterSpacing: 0.6,
@@ -1174,10 +1174,10 @@ function ExerciseDetailSheet({
                       border: `1px solid ${T.border}`,
                     }}
                   >
-                    <span style={{ fontFamily: 'Inter', fontSize: 24, fontWeight: 900, color: T.text }}>{weight}</span>
+                    <span style={{ fontFamily: 'var(--font-inter)', fontSize: 24, fontWeight: 900, color: T.text }}>{weight}</span>
                     <span
                       style={{
-                        fontFamily: 'Inter,"Noto Sans Thai"',
+                        fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                         fontSize: 12,
                         color: T.textMute,
                         marginLeft: 4,
@@ -1198,7 +1198,7 @@ function ExerciseDetailSheet({
 
               <div
                 style={{
-                  fontFamily: 'Inter,"Noto Sans Thai"',
+                  fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                   fontSize: 11,
                   fontWeight: 800,
                   letterSpacing: 0.8,
@@ -1234,7 +1234,7 @@ function ExerciseDetailSheet({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontFamily: 'Inter',
+                        fontFamily: 'var(--font-inter)',
                         fontWeight: 800,
                         fontSize: 12,
                       }}
@@ -1260,7 +1260,7 @@ function ExerciseDetailSheet({
                       background: T.bg4,
                       border: `1px solid ${T.border}`,
                       color: T.textDim,
-                      fontFamily: 'Inter,"Noto Sans Thai"',
+                      fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                       fontWeight: 700,
                       fontSize: 13,
                       cursor: 'pointer',
@@ -1280,7 +1280,7 @@ function ExerciseDetailSheet({
                     background: allFilled ? T.coral : T.coral + '88',
                     border: 'none',
                     color: '#0E0F12',
-                    fontFamily: 'Inter,"Noto Sans Thai"',
+                    fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
                     fontWeight: 800,
                     fontSize: 14,
                     cursor: 'pointer',
@@ -1341,7 +1341,7 @@ function NumInput({
           background: 'transparent',
           border: 'none',
           color: T.text,
-          fontFamily: 'Inter',
+          fontFamily: 'var(--font-inter)',
           fontSize: 15,
           fontWeight: 700,
           outline: 'none',
@@ -1351,7 +1351,7 @@ function NumInput({
       />
       <span
         style={{
-          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
           fontSize: 11,
           color: T.textMute,
           marginLeft: 4,
