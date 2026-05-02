@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: /workout/run wired to DB + food resolver chain + MOPH 2018 schema
+> Last commit: PDF extractor switched to Kimi K2.6; extraction running (97 pages)
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -45,7 +45,8 @@ pnpm dev                              # http://localhost:3000
 | Exercise seed                     | ✅ pnpm db:seed                            | 19 exercises (gym/home_eq/bodyweight)                                  |
 | **Thai food seed**                | ✅ **pnpm db:seed:foods**                  | BaoWio 1,005 INMU rows; CC-BY-SA 4.0                                   |
 | USDA food resolver                | ✅ lib/services/food-resolver.ts           | Thai DB → USDA chain; 3s timeout; missing key → skip silently          |
-| MOPH 2018 schema + seed           | ✅ migration 0002 + seed-moph2018.ts       | 19 nutrient cols on foods; `pnpm db:seed:moph2018` (needs PDF extract) |
+| MOPH 2018 schema + seed           | ✅ migration 0002 + seed-moph2018.ts       | 19 nutrient cols on foods; extractor = Kimi K2.6 vision                |
+| **MOPH 2018 PDF extraction**      | ⏳ **กำลัง run** (97 pages 26–122)         | `scripts/extracted/page_NNN.json` ทยอยสร้าง; ดู run log                |
 | Workout repos                     | ✅                                         | findActive, session lifecycle, bulk createMany                         |
 | /workout/run                      | ✅ real data                               | RSC → findActive plan → create session → RunClient → saveWorkoutAction |
 | Inngest / PWA / offline           | ❌ Phase 3–4                               | deferred                                                               |
@@ -63,19 +64,25 @@ pnpm dev                              # http://localhost:3000
 
 ## Next session — pick up here (in order)
 
-1. **30+ Thai food golden eval cases** (รอ owner supply prompts)
+1. **MOPH 2018 seed — ขั้นตอนที่เหลือ**
+   - extraction กำลัง run อยู่ (Kimi K2.6 vision, 97 pages 26–122)
+   - ถ้า extraction ยังไม่เสร็จ: `KIMI_API_KEY=... scripts/.venv/bin/python scripts/extract_thai_nutrition_pdf.py`
+     - venv อยู่ที่ `scripts/.venv/` (pdf2image + openai installed)
+     - PDF อยู่ที่ root: `ตารางคุณค่า 2018.pdf.pdf`
+     - output: `scripts/extracted/all_foods.json`
+   - เมื่อ extraction เสร็จ:
+     ```bash
+     pnpm db:migrate          # apply migration 0002 (19 nutrient cols)
+     pnpm db:seed:moph2018    # seed จาก scripts/extracted/all_foods.json
+     ```
+
+2. **30+ Thai food golden eval cases** (รอ owner supply prompts)
    - ตอนนี้มี 10 food cases ใน `tests/eval/golden/food.json`
    - target 40+ รวม edge cases (ambiguous portion, restaurant vs home)
 
-2. **system prompt v2** — เพิ่ม safety floors + progressive overload instructions
+3. **system prompt v2** — เพิ่ม safety floors + progressive overload instructions
    - ปัจจุบัน v1 มี ED guardrails บางส่วน แต่ยังไม่ตรงกับ safety-floors.md ที่ confirm แล้ว
    - update `lib/ai/prompts/system-v1.ts` → `system-v2.ts` หลัง eval cases พร้อม
-
-3. **MOPH 2018 seed** — ต้อง extract PDF ก่อน (`python scripts/extract_thai_nutrition_pdf.py`)
-   - PDF อยู่ที่ root; output → `scripts/extracted/moph2018.json`
-   - จากนั้น `pnpm db:seed:moph2018` และ `pnpm db:migrate` สำหรับ migration 0002
-
-4. **`pnpm db:migrate`** — migration 0002 ยังไม่ apply (เพิ่ม 19 nutrient cols ใน foods)
 
 ## Critical known bugs / debt
 
@@ -98,7 +105,8 @@ components/screens/today-screen.tsx ← height:100dvh (tabbar fixed)
 components/screens/plan-screen.tsx  ← height:100dvh (tabbar fixed)
 components/screens/workout-run-screen.tsx ← export Ex, DEFAULT_RUN_PLAN; accept initialPlan+onSave
 scripts/seed-thai-foods.ts          ← pnpm db:seed:foods (BaoWio HuggingFace API)
-scripts/seed-moph2018.ts            ← pnpm db:seed:moph2018 (ต้อง extract PDF ก่อน)
+scripts/seed-moph2018.ts            ← pnpm db:seed:moph2018 (reads scripts/extracted/all_foods.json)
+scripts/extract_thai_nutrition_pdf.py ← Kimi K2.6 vision; venv: scripts/.venv/
 ```
 
 ## ห้าม (hard rules)
