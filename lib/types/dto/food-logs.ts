@@ -13,4 +13,6 @@ export type FoodLogItemDto = {
   fatG: number;
   portionG: number | null;
   loggedAt: string; // ISO string
+  /** Vercel Blob URL for food photo entries; null for text-typed entries. */
+  photoUrl: string | null;
 };

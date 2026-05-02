@@ -144,6 +144,7 @@ export async function loadDaySnapshot(userId: string, dateIct: string): Promise<
       fatG: Math.round(Number(r.fatG) * 10) / 10,
       portionG: r.portionG ?? null,
       loggedAt: r.loggedAt.toISOString(),
+      photoUrl: r.photoUrl ?? null,
     })),
   };
 }
@@ -322,6 +323,7 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
       fatG: Math.round(Number(r.fatG) * 10) / 10,
       portionG: r.portionG ?? null,
       loggedAt: r.loggedAt.toISOString(),
+      photoUrl: r.photoUrl ?? null,
     })),
   };
 }

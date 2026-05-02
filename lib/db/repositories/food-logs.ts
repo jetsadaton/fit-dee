@@ -7,7 +7,7 @@
 
 import { and, asc, between, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { foodLogs, foods } from '@/lib/db/schema';
+import { attachments, foodLogs, foods } from '@/lib/db/schema';
 import type { DailyFoodTotals, FoodLog, NewFoodLog } from '@/lib/types/db/logs';
 
 export type FoodLogWithName = {
@@ -22,6 +22,7 @@ export type FoodLogWithName = {
   fatG: string;
   portionG: number | null;
   loggedAt: Date;
+  photoUrl: string | null;
 };
 
 const isLive = and(isNull(foodLogs.deletedAt), isNotNull(foodLogs.confirmedAt));
@@ -158,9 +159,9 @@ export async function softDeleteOwned(id: string, userId: string): Promise<void>
 }
 
 /**
- * Confirmed food logs for today with display name.
- * name_th: COALESCE(food_logs.name_th, foods.name_th, 'อาหาร')
- * to handle all three cases: new entries, linked DB entries, legacy LLM entries.
+ * Confirmed food logs for a date range, with display name and optional photo URL.
+ * nameTh: COALESCE(food_logs.name_th, foods.name_th, 'อาหาร')
+ * photoUrl: attachments.blob_url when photo_id is set (food photo entries)
  */
 export async function listWithName(args: { userId: string; startUtc: Date; endUtc: Date }): Promise<FoodLogWithName[]> {
   return db
@@ -176,9 +177,11 @@ export async function listWithName(args: { userId: string; startUtc: Date; endUt
       fatG: foodLogs.fatG,
       portionG: foodLogs.portionG,
       loggedAt: foodLogs.loggedAt,
+      photoUrl: attachments.blobUrl,
     })
     .from(foodLogs)
     .leftJoin(foods, eq(foodLogs.foodId, foods.id))
+    .leftJoin(attachments, and(eq(foodLogs.photoId, attachments.id), isNull(attachments.deletedAt)))
     .where(
       and(
         eq(foodLogs.userId, args.userId),
