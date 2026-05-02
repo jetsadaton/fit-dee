@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
-Extract nutritional data from ตารางคุณค่า 2018.pdf.pdf using Claude Vision API.
+Extract nutritional data from ตารางคุณค่า 2018.pdf.pdf using Claude CLI (Haiku).
 Output: scripts/extracted/all_foods.json
+
+Requirements:
+  pip install pdf2image
+  brew install poppler          # for pdf2image on macOS
+  claude CLI in PATH (claude -p)
 """
-import base64, json, os, time
+import json, os, subprocess, tempfile, time
 from pathlib import Path
 from pdf2image import convert_from_path
-import anthropic
 
 PDF_PATH = "ตารางคุณค่า 2018.pdf.pdf"
 OUTPUT_DIR = Path("scripts/extracted")
@@ -31,13 +35,6 @@ sugar_g
 - ถ้าหน้านี้ไม่มีตารางข้อมูล ให้ตอบ []
 - ตอบเฉพาะ JSON array เท่านั้น ห้ามอธิบาย"""
 
-client = anthropic.Anthropic()
-
-def img_to_b64(img) -> str:
-    import io
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=85)
-    return base64.standard_b64encode(buf.getvalue()).decode()
 
 def extract_page(page_num: int, img) -> list[dict]:
     cache_file = OUTPUT_DIR / f"page_{page_num:03d}.json"
@@ -45,19 +42,30 @@ def extract_page(page_num: int, img) -> list[dict]:
         print(f"  [cache] page {page_num}")
         return json.loads(cache_file.read_text())
 
-    print(f"  [api]   page {page_num}")
-    response = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=4096,
-        messages=[{
-            "role": "user",
-            "content": [
-                {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": img_to_b64(img)}},
-                {"type": "text", "text": EXTRACT_PROMPT},
+    print(f"  [cli]   page {page_num}")
+
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        img.save(tmp.name, format="JPEG", quality=85)
+        tmp_path = tmp.name
+
+    try:
+        result = subprocess.run(
+            [
+                "claude", "-p", EXTRACT_PROMPT,
+                "--image", tmp_path,
+                "--model", "claude-haiku-4-5-20251001",
             ],
-        }],
-    )
-    raw = response.content[0].text.strip()
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+        raw = result.stdout.strip()
+        if result.returncode != 0:
+            print(f"  [warn] CLI error page {page_num}: {result.stderr[:120]}")
+            raw = "[]"
+    finally:
+        os.unlink(tmp_path)
+
     # strip markdown code fences if present
     if raw.startswith("```"):
         raw = raw.split("```")[1]
@@ -66,11 +74,13 @@ def extract_page(page_num: int, img) -> list[dict]:
     try:
         rows = json.loads(raw.strip())
     except json.JSONDecodeError:
-        print(f"  [warn] parse error page {page_num}, saving raw")
+        print(f"  [warn] parse error page {page_num}, saving empty")
         rows = []
+
     cache_file.write_text(json.dumps(rows, ensure_ascii=False, indent=2))
-    time.sleep(0.5)  # gentle rate limit
+    time.sleep(0.3)  # gentle pacing between pages
     return rows
+
 
 def main():
     print(f"Converting PDF pages {FIRST_DATA_PAGE}–{LAST_DATA_PAGE}...")
@@ -80,7 +90,7 @@ def main():
         last_page=LAST_DATA_PAGE,
         dpi=150,
     )
-    print(f"Got {len(pages)} page images. Extracting...")
+    print(f"Got {len(pages)} page images. Extracting via claude CLI...")
 
     all_rows = []
     for i, img in enumerate(pages):
@@ -92,6 +102,7 @@ def main():
     out = OUTPUT_DIR / "all_foods.json"
     out.write_text(json.dumps(all_rows, ensure_ascii=False, indent=2))
     print(f"\nDone! {len(all_rows)} foods → {out}")
+
 
 if __name__ == "__main__":
     main()
