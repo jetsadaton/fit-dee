@@ -90,3 +90,25 @@ export async function softDelete(id: string): Promise<void> {
     .set({ deletedAt: new Date() })
     .where(and(eq(workoutSessions.id, id), isLive));
 }
+
+/** Set of ICT calendar dates (YYYY-MM-DD) that have a completed workout session. */
+export async function datesWithWorkoutInRange(args: {
+  userId: string;
+  startUtc: Date;
+  endUtc: Date;
+}): Promise<Set<string>> {
+  const rows = await db
+    .selectDistinct({
+      dateIct: sql<string>`to_char(${workoutSessions.startedAt} AT TIME ZONE 'Asia/Bangkok', 'YYYY-MM-DD')`,
+    })
+    .from(workoutSessions)
+    .where(
+      and(
+        eq(workoutSessions.userId, args.userId),
+        isNotNull(workoutSessions.endedAt),
+        between(workoutSessions.startedAt, args.startUtc, args.endUtc),
+        isLive,
+      ),
+    );
+  return new Set(rows.map((r) => r.dateIct));
+}

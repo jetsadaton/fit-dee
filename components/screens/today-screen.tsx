@@ -649,8 +649,10 @@ function GoalProgress({
   );
 }
 
-function MonthHeatmap() {
-  const days = [0, 1, 2, 0, 2, 3, 0, 0, 1, 2, 0, 3, 2, 0, 0, 2, 1, 0, 3, 2, 0, 0, 2, 3, 1, 0, 2, 0, 1, 0];
+function MonthHeatmap({ days }: { days: { dateIct: string; level: 0 | 1 | 2 | 3 }[] | null }) {
+  const FALLBACK = [0, 1, 2, 0, 2, 3, 0, 0, 1, 2, 0, 3, 2, 0, 0, 2, 1, 0, 3, 2, 0, 0, 2, 3, 1, 0, 2, 0, 1, 0];
+  const levels = days ? days.map((d) => d.level) : FALLBACK;
+  const activeDays = days ? days.filter((d) => d.level > 0).length : 18;
   const colorFor = (v: number) => {
     if (v === 0) return T.bg4;
     if (v === 1) return T.coral + '44';
@@ -664,11 +666,11 @@ function MonthHeatmap() {
           กิจกรรมเดือนนี้
         </span>
         <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, fontWeight: 700, color: T.textDim }}>
-          18/30 วัน
+          {activeDays}/30 วัน
         </span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 4 }}>
-        {days.map((v, i) => (
+        {levels.map((v, i) => (
           <div
             key={i}
             style={{ aspectRatio: '1', borderRadius: 5, background: colorFor(v), border: `1px solid ${T.border}` }}
@@ -866,6 +868,7 @@ export type TodayScreenProps = {
     month30WorkoutCount?: number;
     month30WeightDeltaKg?: number | null;
     month30DaysHitKcal?: number;
+    month30ActivityDays?: { dateIct: string; level: 0 | 1 | 2 | 3 }[];
   };
   /** Optional mutation hooks. When supplied, click writes through to the
    * Server Action; if omitted the card falls back to local-only optimistic
@@ -927,6 +930,7 @@ export function TodayScreen({
   const month30WorkoutCount = data?.month30WorkoutCount ?? 0;
   const month30WeightDeltaKg = data?.month30WeightDeltaKg ?? null;
   const month30DaysHitKcal = data?.month30DaysHitKcal ?? 0;
+  const month30ActivityDays = data?.month30ActivityDays ?? null;
   return (
     <div
       style={{
@@ -1250,7 +1254,7 @@ export function TodayScreen({
                 },
               ]}
             />
-            <MonthHeatmap />
+            <MonthHeatmap days={month30ActivityDays} />
             {latestWeightKg != null && weightKgInitial != null && (
             <div style={{ background: T.bg3, border: `1px solid ${T.border}`, borderRadius: 16, padding: 14, marginBottom: 14 }}>
               <div

@@ -11,7 +11,7 @@ import { latest as latestWeight, findInRange as weightInRange } from '@/lib/db/r
 import { findByUserId as findStreak } from '@/lib/db/repositories/streaks';
 import { findById as findUser } from '@/lib/db/repositories/users';
 import { findActive as findActivePlan } from '@/lib/db/repositories/workout-plans';
-import { countInRange as countWorkoutSessions } from '@/lib/db/repositories/workout-sessions';
+import { countInRange as countWorkoutSessions, datesWithWorkoutInRange } from '@/lib/db/repositories/workout-sessions';
 import type { DailyFoodTotals } from '@/lib/types/db/logs';
 import type { DayKey, WeekPlanDays } from '@/lib/types/db/workouts';
 
@@ -70,6 +70,8 @@ export type TodaySnapshot = {
   month30WorkoutCount: number;
   month30WeightDeltaKg: number | null;
   month30DaysHitKcal: number;
+  /** Per-day activity level for the month heatmap. Level: 0=none 1=food 2=food+workout 3=food+workout+kcal≥goal */
+  month30ActivityDays: { dateIct: string; level: 0 | 1 | 2 | 3 }[];
 };
 
 const ZEROES: DailyFoodTotals = { kcal: 0, proteinG: 0, carbG: 0, fatG: 0, meals: 0 };
@@ -114,6 +116,8 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
     month30Workouts,
     month30Weights,
     month30HitKcal,
+    month30Food,
+    month30WorkoutDates,
   ] = await Promise.all([
     findUser(userId),
     findProfile(userId),
@@ -133,6 +137,9 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
     weightInRange({ userId, startUtc: month30Start, endUtc: dayEnd }).catch(() => []),
     // days where kcal ≥ 80% of goal (computed after profile loads — use 0 as fallback)
     Promise.resolve(0), // placeholder; computed below after profile
+    // heatmap: food per day + workout dates (30d)
+    dailyTotalsInRange({ userId, startUtc: month30Start, endUtc: dayEnd }).catch(() => []),
+    datesWithWorkoutInRange({ userId, startUtc: month30Start, endUtc: dayEnd }).catch(() => new Set<string>()),
   ]);
 
   // Compute kcal-hit days once we have the goal.
@@ -181,6 +188,19 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
         ) / 10
       : null;
 
+  // Month heatmap: 30 ICT calendar slots, oldest→newest.
+  const kcalFloor80 = kcalGoal > 0 ? Math.round(kcalGoal * 0.8) : 0;
+  const foodByDate = new Map(month30Food.map((d) => [d.dateIct, d]));
+  const month30ActivityDays: TodaySnapshot['month30ActivityDays'] = Array.from({ length: 30 }, (_, i) => {
+    const ictDateStr = new Date(Date.now() + ICT_OFFSET_MS - (29 - i) * 86400000).toISOString().slice(0, 10);
+    const fd = foodByDate.get(ictDateStr);
+    const hasFood = fd != null && fd.kcal > 0;
+    const hasWorkout = month30WorkoutDates.has(ictDateStr);
+    const hitGoal = kcalFloor80 > 0 && fd != null && fd.kcal >= kcalFloor80;
+    const level: 0 | 1 | 2 | 3 = hasFood && hasWorkout && hitGoal ? 3 : hasFood && hasWorkout ? 2 : hasFood ? 1 : 0;
+    return { dateIct: ictDateStr, level };
+  });
+
   return {
     displayName: profile?.displayName ?? user?.email?.split('@')[0] ?? 'นาย',
     streakCurrent: streak?.current ?? 0,
@@ -210,5 +230,6 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
     month30WorkoutCount: month30Workouts,
     month30WeightDeltaKg,
     month30DaysHitKcal: month30HitKcalReal,
+    month30ActivityDays,
   };
 }
