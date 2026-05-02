@@ -14,6 +14,134 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type UIMessage } from 'ai';
 import { BottomTabBar, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
+import type { FoodLogConfirmPayload } from '@/lib/ai/tools';
+import { confirmFoodLogAction, cancelFoodLogAction } from './actions';
+
+const MEAL_LABEL: Record<string, string> = {
+  breakfast: 'เช้า',
+  lunch: 'กลางวัน',
+  dinner: 'เย็น',
+  snack: 'ว่าง',
+};
+
+function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
+  const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>('idle');
+
+  const handleConfirm = async () => {
+    setState('loading');
+    await confirmFoodLogAction(payload.pendingId);
+    setState('confirmed');
+  };
+
+  const handleCancel = async () => {
+    setState('loading');
+    await cancelFoodLogAction(payload.pendingId);
+    setState('cancelled');
+  };
+
+  if (state === 'confirmed') {
+    return (
+      <div style={{ background: T.bg3, borderRadius: 12, padding: '10px 14px', fontSize: 13, color: T.textDim }}>
+        ✓ บันทึก <strong style={{ color: T.text }}>{payload.nameTh}</strong> แล้ว
+      </div>
+    );
+  }
+  if (state === 'cancelled') {
+    return (
+      <div style={{ background: T.bg3, borderRadius: 12, padding: '10px 14px', fontSize: 13, color: T.textDim }}>
+        ยกเลิกแล้ว
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        background: T.bg3,
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
+        padding: '12px 14px',
+        fontSize: 13,
+        fontFamily: 'Inter,"Noto Sans Thai"',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: T.text }}>{payload.nameTh}</div>
+          <div style={{ color: T.textDim, fontSize: 12 }}>
+            มื้อ{MEAL_LABEL[payload.mealType] ?? payload.mealType}
+            {payload.portionG ? ` · ${payload.portionG}g` : ''}
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontWeight: 800, fontSize: 16, color: T.coral }}>
+            {payload.kcalLow}–{payload.kcalHigh}
+          </div>
+          <div style={{ fontSize: 11, color: T.textDim }}>kcal</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <MacroPill label="โปรตีน" value={payload.proteinG} unit="g" color="#6EE7B7" />
+        <MacroPill label="คาร์บ" value={payload.carbG} unit="g" color="#93C5FD" />
+        <MacroPill label="ไขมัน" value={payload.fatG} unit="g" color="#FCA5A5" />
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={handleConfirm}
+          disabled={state === 'loading'}
+          style={{
+            flex: 1,
+            padding: '8px 0',
+            borderRadius: 999,
+            border: 'none',
+            background: state === 'loading' ? T.bg4 : T.coral,
+            color: state === 'loading' ? T.textMute : '#0E0F12',
+            fontWeight: 800,
+            fontSize: 13,
+            cursor: state === 'loading' ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {state === 'loading' ? '…' : 'ยืนยัน'}
+        </button>
+        <button
+          onClick={handleCancel}
+          disabled={state === 'loading'}
+          style={{
+            flex: 1,
+            padding: '8px 0',
+            borderRadius: 999,
+            border: `1px solid ${T.border}`,
+            background: 'transparent',
+            color: T.textDim,
+            fontSize: 13,
+            cursor: state === 'loading' ? 'not-allowed' : 'pointer',
+          }}
+        >
+          ยกเลิก
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MacroPill({ label, value, unit, color }: { label: string; value: number; unit: string; color: string }) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        background: T.bg4,
+        borderRadius: 8,
+        padding: '4px 6px',
+        textAlign: 'center',
+      }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 700, color }}>{value}{unit}</div>
+      <div style={{ fontSize: 10, color: T.textDim }}>{label}</div>
+    </div>
+  );
+}
 
 type ChatClientProps = {
   initialMessages: UIMessage[];
@@ -61,30 +189,50 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
           </div>
         )}
         {messages.map((m) => {
-          const text = m.parts
-            .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
-            .map((p) => p.text)
-            .join('');
-          if (!text) return null;
-          return (
-            <div key={m.id} style={{ marginBottom: 12, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div
-                style={{
-                  maxWidth: '80%',
-                  padding: '10px 14px',
-                  borderRadius: 16,
-                  background: m.role === 'user' ? T.coral : T.bg3,
-                  color: m.role === 'user' ? '#0E0F12' : T.text,
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {text}
-              </div>
-            </div>
-          );
+          const bubbles: React.ReactNode[] = [];
+
+          for (const p of m.parts) {
+            if (p.type === 'text' && p.text) {
+              bubbles.push(
+                <div
+                  key={`${m.id}-text-${bubbles.length}`}
+                  style={{ marginBottom: 8, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}
+                >
+                  <div
+                    style={{
+                      maxWidth: '80%',
+                      padding: '10px 14px',
+                      borderRadius: 16,
+                      background: m.role === 'user' ? T.coral : T.bg3,
+                      color: m.role === 'user' ? '#0E0F12' : T.text,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      fontFamily: 'Inter,"Noto Sans Thai"',
+                    }}
+                  >
+                    {p.text}
+                  </div>
+                </div>
+              );
+            }
+
+            // AI SDK v6: tool parts use type 'tool-{toolName}', state 'output-available', part.output
+            if (p.type === 'tool-log_food' && 'state' in p && p.state === 'output-available' && 'output' in p) {
+              const result = p.output as FoodLogConfirmPayload;
+              if (result?.type === 'food_log_confirm') {
+                bubbles.push(
+                  <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
+                    <FoodConfirmCard payload={result} />
+                  </div>
+                );
+              }
+            }
+          }
+
+          if (bubbles.length === 0) return null;
+          return <div key={m.id} style={{ marginBottom: 4 }}>{bubbles}</div>;
         })}
         {submitting && (
           <div style={{ color: T.textMute, fontSize: 12, padding: 8 }}>โค้ชกำลังพิมพ์…</div>

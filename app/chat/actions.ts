@@ -6,7 +6,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
-import { confirm } from '@/lib/db/repositories/food-logs';
+import { confirm, softDelete } from '@/lib/db/repositories/food-logs';
 import type { LogActionResult } from '@/app/today/actions';
 
 export async function confirmFoodLogAction(pendingId: string): Promise<LogActionResult> {
@@ -17,6 +17,18 @@ export async function confirmFoodLogAction(pendingId: string): Promise<LogAction
     const row = await confirm(pendingId);
     if (!row) return { ok: false, error: 'unknown', message: 'pending food log not found or already deleted' };
     revalidatePath('/today');
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: 'unknown', message: err instanceof Error ? err.message : 'unknown error' };
+  }
+}
+
+export async function cancelFoodLogAction(pendingId: string): Promise<LogActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { ok: false, error: 'unauthorized' };
+
+  try {
+    await softDelete(pendingId);
     return { ok: true };
   } catch (err) {
     return { ok: false, error: 'unknown', message: err instanceof Error ? err.message : 'unknown error' };
