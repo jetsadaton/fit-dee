@@ -1,18 +1,12 @@
 'use client';
 
-// Minimal useChat-based UI to verify Phase 2 end-to-end.
-//
-// INTENTIONALLY NOT styled to match the full ChatScreen design — the next
-// session integrates useChat into components/screens/chat-screen.tsx so
-// the rich bubble variants (food card, workout card, AI insight card)
-// can render through tool-call payloads. For now this proves the
-// transport: input → POST /api/chat → Kimi → streaming → message list.
+// keep visual structure in sync with components/screens/chat-screen.tsx
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type FileUIPart, type UIMessage } from 'ai';
-import { BottomTabBar, type TabId } from '@/components/coach/primitives';
+import { BottomTabBar, CoachAvatar, KcalRing, StreakFlame, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
 import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload } from '@/lib/ai/tools';
 import { MOOD_LABEL } from '@/lib/ai/tools';
@@ -25,6 +19,8 @@ const MEAL_LABEL: Record<string, string> = {
   dinner: 'เย็น',
   snack: 'ว่าง',
 };
+
+const QUICK_CHIPS = ['🍱 กินอะไรดี', '💪 วันนี้ทำอะไร', '📝 บันทึกอาหาร', '⚖️ ชั่งน้ำหนัก'];
 
 function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
   const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>('idle');
@@ -204,9 +200,11 @@ function ExerciseLogCard({ payload }: { payload: ExerciseLogDonePayload }) {
 type ChatClientProps = {
   initialMessages: UIMessage[];
   displayName: string;
+  kcalGoal?: number;
+  streak?: number;
 };
 
-export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
+export function ChatClient({ initialMessages, displayName: _displayName, kcalGoal = 0, streak = 0 }: ChatClientProps) {
   const router = useRouter();
   const onTab = (t: TabId) => {
     if (t === 'chat') return;
@@ -224,10 +222,19 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const streaming = status === 'submitted' || status === 'streaming';
   const busy = streaming || uploading;
   const canSend = !busy && (input.trim().length > 0 || pendingFile !== null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    if (nearBottom) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, busy]);
 
   const pickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -244,7 +251,12 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
     setPreviewUrl(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleChipSend = (text: string) => {
+    if (busy) return;
+    sendMessage({ text });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!canSend) return;
 
@@ -254,7 +266,6 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
         const resized = await resizeImage(pendingFile);
         const form = new FormData();
         form.append('file', resized, 'photo.jpg');
-        // Guess kind from context: default food_photo; treadmill/scale handled by Kimi
         form.append('kind', 'food_photo');
         const res = await fetch('/api/attachments', { method: 'POST', body: form });
         if (!res.ok) throw new Error('upload failed');
@@ -269,7 +280,7 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
         sendMessage({ text: input || 'วิเคราะห์รูปนี้ให้หน่อย', files: [filePart] });
         clearFile();
       } catch {
-        // If upload fails, surface via the natural error state — don't crash
+        // upload failure handled by natural error state
       } finally {
         setUploading(false);
       }
@@ -279,18 +290,44 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
     setInput('');
   };
 
+  const statusText = uploading
+    ? 'กำลังอัปโหลด…'
+    : streaming
+    ? 'กำลังพิมพ์…'
+    : 'ออนไลน์ · ตอบทันที';
+
   return (
     <div style={{ height: '100dvh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-      <header style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-        <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, fontWeight: 700, color: T.textDim, letterSpacing: 0.6, textTransform: 'uppercase' }}>
-          แชทกับโค้ชดี
-        </div>
-        <h1 style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 900, fontSize: 22, color: T.text, margin: '2px 0 0' }}>
-          สวัสดี {displayName}
-        </h1>
-      </header>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px 8px' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px 12px', borderBottom: `1px solid ${T.border}`, background: T.bg, flexShrink: 0 }}>
+        <CoachAvatar size={38} online thinking={streaming} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontWeight: 800, fontSize: 15, color: T.text }}>
+              โค้ชดี
+            </span>
+            <div style={{ width: 6, height: 6, borderRadius: 999, background: T.lime }} />
+          </div>
+          <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 11, color: T.textDim, fontWeight: 600 }}>
+            {statusText}
+          </div>
+        </div>
+        {streak > 0 && <StreakFlame count={streak} />}
+        {kcalGoal > 0 && (
+          <button
+            type="button"
+            onClick={() => onTab('today')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginLeft: 4 }}
+            aria-label="ดู Today"
+          >
+            <KcalRing size={36} stroke={4} eaten={0} goal={kcalGoal} burned={0} animate={false} />
+          </button>
+        )}
+      </div>
+
+      {/* Message list */}
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px 8px' }}>
         {messages.length === 0 && (
           <div style={{ color: T.textMute, fontSize: 13, textAlign: 'center', padding: 24 }}>
             ทักโค้ชดีได้เลย เช่น &quot;วันนี้กินข้าวกะเพราหมูสับ&quot; หรือ 📷 แนบรูปอาหาร/ลู่วิ่ง/ตาชั่ง
@@ -300,7 +337,6 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
           const bubbles: React.ReactNode[] = [];
 
           for (const p of m.parts) {
-            // Image bubble
             if (p.type === 'file' && 'mediaType' in p && String(p.mediaType).startsWith('image/') && 'url' in p) {
               bubbles.push(
                 <div key={`${m.id}-img-${bubbles.length}`} style={{ marginBottom: 8, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
@@ -313,7 +349,6 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
               );
             }
 
-            // Text bubble
             if (p.type === 'text' && p.text) {
               bubbles.push(
                 <div
@@ -340,7 +375,6 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
               );
             }
 
-            // Tool result cards (AI SDK v6: type 'tool-{toolName}', state 'output-available', part.output)
             if ('state' in p && p.state === 'output-available' && 'output' in p) {
               const out = p.output as Record<string, unknown>;
 
@@ -381,11 +415,34 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
           if (bubbles.length === 0) return null;
           return <div key={m.id} style={{ marginBottom: 4 }}>{bubbles}</div>;
         })}
-        {busy && (
-          <div style={{ color: T.textMute, fontSize: 12, padding: 8 }}>
-            {uploading ? 'กำลังอัปโหลดรูป…' : 'โค้ชกำลังพิมพ์…'}
-          </div>
-        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick chips */}
+      <div style={{ padding: '6px 12px 0', display: 'flex', gap: 6, overflowX: 'auto', flexShrink: 0 }}>
+        {QUICK_CHIPS.map((c) => (
+          <button
+            type="button"
+            key={c}
+            onClick={() => handleChipSend(c)}
+            disabled={busy}
+            style={{
+              flexShrink: 0,
+              padding: '7px 12px',
+              borderRadius: 999,
+              background: T.bg3,
+              border: `1px solid ${T.border}`,
+              color: busy ? T.textMute : T.text,
+              fontFamily: 'Inter,"Noto Sans Thai"',
+              fontWeight: 700,
+              fontSize: 12,
+              cursor: busy ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {c}
+          </button>
+        ))}
       </div>
 
       {/* Image preview strip */}
@@ -411,9 +468,20 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
         </div>
       )}
 
+      {/* Composer */}
       <form
         onSubmit={(e) => { void handleSubmit(e); }}
-        style={{ padding: '10px 12px', paddingBottom: 'calc(68px + env(safe-area-inset-bottom, 0px))', borderTop: `1px solid ${T.border}`, display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}
+        style={{
+          padding: '8px 12px 12px',
+          paddingBottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
+          borderTop: `1px solid ${T.border}`,
+          marginTop: 8,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          flexShrink: 0,
+          background: T.bg,
+        }}
       >
         {/* Hidden file input */}
         <input
@@ -424,50 +492,80 @@ export function ChatClient({ initialMessages, displayName }: ChatClientProps) {
           onChange={pickFile}
         />
 
+        {/* + button */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={busy}
+          aria-label="แนบไฟล์"
+          style={{
+            width: 40, height: 40, borderRadius: 999, flexShrink: 0,
+            background: T.bg3, border: `1px solid ${T.border}`,
+            color: T.text, cursor: busy ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+        </button>
+
+        {/* Text input */}
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={pendingFile ? 'เพิ่มข้อความ (ไม่บังคับ)…' : 'พิมพ์อะไรก็ได้...'}
+          disabled={busy}
+          style={{
+            flex: 1, height: 40, padding: '0 14px', borderRadius: 999,
+            border: `1px solid ${T.border}`, background: T.bg3,
+            color: T.text, fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 14,
+            outline: 'none',
+          }}
+        />
+
         {/* Camera button */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={busy}
-          aria-label="แนบรูปภาพ"
+          aria-label="ถ่ายรูป"
           style={{
-            width: 40, height: 40, borderRadius: '50%', border: 'none', flexShrink: 0,
+            width: 40, height: 40, borderRadius: 999, flexShrink: 0,
             background: pendingFile ? T.coral : T.bg3,
-            color: pendingFile ? '#0E0F12' : T.textDim,
+            border: `1px solid ${T.border}`,
+            color: pendingFile ? '#0E0F12' : T.text,
             cursor: busy ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-            <circle cx="12" cy="13" r="4"/>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 3l-1.5 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.5L15 3H9z" />
+            <circle cx="12" cy="13" r="4" />
           </svg>
         </button>
 
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={pendingFile ? 'เพิ่มข้อความ (ไม่บังคับ)…' : 'พิมพ์ที่นี่…'}
-          disabled={busy}
-          style={{
-            flex: 1, padding: '10px 14px', borderRadius: 999,
-            border: `1px solid ${T.border}`, background: T.bg3,
-            color: T.text, fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 14,
-          }}
-        />
+        {/* Send button */}
         <button
           type="submit"
           disabled={!canSend}
+          aria-label="ส่ง"
           style={{
-            padding: '10px 18px', borderRadius: 999, border: 'none',
+            width: 40, height: 40, borderRadius: 999, border: 'none', flexShrink: 0,
             background: canSend ? T.coral : T.bg4,
             color: canSend ? '#0E0F12' : T.textMute,
-            fontWeight: 800, fontSize: 14, cursor: canSend ? 'pointer' : 'not-allowed',
-            flexShrink: 0,
+            cursor: canSend ? 'pointer' : 'not-allowed',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
-          {uploading ? '…' : 'ส่ง'}
+          {uploading ? (
+            <span style={{ fontSize: 13, fontWeight: 800 }}>…</span>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 12l18-9-4 9 4 9z" />
+            </svg>
+          )}
         </button>
       </form>
 

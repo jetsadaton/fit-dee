@@ -28,5 +28,5 @@ export default async function ChatPage() {
       parts: [{ type: 'text' as const, text: r.content ?? '' }],
     }));
 
-  return <ChatClient initialMessages={initialMessages} displayName={profile.displayName} />;
+  return <ChatClient initialMessages={initialMessages} displayName={profile.displayName} kcalGoal={profile.kcalTarget ?? 0} />;
 }
