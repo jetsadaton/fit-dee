@@ -1,6 +1,22 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import { Noto_Sans_Thai } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const notoSansThai = Noto_Sans_Thai({
+  subsets: ['thai'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-noto-sans-thai',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Coachly · โค้ชดี',
@@ -24,15 +40,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="th" className={`${inter.variable} ${notoSansThai.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>

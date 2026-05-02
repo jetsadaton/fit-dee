@@ -3,6 +3,7 @@
 // keep visual structure in sync with components/screens/chat-screen.tsx
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type FileUIPart, type UIMessage } from 'ai';
@@ -348,6 +349,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
             if (p.type === 'file' && 'mediaType' in p && String(p.mediaType).startsWith('image/') && 'url' in p) {
               bubbles.push(
                 <div key={`${m.id}-img-${bubbles.length}`} style={{ marginBottom: 8, display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={String(p.url)}
                     alt="รูปที่แนบ"
@@ -476,7 +478,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
       {previewUrl && (
         <div style={{ padding: '8px 12px 0', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <div style={{ position: 'relative', width: 56, height: 56 }}>
-            <img src={previewUrl} alt="preview" style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover' }} />
+            <Image src={previewUrl} alt="preview" width={56} height={56} unoptimized style={{ borderRadius: 8, objectFit: 'cover' }} />
             <button
               type="button"
               onClick={clearFile}

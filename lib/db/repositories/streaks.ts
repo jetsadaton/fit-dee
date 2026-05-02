@@ -1,10 +1,11 @@
 // Streaks repository.
-// One row per user; the Inngest nightly job (Phase 3) is the only writer in
-// production. /today reads `current` for the header flame badge.
+// One row per user; the Inngest nightly job writes via `upsert`.
+// /today reads `current` for the header flame badge.
 
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { streaks } from '@/lib/db/schema';
+import type { StreakState } from '@/lib/services/streak';
 
 export type StreakRow = {
   userId: string;
@@ -25,4 +26,24 @@ export async function findByUserId(userId: string): Promise<StreakRow | undefine
     lastActiveDate: r.lastActiveDate ?? null,
     updatedAt: r.updatedAt ?? new Date(),
   };
+}
+
+export async function upsert(userId: string, state: StreakState): Promise<void> {
+  await db
+    .insert(streaks)
+    .values({
+      userId,
+      current: state.current,
+      longest: state.longest,
+      lastActiveDate: state.lastActiveDate,
+    })
+    .onConflictDoUpdate({
+      target: streaks.userId,
+      set: {
+        current: state.current,
+        longest: state.longest,
+        lastActiveDate: state.lastActiveDate,
+        updatedAt: new Date(),
+      },
+    });
 }
