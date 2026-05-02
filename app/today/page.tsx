@@ -51,6 +51,7 @@ export default async function TodayPage() {
         month30DaysHitKcal: data.month30DaysHitKcal,
         month30ActivityDays: data.month30ActivityDays,
         weightSeriesKg: data.weightSeriesKg,
+        todayFoodLogs: data.todayFoodLogs,
       }}
     />
   );

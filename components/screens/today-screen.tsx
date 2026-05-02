@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BottomTabBar, MacroBar, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
 import type { Insight, InsightRange } from '@/lib/types/dto/insights';
+import type { FoodLogItemDto } from '@/lib/types/dto/food-logs';
 
 type Range = InsightRange;
 
@@ -842,6 +843,262 @@ const insights: Record<Range, Insight[]> = {
   ],
 };
 
+// ─── Food Log List ───────────────────────────────────────────────────
+
+const MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
+const MEAL_LABEL_TH: Record<string, string> = {
+  breakfast: 'เช้า',
+  lunch: 'กลางวัน',
+  dinner: 'เย็น',
+  snack: 'ของว่าง',
+};
+
+function FoodLogList({
+  items = [],
+  onDelete,
+  onUpdate,
+}: {
+  items?: FoodLogItemDto[];
+  onDelete?: (id: string) => void;
+  onUpdate?: (id: string, changes: { kcal: number; proteinG: number; carbG: number; fatG: number }) => void;
+}) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState({ kcal: '', proteinG: '', carbG: '', fatG: '' });
+
+  const grouped = MEAL_ORDER.map((meal) => ({
+    meal,
+    rows: items.filter((i) => i.mealType === meal),
+  })).filter((g) => g.rows.length > 0);
+
+  const startEdit = (item: FoodLogItemDto) => {
+    setDeletingId(null);
+    setEditingId(item.id);
+    setEditValues({
+      kcal: String(item.kcal),
+      proteinG: String(item.proteinG),
+      carbG: String(item.carbG),
+      fatG: String(item.fatG),
+    });
+  };
+
+  const confirmEdit = (id: string) => {
+    const kcal = parseInt(editValues.kcal, 10);
+    const proteinG = parseFloat(editValues.proteinG);
+    const carbG = parseFloat(editValues.carbG);
+    const fatG = parseFloat(editValues.fatG);
+    if (!isNaN(kcal) && !isNaN(proteinG) && !isNaN(carbG) && !isNaN(fatG)) {
+      onUpdate?.(id, { kcal, proteinG, carbG, fatG });
+    }
+    setEditingId(null);
+  };
+
+  const confirmDelete = (id: string) => {
+    onDelete?.(id);
+    setDeletingId(null);
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '6px 8px',
+    borderRadius: 8,
+    border: `1px solid ${T.border}`,
+    background: T.bg,
+    color: T.text,
+    fontSize: 13,
+    fontFamily: 'Inter,"Noto Sans Thai"',
+    outline: 'none',
+    textAlign: 'center',
+  };
+
+  return (
+    <div
+      style={{
+        background: T.bg3,
+        border: `1px solid ${T.border}`,
+        borderRadius: 16,
+        padding: 14,
+        marginBottom: 14,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: 'Inter,"Noto Sans Thai"',
+          fontSize: 10,
+          fontWeight: 800,
+          letterSpacing: 0.6,
+          textTransform: 'uppercase',
+          color: T.textDim,
+          marginBottom: grouped.length === 0 ? 8 : 12,
+        }}
+      >
+        รายการอาหารวันนี้
+      </div>
+
+      {grouped.length === 0 && (
+        <div style={{ color: T.textMute, fontSize: 13, fontFamily: 'Inter,"Noto Sans Thai"', textAlign: 'center', padding: '8px 0' }}>
+          ยังไม่มีรายการ · บอกโค้ชได้เลยว่ากินอะไร
+        </div>
+      )}
+
+      {grouped.map(({ meal, rows }, gi) => (
+        <div key={meal} style={{ marginBottom: gi < grouped.length - 1 ? 12 : 0 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.textDim, marginBottom: 6, fontFamily: 'Inter,"Noto Sans Thai"' }}>
+            {MEAL_LABEL_TH[meal]}
+          </div>
+          {rows.map((item) => {
+            const isEditing = editingId === item.id;
+            const isDeleting = deletingId === item.id;
+
+            if (isDeleting) {
+              return (
+                <div
+                  key={item.id}
+                  style={{
+                    background: T.bg4,
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    marginBottom: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: T.textDim, fontFamily: 'Inter,"Noto Sans Thai"' }}>
+                    ลบ <strong style={{ color: T.text }}>{item.nameTh}</strong>?
+                  </span>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button
+                      onClick={() => setDeletingId(null)}
+                      style={{ padding: '5px 10px', borderRadius: 8, border: `1px solid ${T.border}`, background: 'transparent', color: T.textDim, fontSize: 12, cursor: 'pointer' }}
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      onClick={() => confirmDelete(item.id)}
+                      style={{ padding: '5px 10px', borderRadius: 8, border: 'none', background: '#EF4444', color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      ลบ
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            if (isEditing) {
+              return (
+                <div
+                  key={item.id}
+                  style={{
+                    background: T.bg4,
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    marginBottom: 6,
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: T.textDim, fontFamily: 'Inter,"Noto Sans Thai"', marginBottom: 8 }}>
+                    ✎ แก้ไข · {item.nameTh}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 6, marginBottom: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: T.textMute, marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>kcal</div>
+                      <input style={inputStyle} type="number" value={editValues.kcal} onChange={(e) => setEditValues((v) => ({ ...v, kcal: e.target.value }))} min={0} max={5000} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: '#6EE7B7', marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>P(g)</div>
+                      <input style={inputStyle} type="number" value={editValues.proteinG} onChange={(e) => setEditValues((v) => ({ ...v, proteinG: e.target.value }))} min={0} max={500} step={0.1} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: '#93C5FD', marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>C(g)</div>
+                      <input style={inputStyle} type="number" value={editValues.carbG} onChange={(e) => setEditValues((v) => ({ ...v, carbG: e.target.value }))} min={0} max={500} step={0.1} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: '#FCA5A5', marginBottom: 3, fontFamily: 'Inter', textAlign: 'center' }}>F(g)</div>
+                      <input style={inputStyle} type="number" value={editValues.fatG} onChange={(e) => setEditValues((v) => ({ ...v, fatG: e.target.value }))} min={0} max={500} step={0.1} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      style={{ flex: 1, padding: '7px 0', borderRadius: 8, border: `1px solid ${T.border}`, background: 'transparent', color: T.textDim, fontSize: 12, cursor: 'pointer' }}
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      onClick={() => confirmEdit(item.id)}
+                      style={{ flex: 2, padding: '7px 0', borderRadius: 8, border: 'none', background: T.coral, color: '#0E0F12', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      บันทึก
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 10px',
+                  borderRadius: 10,
+                  background: T.bg4,
+                  marginBottom: 6,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'Inter,"Noto Sans Thai"', fontSize: 13, fontWeight: 600, color: T.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.nameTh}
+                  </div>
+                  <div style={{ fontSize: 11, color: T.textMute, fontFamily: 'Inter', marginTop: 2 }}>
+                    P{item.proteinG}·C{item.carbG}·F{item.fatG}g
+                    {item.portionG ? ` · ${item.portionG}g` : ''}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 800, color: T.coral }}>
+                    {item.kcalLow && item.kcalHigh && item.kcalLow !== item.kcalHigh
+                      ? `${item.kcalLow}–${item.kcalHigh}`
+                      : item.kcal}
+                  </div>
+                  <div style={{ fontSize: 10, color: T.textMute }}>kcal</div>
+                </div>
+                <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                  <button
+                    onClick={() => startEdit(item)}
+                    aria-label={`แก้ไข ${item.nameTh}`}
+                    style={{ width: 28, height: 28, borderRadius: 8, border: `1px solid ${T.border}`, background: 'transparent', color: T.textDim, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => { setEditingId(null); setDeletingId(item.id); }}
+                    aria-label={`ลบ ${item.nameTh}`}
+                    style={{ width: 28, height: 28, borderRadius: 8, border: `1px solid ${T.border}`, background: 'transparent', color: T.textMute, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export type TodayScreenProps = {
   onTab?: (t: TabId) => void;
   activeTab?: TabId;
@@ -879,6 +1136,8 @@ export type TodayScreenProps = {
     month30ActivityDays?: { dateIct: string; level: 0 | 1 | 2 | 3 }[];
     /** Weight readings oldest→newest. ≥2 entries → sparkline shown. Empty = hide. */
     weightSeriesKg?: number[];
+    /** Confirmed food logs for today — rendered as FoodLogList. */
+    todayFoodLogs?: FoodLogItemDto[];
   };
   /** Optional mutation hooks. When supplied, click writes through to the
    * Server Action; if omitted the card falls back to local-only optimistic
@@ -886,6 +1145,8 @@ export type TodayScreenProps = {
   onAddWater?: (ml: number) => void;
   onSelectMood?: (energy: number) => void;
   onStartWorkout?: () => void;
+  onDeleteFoodLog?: (id: string) => void;
+  onUpdateFoodLog?: (id: string, changes: { kcal: number; proteinG: number; carbG: number; fatG: number }) => void;
   /** Controlled range from parent. When omitted, TodayScreen manages its own range state. */
   range?: Range;
   onRangeChange?: (r: Range) => void;
@@ -901,6 +1162,8 @@ export function TodayScreen({
   onAddWater,
   onSelectMood,
   onStartWorkout,
+  onDeleteFoodLog,
+  onUpdateFoodLog,
   range: controlledRange,
   onRangeChange,
   insights: insightsProp,
@@ -1086,6 +1349,11 @@ export function TodayScreen({
                 f={{ eaten: fatEaten, goal: fatGoal }}
               />
             </div>
+            <FoodLogList
+              items={data?.todayFoodLogs}
+              onDelete={onDeleteFoodLog}
+              onUpdate={onUpdateFoodLog}
+            />
             <AIInsightCard
               items={insightsLoading ? [] : (insightsProp?.length ? insightsProp : insights.today)}
               range="today"

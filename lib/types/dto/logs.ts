@@ -28,3 +28,11 @@ export const logWeightInputSchema = z.object({
   loggedAt: z.coerce.date(),
 });
 export type LogWeightInput = z.infer<typeof logWeightInputSchema>;
+
+export const updateFoodLogInputSchema = z.object({
+  kcal: z.coerce.number().int().min(0).max(5000),
+  proteinG: z.coerce.number().min(0).max(500),
+  carbG: z.coerce.number().min(0).max(500),
+  fatG: z.coerce.number().min(0).max(500),
+});
+export type UpdateFoodLogInput = z.infer<typeof updateFoodLogInputSchema>;

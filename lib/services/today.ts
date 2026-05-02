@@ -4,7 +4,12 @@
 // page doesn't crash before onboarding.
 
 import { findByUserId as findProfile } from '@/lib/db/repositories/profiles';
-import { sumInRange as sumFood, dailyTotalsInRange, countDaysHitKcal } from '@/lib/db/repositories/food-logs';
+import {
+  sumInRange as sumFood,
+  dailyTotalsInRange,
+  countDaysHitKcal,
+  listWithName,
+} from '@/lib/db/repositories/food-logs';
 import { sumMlInRange as sumWaterMl } from '@/lib/db/repositories/water-logs';
 import { latestInRange as latestMood } from '@/lib/db/repositories/mood-logs';
 import { latest as latestWeight, findInRange as weightInRange } from '@/lib/db/repositories/weight-logs';
@@ -13,6 +18,7 @@ import { findById as findUser } from '@/lib/db/repositories/users';
 import { findActive as findActivePlan } from '@/lib/db/repositories/workout-plans';
 import { countInRange as countWorkoutSessions, datesWithWorkoutInRange } from '@/lib/db/repositories/workout-sessions';
 import type { DailyFoodTotals } from '@/lib/types/db/logs';
+import type { FoodLogItemDto } from '@/lib/types/dto/food-logs';
 import type { DayKey, WeekPlanDays } from '@/lib/types/db/workouts';
 
 // User tz pinned to Asia/Bangkok until users.tz column ships (Phase 2).
@@ -74,6 +80,8 @@ export type TodaySnapshot = {
   month30ActivityDays: { dateIct: string; level: 0 | 1 | 2 | 3 }[];
   /** Weight readings oldest→newest (past 30d). Empty = no data. ≥2 entries = sparkline eligible. */
   weightSeriesKg: number[];
+  /** Confirmed food logs for today, ordered by mealType then loggedAt. */
+  todayFoodLogs: FoodLogItemDto[];
 };
 
 const ZEROES: DailyFoodTotals = { kcal: 0, proteinG: 0, carbG: 0, fatG: 0, meals: 0 };
@@ -120,6 +128,7 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
     month30HitKcal,
     month30Food,
     month30WorkoutDates,
+    todayFoodLogsRaw,
   ] = await Promise.all([
     findUser(userId),
     findProfile(userId),
@@ -142,6 +151,8 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
     // heatmap: food per day + workout dates (30d)
     dailyTotalsInRange({ userId, startUtc: month30Start, endUtc: dayEnd }).catch(() => []),
     datesWithWorkoutInRange({ userId, startUtc: month30Start, endUtc: dayEnd }).catch(() => new Set<string>()),
+    // today's individual food log items for the food list
+    listWithName({ userId, startUtc: dayStart, endUtc: dayEnd }).catch(() => []),
   ]);
 
   // Compute kcal-hit days once we have the goal.
@@ -237,5 +248,18 @@ export async function loadTodaySnapshot(userId: string): Promise<TodaySnapshot> 
     month30DaysHitKcal: month30HitKcalReal,
     month30ActivityDays,
     weightSeriesKg,
+    todayFoodLogs: todayFoodLogsRaw.map((r) => ({
+      id: r.id,
+      nameTh: r.nameTh,
+      mealType: r.mealType as FoodLogItemDto['mealType'],
+      kcal: r.kcal,
+      kcalLow: r.kcalLow ?? null,
+      kcalHigh: r.kcalHigh ?? null,
+      proteinG: Math.round(Number(r.proteinG) * 10) / 10,
+      carbG: Math.round(Number(r.carbG) * 10) / 10,
+      fatG: Math.round(Number(r.fatG) * 10) / 10,
+      portionG: r.portionG ?? null,
+      loggedAt: r.loggedAt.toISOString(),
+    })),
   };
 }

@@ -9,7 +9,13 @@ import { auth } from '@/lib/auth';
 import { create as createWater } from '@/lib/db/repositories/water-logs';
 import { create as createMood } from '@/lib/db/repositories/mood-logs';
 import { create as createWeight } from '@/lib/db/repositories/weight-logs';
-import { logMoodInputSchema, logWaterInputSchema, logWeightInputSchema } from '@/lib/types/dto/logs';
+import { softDeleteOwned, updateFoodLog } from '@/lib/db/repositories/food-logs';
+import {
+  logMoodInputSchema,
+  logWaterInputSchema,
+  logWeightInputSchema,
+  updateFoodLogInputSchema,
+} from '@/lib/types/dto/logs';
 import { loadTodaySnapshot } from '@/lib/services/today';
 import { generateInsights } from '@/lib/services/insights';
 import { findFresh, upsert as upsertInsights } from '@/lib/db/repositories/insights-cache';
@@ -91,6 +97,41 @@ export async function logWeightAction(rawInput: unknown): Promise<LogActionResul
     // Weight feeds plan-preview's TDEE explainer copy + Phase-3 recalibration.
     revalidatePath('/today');
     revalidatePath('/plan-preview');
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: 'unknown', message: err instanceof Error ? err.message : 'unknown error' };
+  }
+}
+
+export async function deleteFoodLogAction(id: string): Promise<LogActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { ok: false, error: 'unauthorized' };
+
+  try {
+    await softDeleteOwned(id, session.user.id);
+    revalidatePath('/today');
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: 'unknown', message: err instanceof Error ? err.message : 'unknown error' };
+  }
+}
+
+export async function updateFoodLogAction(id: string, rawInput: unknown): Promise<LogActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { ok: false, error: 'unauthorized' };
+
+  const parsed = updateFoodLogInputSchema.safeParse(rawInput);
+  if (!parsed.success) return validationError(parsed);
+
+  try {
+    const row = await updateFoodLog(id, session.user.id, {
+      kcal: parsed.data.kcal,
+      proteinG: String(parsed.data.proteinG),
+      carbG: String(parsed.data.carbG),
+      fatG: String(parsed.data.fatG),
+    });
+    if (!row) return { ok: false, error: 'unknown', message: 'food log not found or already deleted' };
+    revalidatePath('/today');
     return { ok: true };
   } catch (err) {
     return { ok: false, error: 'unknown', message: err instanceof Error ? err.message : 'unknown error' };

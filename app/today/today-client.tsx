@@ -7,7 +7,7 @@ import { TodayScreen, type TodayScreenProps } from '@/components/screens/today-s
 import { queryKeys } from '@/lib/queries/keys';
 import type { TabId } from '@/components/coach/primitives';
 import type { InsightRange } from '@/lib/types/dto/insights';
-import { logMoodAction, logWaterAction, fetchInsightsAction } from './actions';
+import { logMoodAction, logWaterAction, fetchInsightsAction, deleteFoodLogAction, updateFoodLogAction } from './actions';
 
 // ICT date string (YYYY-MM-DD) used as part of the insights cache key.
 // Insights refresh automatically when the date changes (page reload after midnight).
@@ -60,6 +60,31 @@ export function TodayClient({ data }: { data: TodayData }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.dailyDashboard.all }),
   });
 
+  const deleteFoodLog = useMutation({
+    mutationFn: async (id: string) => {
+      const r = await deleteFoodLogAction(id);
+      if (!r.ok) throw new Error(r.message ?? r.error);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.dailyDashboard.all });
+      qc.invalidateQueries({ queryKey: queryKeys.insights.all });
+    },
+  });
+
+  const updateFoodLog = useMutation({
+    mutationFn: async ({
+      id,
+      ...changes
+    }: { id: string; kcal: number; proteinG: number; carbG: number; fatG: number }) => {
+      const r = await updateFoodLogAction(id, changes);
+      if (!r.ok) throw new Error(r.message ?? r.error);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.dailyDashboard.all });
+      qc.invalidateQueries({ queryKey: queryKeys.insights.all });
+    },
+  });
+
   return (
     <TodayScreen
       data={data}
@@ -72,6 +97,8 @@ export function TodayClient({ data }: { data: TodayData }) {
       onAddWater={(ml) => water.mutate(ml)}
       onSelectMood={(energy) => mood.mutate(energy)}
       onStartWorkout={() => router.push('/workout/run')}
+      onDeleteFoodLog={(id) => deleteFoodLog.mutate(id)}
+      onUpdateFoodLog={(id, changes) => updateFoodLog.mutate({ id, ...changes })}
     />
   );
 }
