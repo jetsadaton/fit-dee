@@ -1,29 +1,59 @@
-'use client';
+// Server Component — gates /me with auth + profile, passes data to MeClient.
 
-import { useRouter } from 'next/navigation';
-import { BottomTabBar, type TabId } from '@/components/coach/primitives';
-import { T } from '@/lib/design/tokens';
+import { redirect } from 'next/navigation';
+import { auth } from '@/lib/auth';
+import { findByUserId as findProfile } from '@/lib/db/repositories/profiles';
+import { MeClient } from './me-client';
 
-// Placeholder until Phase 1 ships profile/account screen.
-// Exists to satisfy strict typedRoutes for the TabBar /me push.
-export default function MePage() {
-  const router = useRouter();
-  const onTab = (t: TabId) => {
-    if (t === 'me') return;
-    if (t === 'chat') router.push('/chat');
-    else if (t === 'today') router.push('/today');
-    else router.push('/plan');
-  };
+const GOAL_LABEL: Record<string, string> = {
+  lose: 'ลดน้ำหนัก',
+  gain: 'เพิ่มกล้ามเนื้อ',
+  fit: 'ฟิตเฟิร์ม',
+};
+
+const ACTIVITY_LABEL: Record<string, string> = {
+  sit: 'นั่งทำงานส่วนใหญ่',
+  walk: 'เดินบ้างในชีวิตประจำวัน',
+  move: 'ออกกำลังกายบ้าง',
+  active: 'ออกกำลังกายสม่ำเสมอ',
+};
+
+const EQUIPMENT_LABEL: Record<string, string> = {
+  gym: 'ยิม',
+  home_eq: 'อุปกรณ์ที่บ้าน',
+  home: 'Bodyweight',
+};
+
+const SEX_LABEL: Record<string, string> = {
+  m: 'ชาย',
+  f: 'หญิง',
+  o: 'ไม่ระบุ',
+};
+
+export default async function MePage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect('/');
+
+  const profile = await findProfile(session.user.id);
+  if (!profile?.kcalTarget) redirect('/onboarding');
+
   return (
-    <div style={{ minHeight: '100vh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center', gap: 12 }}>
-        <div style={{ fontSize: 48 }}>👤</div>
-        <h1 style={{ fontSize: 22, fontWeight: 800 }}>ฉัน</h1>
-        <p style={{ color: T.textDim, maxWidth: 280, lineHeight: 1.5 }}>
-          หน้าโปรไฟล์ + ตั้งค่า กำลังจะมาเร็วๆ นี้
-        </p>
-      </div>
-      <BottomTabBar active="me" onTab={onTab} />
-    </div>
+    <MeClient
+      displayName={profile.displayName}
+      goal={profile.goal}
+      goalLabel={GOAL_LABEL[profile.goal] ?? profile.goal}
+      sex={SEX_LABEL[profile.sex] ?? profile.sex}
+      age={profile.age}
+      heightCm={profile.heightCm}
+      weightKgInitial={String(profile.weightKgInitial)}
+      targetWeightKg={String(profile.targetWeightKg)}
+      kcalTarget={profile.kcalTarget}
+      proteinGTarget={profile.proteinGTarget ?? null}
+      carbGTarget={profile.carbGTarget ?? null}
+      fatGTarget={profile.fatGTarget ?? null}
+      activityLabel={ACTIVITY_LABEL[profile.activityLevel] ?? profile.activityLevel}
+      equipmentLabel={EQUIPMENT_LABEL[profile.equipment] ?? profile.equipment}
+      daysPerWeek={profile.daysPerWeek}
+    />
   );
 }
