@@ -29,8 +29,15 @@ yarn-error.log*
 # test artifacts
 coverage
 .playwright
+.playwright-mcp
 playwright-report
 test-results
+
+# python cache
+scripts/__pycache__/
+
+# local claude settings
+.claude/settings.local.json
 
 # drizzle / db
 drizzle/.snapshot
