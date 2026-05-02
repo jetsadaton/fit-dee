@@ -2,7 +2,7 @@
 
 > อ่านไฟล์นี้เป็นอันดับแรกในทุก session ใหม่
 > Last updated: 2026-05-02 · Branch: `claude/build-coachly-coach-ZBpRx`
-> Last commit: phase 2 — search_food + log_food tools wired; /api/chat streams with multi-step tool calling
+> Last commit: phase 2 complete — all 5 tools + photo upload + plan generator + eval harness
 
 ## TL;DR — เปิด session ใหม่ทำตามนี้
 
@@ -165,14 +165,23 @@ _Phase 0 ปิดครบ → ก้าวเข้า Phase 1_
 - ✅ `app/chat/chat-client.tsx` — guards empty text (tool-only messages skip render)
 - ✅ `pnpm build` passes; pushed to remote
 
+**Already shipped this session (2026-05-02 continued)**:
+
+- ✅ Photo upload in chat — resize (768px, JPEG 85%) → `/api/attachments` → Vercel Blob → `FileUIPart` → Kimi vision
+- ✅ `log_water` / `weigh_in` / `set_mood` tools — direct-commit, no pending row; UI cards rendered in chat
+- ✅ `lib/db/seed/exercises.ts` — 20 curated exercises (gym / home_eq / home tiers)
+- ✅ `scripts/seed-exercises.ts` + `pnpm db:seed` — upsert by semanticId
+- ✅ `lib/services/plan-generator.ts` — full-body/upper-lower/PPL split; triggered after onboarding (best-effort)
+- ✅ `tests/eval/run.ts` + `golden/food.json` + `golden/other.json` — 19 cases; `pnpm eval [--filter <id>]`
+
 **Next session — pick up here (in order)**:
 
-1. **Verify /chat + tools e2e in browser** — open `/chat`, send "กินข้าวกะเพราหมูสับ"; should see Kimi call search_food (empty result OK) then log_food (pending row in DB); `pnpm db:studio` ดู `food_logs` + `messages.tool_calls`. Report back to confirm before wiring UI cards.
-2. **Refactor full ChatScreen (Phase 2.5)** — remove minimal `ChatClient`, pass `useChat` messages into `ChatScreen` (components/screens/chat-screen.tsx). Add `tool-invocation` part rendering for `food_log_confirm` payload → show confirm card + wire `confirmFoodLogAction`.
-3. **Remaining tools** — `log_water` / `weigh_in` / `set_mood`. Thin wrappers over existing Server Actions in `today/actions.ts`. Add to `createCoachTools`.
-4. **log_exercise tool** — needs workout-sessions + exercise-logs repos wired. Depends on plan generator.
-5. **Plan generator** — `lib/services/plan-generator.ts`. Takes profile → produces a `WorkoutPlan` row. Triggered (a) right after onboarding, (b) by `update_plan` tool. `/plan` RSC reads `findActive` and renders.
-6. **Eval harness** — `tests/eval/run.ts` + `tests/eval/golden/*.json`. 50 Thai food prompts (need owner). Gates merges that touch `system-v*.ts` or any tool.
+1. **Run `pnpm db:seed`** — populate exercises table so plan generator produces real plans (run once on dev Neon branch)
+2. **Wire `/plan` RSC to real data** — `app/plan/page.tsx` RSC calls `findActive(userId)` → render real `WorkoutPlan.days` in the plan screen instead of static mock
+3. **`log_exercise` tool** — needs workout-sessions repo wired; call `create` in workout-sessions then `createMany` in exercise-logs; return `exercise_log_done` card in chat
+4. **Full ChatScreen refactor (Phase 2.5)** — replace minimal `ChatClient` with `ChatScreen` component integration + `useChat` wired through proper bubble variants
+5. **Add 30+ Thai food golden cases** — requires owner to supply prompts + expected tool calls; current eval has 10 food + 9 other
+6. **topics/progressive-overload.md** — interview owner; rep-range policy + deload schedule; unblock `plan-generator` hardcoded defaults
 
 **Notes on foods table**: table is empty — `search_food` returns `[]` for any query. LLM falls through to estimate macros from training data and calls `log_food` directly. `food_logs.food_id` is nullable so this is valid. Seed foods data when real Thai food DB content is available.
 
