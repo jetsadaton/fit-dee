@@ -455,6 +455,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -483,6 +484,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPendingFile(file);
     setPreviewUrl(URL.createObjectURL(file));
+    setUploadError(null);
     e.target.value = '';
   };
 
@@ -490,6 +492,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPendingFile(null);
     setPreviewUrl(null);
+    setUploadError(null);
   };
 
   const handleChipSend = (text: string) => {
@@ -503,13 +506,24 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
 
     if (pendingFile) {
       setUploading(true);
+      setUploadError(null);
       try {
         const resized = await resizeImage(pendingFile);
         const form = new FormData();
         form.append('file', resized, 'photo.jpg');
         form.append('kind', 'food_photo');
         const res = await fetch('/api/attachments', { method: 'POST', body: form });
-        if (!res.ok) throw new Error('upload failed');
+        if (!res.ok) {
+          // Server returns { error: '...' } for known failures.
+          let serverMsg = `อัปโหลดไม่สำเร็จ (${res.status})`;
+          try {
+            const body = (await res.json()) as { error?: string };
+            if (body?.error) serverMsg = body.error;
+          } catch {
+            /* response wasn't JSON — keep generic msg */
+          }
+          throw new Error(serverMsg);
+        }
         const { url } = (await res.json()) as { id: string; url: string };
 
         const filePart: FileUIPart = {
@@ -520,14 +534,19 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
         };
         sendMessage({ text: input || 'วิเคราะห์รูปนี้ให้หน่อย', files: [filePart] });
         clearFile();
-      } catch {
-        // upload failure handled by natural error state
+        setInput('');
+      } catch (err) {
+        // Keep the file in preview so the user can retry without re-picking.
+        const msg = err instanceof Error ? err.message : 'อัปโหลดไม่สำเร็จ';
+        setUploadError(msg);
+        console.error('[chat upload]', err);
       } finally {
         setUploading(false);
       }
-    } else {
-      sendMessage({ text: input });
+      return;
     }
+
+    sendMessage({ text: input });
     setInput('');
   };
 
@@ -845,6 +864,21 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
           <span style={{ fontSize: 12, color: T.textDim, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {pendingFile?.name}
           </span>
+        </div>
+      )}
+
+      {uploadError && (
+        <div
+          style={{
+            padding: '6px 14px',
+            color: T.coral,
+            fontSize: 12,
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
+            flexShrink: 0,
+          }}
+          role="alert"
+        >
+          ⚠ {uploadError}
         </div>
       )}
 
