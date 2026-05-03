@@ -73,6 +73,16 @@ export type UpdateProfileConfirmPayload = {
   };
 };
 
+export type WorkoutPlanCreatedPayload = {
+  type: 'workout_plan_created';
+  daysPerWeek: number;
+  workoutDayNames: string[];
+  weekStartsOn: string;
+  equipment: 'gym' | 'home_eq' | 'home';
+  goal: 'lose' | 'gain' | 'fit';
+  replacedExisting: boolean;
+};
+
 export const GOAL_LABEL: Record<string, string> = {
   lose: 'ลดน้ำหนัก',
   gain: 'เพิ่มกล้าม',

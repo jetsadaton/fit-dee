@@ -5,14 +5,35 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, type FileUIPart, type UIMessage } from 'ai';
 import { BottomTabBar, CoachAvatar, KcalRing, StreakFlame, type TabId } from '@/components/coach/primitives';
 import { T } from '@/lib/design/tokens';
-import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload, UpdateProfileConfirmPayload } from '@/lib/ai/tools/shared-types';
+import type { FoodLogConfirmPayload, WaterLogDonePayload, WeighInDonePayload, MoodLogDonePayload, ExerciseLogDonePayload, UpdateProfileConfirmPayload, WorkoutPlanCreatedPayload } from '@/lib/ai/tools/shared-types';
 import { MOOD_LABEL, GOAL_LABEL, ACTIVITY_LABEL, EQUIPMENT_LABEL } from '@/lib/ai/tools/shared-types';
 import { resizeImage } from '@/lib/utils/resize-image';
-import { confirmFoodLogAction, cancelFoodLogAction, confirmUpdateProfileAction } from './actions';
+import { queryKeys } from '@/lib/queries/keys';
+import { confirmFoodLogAction, cancelFoodLogAction, confirmUpdateProfileAction, fetchChatByDateAction } from './actions';
+
+const THAI_MONTHS = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+function todayIct(): string {
+  return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+function shiftDay(dateIct: string, delta: number): string {
+  const [y, m, d] = dateIct.split('-').map(Number);
+  const dt = new Date(Date.UTC(y!, m! - 1, d!));
+  dt.setUTCDate(dt.getUTCDate() + delta);
+  return dt.toISOString().slice(0, 10);
+}
+
+function fmtDateThai(dateIct: string, isToday: boolean): string {
+  const [, m, d] = dateIct.split('-').map(Number);
+  const base = `${d} ${THAI_MONTHS[m! - 1]}`;
+  return isToday ? `วันนี้ · ${base}` : base;
+}
 
 const MEAL_LABEL: Record<string, string> = {
   breakfast: 'เช้า',
@@ -21,10 +42,12 @@ const MEAL_LABEL: Record<string, string> = {
   snack: 'ว่าง',
 };
 
-const QUICK_CHIPS = ['🍱 กินอะไรดี', '💪 วันนี้ทำอะไร', '📝 บันทึกอาหาร', '⚖️ ชั่งน้ำหนัก'];
+const QUICK_CHIPS_BASE = ['🍱 กินอะไรดี', '💪 วันนี้ทำอะไร', '📝 บันทึกอาหาร', '⚖️ ชั่งน้ำหนัก'];
 
-function FoodConfirmCard({ payload }: { payload: FoodLogConfirmPayload }) {
-  const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>('idle');
+function FoodConfirmCard({ payload, historical = false }: { payload: FoodLogConfirmPayload; historical?: boolean }) {
+  const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>(
+    historical ? 'confirmed' : 'idle',
+  );
 
   const handleConfirm = async () => {
     setState('loading');
@@ -203,8 +226,60 @@ function ExerciseLogCard({ payload }: { payload: ExerciseLogDonePayload }) {
   );
 }
 
-function UpdateProfileConfirmCard({ payload }: { payload: UpdateProfileConfirmPayload }) {
-  const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>('idle');
+function WorkoutPlanCreatedCard({ payload }: { payload: WorkoutPlanCreatedPayload }) {
+  const router = useRouter();
+  return (
+    <div
+      style={{
+        background: T.bg3,
+        border: `1px solid ${T.coral}55`,
+        borderRadius: 14,
+        padding: '12px 14px',
+        fontSize: 13,
+        fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
+      }}
+    >
+      <div style={{ fontSize: 11, color: T.coral, fontWeight: 700, marginBottom: 6, letterSpacing: 0.2 }}>
+        🏋️ {payload.replacedExisting ? 'เปลี่ยนแผนใหม่แล้ว' : 'สร้างแผนใหม่แล้ว'}
+      </div>
+      <div style={{ fontWeight: 700, color: T.text, fontSize: 14, marginBottom: 4 }}>
+        {payload.daysPerWeek} วัน/สัปดาห์
+      </div>
+      <div style={{ color: T.textDim, fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
+        {payload.workoutDayNames.join(' · ')}
+      </div>
+      <button
+        type="button"
+        onClick={() => router.push('/plan')}
+        style={{
+          width: '100%',
+          padding: '10px 0',
+          borderRadius: 999,
+          border: 'none',
+          background: T.coral,
+          color: '#0E0F12',
+          fontWeight: 800,
+          fontSize: 13,
+          cursor: 'pointer',
+          fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
+        }}
+      >
+        ดูแผน →
+      </button>
+    </div>
+  );
+}
+
+function UpdateProfileConfirmCard({
+  payload,
+  historical = false,
+}: {
+  payload: UpdateProfileConfirmPayload;
+  historical?: boolean;
+}) {
+  const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>(
+    historical ? 'confirmed' : 'idle',
+  );
 
   const handleConfirm = async () => {
     setState('loading');
@@ -321,9 +396,10 @@ type ChatClientProps = {
   displayName: string;
   kcalGoal?: number;
   streak?: number;
+  hasPlan?: boolean;
 };
 
-export function ChatClient({ initialMessages, displayName: _displayName, kcalGoal = 0, streak = 0 }: ChatClientProps) {
+export function ChatClient({ initialMessages, displayName: _displayName, kcalGoal = 0, streak = 0, hasPlan = false }: ChatClientProps) {
   const router = useRouter();
   const onTab = (t: TabId) => {
     if (t === 'chat') return;
@@ -332,10 +408,49 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
     else router.push('/me');
   };
 
-  const { messages, sendMessage, status } = useChat({
+  const planChip = hasPlan ? '🏋️ เปลี่ยนแผนออกกำลัง' : '🏋️ สร้างแผนออกกำลัง';
+  const QUICK_CHIPS = [...QUICK_CHIPS_BASE, planChip];
+
+  const [selectedDate, setSelectedDate] = useState(todayIct);
+  const isToday = selectedDate === todayIct();
+  const calendarRef = useRef<HTMLInputElement>(null);
+
+  const { data: historicalMessages, isLoading: histLoading } = useQuery({
+    queryKey: queryKeys.chatMessages.byDate(selectedDate),
+    queryFn: () => fetchChatByDateAction(selectedDate),
+    enabled: !isToday,
+    staleTime: 30_000,
+  });
+
+  const { messages, setMessages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
     messages: initialMessages,
   });
+
+  // Sync useChat with the server when initialMessages grows (e.g. user sent a
+  // message, navigated away mid-stream, server finished + revalidatePath('/chat')
+  // fired, page re-rendered with the assistant turn now in DB). Only adopt
+  // when not actively streaming so we don't stomp on in-flight updates.
+  useEffect(() => {
+    if (status === 'streaming' || status === 'submitted') return;
+    if (initialMessages.length > messages.length) {
+      setMessages(initialMessages);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMessages]);
+
+  // When the user returns to /chat (tab focus or in-app nav), pull the latest
+  // server state. Without this, an assistant turn that completed while away
+  // wouldn't surface until the next manual action.
+  useEffect(() => {
+    const handler = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (status === 'streaming' || status === 'submitted') return;
+      router.refresh();
+    };
+    document.addEventListener('visibilitychange', handler);
+    return () => document.removeEventListener('visibilitychange', handler);
+  }, [status, router]);
   const [input, setInput] = useState('');
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -346,7 +461,8 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
 
   const streaming = status === 'submitted' || status === 'streaming';
   const busy = streaming || uploading;
-  const canSend = !busy && (input.trim().length > 0 || pendingFile !== null);
+  const canSend = !busy && isToday && (input.trim().length > 0 || pendingFile !== null);
+  const displayMessages = isToday ? messages : (historicalMessages ?? []);
 
   // Scroll to bottom on initial load (instant, no animation)
   useEffect(() => {
@@ -448,14 +564,122 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
         )}
       </div>
 
+      {/* Date nav */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          padding: '6px 14px 8px',
+          borderBottom: `1px solid ${T.border}`,
+          flexShrink: 0,
+          position: 'relative',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setSelectedDate((d) => shiftDay(d, -1))}
+          aria-label="วันก่อนหน้า"
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 10,
+            border: `1px solid ${T.border}`,
+            background: T.bg3,
+            color: T.textDim,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            const el = calendarRef.current;
+            if (!el) return;
+            if (typeof el.showPicker === 'function') el.showPicker();
+            else el.click();
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '5px 12px',
+            borderRadius: 10,
+            border: `1px solid ${T.border}`,
+            background: isToday ? T.coralBg : T.bg3,
+            color: isToday ? T.coral : T.text,
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: 'pointer',
+          }}
+        >
+          {fmtDateThai(selectedDate, isToday)}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </button>
+        <input
+          ref={calendarRef}
+          type="date"
+          max={todayIct()}
+          value={selectedDate}
+          onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+          style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
+          tabIndex={-1}
+          aria-hidden
+        />
+
+        <button
+          type="button"
+          onClick={() => { if (!isToday) setSelectedDate((d) => shiftDay(d, 1)); }}
+          disabled={isToday}
+          aria-label="วันถัดไป"
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 10,
+            border: `1px solid ${T.border}`,
+            background: T.bg3,
+            color: isToday ? T.bg4 : T.textDim,
+            cursor: isToday ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </div>
+
       {/* Message list */}
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px 8px' }}>
-        {messages.length === 0 && (
+        {histLoading && (
           <div style={{ color: T.textMute, fontSize: 13, textAlign: 'center', padding: 24 }}>
-            ทักโค้ชดีได้เลย เช่น &quot;วันนี้กินข้าวกะเพราหมูสับ&quot; หรือ 📷 แนบรูปอาหาร/ลู่วิ่ง/ตาชั่ง
+            กำลังโหลด…
           </div>
         )}
-        {messages.map((m) => {
+        {!histLoading && displayMessages.length === 0 && (
+          <div style={{ color: T.textMute, fontSize: 13, textAlign: 'center', padding: 24 }}>
+            {isToday
+            ? 'ทักโค้ชดีได้เลย เช่น "วันนี้กินข้าวกะเพราหมูสับ" หรือ 📷 แนบรูปอาหาร/ลู่วิ่ง/ตาชั่ง'
+            : 'ไม่มีบทสนทนาในวันนี้'}
+          </div>
+        )}
+        {displayMessages.map((m) => {
           const bubbles: React.ReactNode[] = [];
 
           for (const p of m.parts) {
@@ -504,7 +728,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
               if (p.type === 'tool-log_food' && out?.type === 'food_log_confirm') {
                 bubbles.push(
                   <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
-                    <FoodConfirmCard payload={out as unknown as FoodLogConfirmPayload} />
+                    <FoodConfirmCard payload={out as unknown as FoodLogConfirmPayload} historical={!isToday} />
                   </div>
                 );
               } else if (p.type === 'tool-log_water' && out?.type === 'water_log_done') {
@@ -531,10 +755,16 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
                     <ExerciseLogCard payload={out as unknown as ExerciseLogDonePayload} />
                   </div>
                 );
+              } else if (p.type === 'tool-create_workout_plan' && out?.type === 'workout_plan_created') {
+                bubbles.push(
+                  <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
+                    <WorkoutPlanCreatedCard payload={out as unknown as WorkoutPlanCreatedPayload} />
+                  </div>
+                );
               } else if (p.type === 'tool-update_profile' && out?.type === 'update_profile_confirm') {
                 bubbles.push(
                   <div key={`${m.id}-card-${bubbles.length}`} style={{ marginBottom: 8, maxWidth: '90%' }}>
-                    <UpdateProfileConfirmCard payload={out as unknown as UpdateProfileConfirmPayload} />
+                    <UpdateProfileConfirmCard payload={out as unknown as UpdateProfileConfirmPayload} historical={!isToday} />
                   </div>
                 );
               }
@@ -544,7 +774,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
           if (bubbles.length === 0) return null;
           return <div key={m.id} style={{ marginBottom: 4 }}>{bubbles}</div>;
         })}
-        {streaming && (
+        {isToday && streaming && (
           <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-start' }}>
             <div style={{ padding: '10px 16px', borderRadius: 16, background: T.bg3, display: 'flex', gap: 5, alignItems: 'center' }}>
               {([0, 1, 2] as const).map((i) => (
@@ -566,32 +796,34 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick chips */}
-      <div style={{ padding: '6px 12px 0', display: 'flex', gap: 6, overflowX: 'auto', flexShrink: 0 }}>
-        {QUICK_CHIPS.map((c) => (
-          <button
-            type="button"
-            key={c}
-            onClick={() => handleChipSend(c)}
-            disabled={busy}
-            style={{
-              flexShrink: 0,
-              padding: '7px 12px',
-              borderRadius: 999,
-              background: T.bg3,
-              border: `1px solid ${T.border}`,
-              color: busy ? T.textMute : T.text,
-              fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
-              fontWeight: 700,
-              fontSize: 12,
-              cursor: busy ? 'not-allowed' : 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
+      {/* Quick chips — today only */}
+      {isToday && (
+        <div style={{ padding: '6px 12px 0', display: 'flex', gap: 6, overflowX: 'auto', flexShrink: 0 }}>
+          {QUICK_CHIPS.map((c) => (
+            <button
+              type="button"
+              key={c}
+              onClick={() => handleChipSend(c)}
+              disabled={busy}
+              style={{
+                flexShrink: 0,
+                padding: '7px 12px',
+                borderRadius: 999,
+                background: T.bg3,
+                border: `1px solid ${T.border}`,
+                color: busy ? T.textMute : T.text,
+                fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: busy ? 'not-allowed' : 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Image preview strip */}
       {previewUrl && (
@@ -616,8 +848,24 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
         </div>
       )}
 
-      {/* Composer */}
-      <form
+      {/* Composer — today only */}
+      {!isToday && (
+        <div
+          style={{
+            padding: '10px 16px',
+            paddingBottom: 'calc(76px + env(safe-area-inset-bottom, 0px))',
+            borderTop: `1px solid ${T.border}`,
+            background: T.bg,
+            textAlign: 'center',
+            fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
+            fontSize: 12,
+            color: T.textMute,
+          }}
+        >
+          ดูย้อนหลัง · กลับวันนี้เพื่อแชท
+        </div>
+      )}
+      {isToday && (<form
         onSubmit={(e) => { void handleSubmit(e); }}
         style={{
           padding: '8px 12px 12px',
@@ -715,7 +963,7 @@ export function ChatClient({ initialMessages, displayName: _displayName, kcalGoa
             </svg>
           )}
         </button>
-      </form>
+      </form>)}
 
       <BottomTabBar active="chat" onTab={onTab} />
     </div>

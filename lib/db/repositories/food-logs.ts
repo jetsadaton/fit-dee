@@ -96,6 +96,16 @@ export async function confirm(id: string): Promise<FoodLog | undefined> {
   return row;
 }
 
+/** Confirm with ownership check — safe for user-facing actions. */
+export async function confirmOwned(id: string, userId: string): Promise<FoodLog | undefined> {
+  const [row] = await db
+    .update(foodLogs)
+    .set({ confirmedAt: new Date() })
+    .where(and(eq(foodLogs.id, id), eq(foodLogs.userId, userId), isNull(foodLogs.deletedAt)))
+    .returning();
+  return row;
+}
+
 /**
  * Per-day kcal totals for a date range, grouped by ICT calendar day.
  * Returns an array of { dateIct: 'YYYY-MM-DD', kcal, proteinG } sorted ascending.

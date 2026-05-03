@@ -63,5 +63,5 @@ export default async function PlanPage() {
   const exerciseMap = new Map(catalogExercises.map((e) => [e.semanticId, e]));
 
   const screenPlan = buildScreenPlan(days, exerciseMap);
-  return <PlanClient initialPlan={screenPlan} />;
+  return <PlanClient initialPlan={screenPlan} weekStartsOn={plan.weekStartsOn} />;
 }

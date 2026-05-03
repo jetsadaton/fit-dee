@@ -207,23 +207,24 @@ export async function generatePlan(args: { userId: string; profile: UserProfile 
     await deactivatePlan(existing.id);
   }
 
-  const weekStartsOn = getMondayOfCurrentWeek();
-
   await createPlan({
     userId,
-    weekStartsOn: weekStartsOn.toISOString().slice(0, 10),
+    weekStartsOn: getMondayOfCurrentWeekIct(),
     days,
     version: existing ? (existing.version ?? 1) + 1 : 1,
     active: true,
   });
 }
 
-function getMondayOfCurrentWeek(): Date {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0=Sun
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
+// Returns 'YYYY-MM-DD' (Monday) in ICT (UTC+7). Server is UTC on Vercel,
+// so naive new Date() / getDay() / toISOString() drifts by one week during
+// Sun 17:00–24:00 UTC (= Mon 00:00–07:00 ICT). Must match plan-screen's
+// checkIsCurrentWeek() which also reads ICT.
+function getMondayOfCurrentWeekIct(): string {
+  const nowIct = new Date(Date.now() + 7 * 3600 * 1000);
+  const jsDay = nowIct.getUTCDay();
+  const diff = jsDay === 0 ? -6 : 1 - jsDay;
+  const monday = new Date(nowIct);
+  monday.setUTCDate(nowIct.getUTCDate() + diff);
+  return monday.toISOString().slice(0, 10);
 }

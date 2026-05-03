@@ -45,8 +45,11 @@ export const queryKeys = {
     all: ['day-snapshot'] as const,
     byDate: (dateIct: string) => ['day-snapshot', dateIct] as const,
   },
+  chatMessages: {
+    all: ['chat-messages'] as const,
+    byDate: (dateIct: string) => [...queryKeys.chatMessages.all, 'byDate', dateIct] as const,
+  },
   // Add aggregates as services land:
   // foodLogs:       { all: ['food-logs']       as const, today: () => [...]      }
   // workoutPlans:   { all: ['workout-plans']   as const, current: () => [...]    }
-  // chatMessages:   { all: ['chat-messages']   as const, recent: (n=20) => [...] }
 } as const;

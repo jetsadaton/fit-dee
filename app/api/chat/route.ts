@@ -13,6 +13,7 @@
 // Drizzle's HTTP driver both work in Node. Move to edge after we confirm
 // streaming latency under prod traffic.
 
+import { revalidatePath } from 'next/cache';
 import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from 'ai';
 import { auth } from '@/lib/auth';
 import { kimi, DEFAULT_MODEL } from '@/lib/ai/kimi';
@@ -22,6 +23,7 @@ import { checkChatLimit } from '@/lib/ai/rate-limit';
 import { createCoachTools } from '@/lib/ai/tools';
 import { getOrCreate as getOrCreateThread, touch as touchThread } from '@/lib/db/repositories/chat-threads';
 import { create as createMessage } from '@/lib/db/repositories/messages';
+import { findByBlobUrls as findAttachmentsByBlobUrls } from '@/lib/db/repositories/attachments';
 import type { ToolCall } from '@/lib/types/db/chat';
 
 export const runtime = 'nodejs';
@@ -77,39 +79,81 @@ export async function POST(req: Request) {
           .map((p) => p.text)
           .join('\n')
       : '';
+  // File parts arrive with the public Blob URL (set by /api/attachments).
+  // Resolve back to attachment row IDs so historical views can re-render the image.
+  // TODO: tighten this duck-type when the AI SDK's part union stabilizes.
+  const latestUserBlobUrls: string[] =
+    latest && latest.role === 'user'
+      ? latest.parts.flatMap((p) =>
+          p.type === 'file' && typeof (p as { url?: unknown }).url === 'string' ? [(p as { url: string }).url] : [],
+        )
+      : [];
+
+  // Persist the user turn BEFORE streaming starts. If we wait for `onFinish`,
+  // a user who sends a message and navigates away before the LLM stream
+  // completes will lose their message — `onFinish` fires whenever the LLM
+  // call ends server-side, but if the user returns to /chat in the meantime
+  // the page hydration only sees what's in the DB. Persisting up front means
+  // the user message survives navigation regardless of stream completion.
+  // Trade-off: a failed/aborted assistant response leaves an orphan user
+  // turn (no reply). Better than silently dropping the input.
+  if (latestUserText || latestUserBlobUrls.length > 0) {
+    try {
+      const ownedAttachments =
+        latestUserBlobUrls.length > 0 ? await findAttachmentsByBlobUrls(userId, latestUserBlobUrls) : [];
+      await createMessage({
+        threadId: thread.id,
+        userId,
+        role: 'user',
+        content: latestUserText || null,
+        attachments: ownedAttachments.length > 0 ? ownedAttachments.map((a) => a.id) : undefined,
+      });
+    } catch (err) {
+      console.error('[chat] persist user msg failed', { err, threadId: thread.id });
+    }
+  }
 
   const systemPrompt = buildSystemPrompt(memory);
   const startedAt = Date.now();
   const modelMessages = await convertToModelMessages(body.messages);
 
+  // Cost/latency: thinking mode roughly triples token usage and time, but is
+  // worth it for vision (the model has to read what's in the photo before
+  // reasoning). Plain text chat — including tool flows like log_food /
+  // create_workout_plan — runs fine without it. Check ALL messages, not
+  // just the latest, because a follow-up question may still reference an
+  // image earlier in the thread.
+  const hasImage = body.messages.some(
+    (m) =>
+      m.role === 'user' &&
+      m.parts.some(
+        (p) =>
+          p.type === 'file' &&
+          'mediaType' in p &&
+          typeof (p as { mediaType?: unknown }).mediaType === 'string' &&
+          (p as { mediaType: string }).mediaType.startsWith('image/'),
+      ),
+  );
+
   const result = streamText({
     model: kimi(DEFAULT_MODEL),
     system: systemPrompt,
     messages: modelMessages,
-    temperature: 1, // kimi-k2.6 with thinking mode requires temperature = 1
+    // K2.6 with thinking requires temperature=1; without thinking, lower temp
+    // gives more deterministic tool calls.
+    temperature: hasImage ? 1 : 0.7,
     tools: createCoachTools(userId),
     stopWhen: stepCountIs(5),
-    // Kimi K2.6 extended thinking — improves multi-step reasoning for food/workout advice.
-    // tool_choice defaults to 'auto' which is required when thinking is enabled.
-    providerOptions: {
-      kimi: { thinking: { type: 'enabled' } },
-    },
+    // tool_choice defaults to 'auto'; required when thinking is enabled.
+    providerOptions: hasImage ? { kimi: { thinking: { type: 'enabled' } } } : undefined,
 
     onFinish: async ({ text, usage, response, steps }) => {
       const latencyMs = Date.now() - startedAt;
       const requestId = response?.id ?? null;
 
-      // Persist user turn first so chronology is intact even if the
-      // assistant insert fails midway.
+      // User turn already persisted before streamText (so it survives nav-away).
+      // Here we only persist the assistant turn + tool-call trace.
       try {
-        if (latestUserText) {
-          await createMessage({
-            threadId: thread.id,
-            userId,
-            role: 'user',
-            content: latestUserText,
-          });
-        }
         // Collect tool calls + results across all steps for in-DB tracing.
         // Cast through unknown: AI SDK v6 uses `input`/`output` (not `args`/`result`).
         const toolCalls: ToolCall[] = (steps ?? []).flatMap((step) => {
@@ -136,6 +180,13 @@ export async function POST(req: Request) {
           latencyMs,
         });
         await touchThread(thread.id);
+        // Invalidate /chat cache so a user who navigated away mid-stream sees
+        // the assistant turn on return without a manual refresh. Also invalidate
+        // /plan in case create_workout_plan or update_profile fired, and /today
+        // for any food/water/weight/mood/exercise log changes.
+        revalidatePath('/chat');
+        revalidatePath('/plan');
+        revalidatePath('/today');
       } catch (err) {
         // Non-fatal — the stream already delivered to the user; we only
         // lost the trace row. Log so production can investigate.

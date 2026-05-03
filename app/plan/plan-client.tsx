@@ -4,7 +4,13 @@ import { useRouter } from 'next/navigation';
 import { PlanScreen, type WeekPlan } from '@/components/screens/plan-screen';
 import type { TabId } from '@/components/coach/primitives';
 
-export default function PlanClient({ initialPlan }: { initialPlan: WeekPlan | null }) {
+export default function PlanClient({
+  initialPlan,
+  weekStartsOn,
+}: {
+  initialPlan: WeekPlan | null;
+  weekStartsOn?: string;
+}) {
   const router = useRouter();
   const onTab = (t: TabId) => {
     if (t === 'plan') return;
@@ -17,7 +23,9 @@ export default function PlanClient({ initialPlan }: { initialPlan: WeekPlan | nu
       onTab={onTab}
       activeTab="plan"
       onStartWorkout={() => router.push('/workout/run')}
+      onAskAI={() => router.push('/chat')}
       initialPlan={initialPlan ?? undefined}
+      weekStartsOn={weekStartsOn}
     />
   );
 }
