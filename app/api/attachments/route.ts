@@ -1,9 +1,13 @@
 // POST /api/attachments
 // Receives a resized JPEG from the client (FormData field "file" + "kind").
-// Uploads to Vercel Blob, inserts an attachments row, returns { id, url }.
+// Uploads to a *private* Vercel Blob store and returns { id, url } where
+// `url` is our own auth-gated proxy (`/api/attachments/<id>`) — never the
+// raw blob URL. The proxy keeps photos behind session auth (PDPA) while
+// still letting <img src=> work for the user who uploaded it.
 //
-// Phase 2: public Blob URL (Kimi vision needs direct URL access).
-// Phase 3 TODO: migrate to private Blob + signed URL (1d TTL).
+// For the AI vision call: chat/route.ts walks user file parts before
+// streaming and inlines the bytes as a base64 `data:` URI in the message
+// to Kimi (which can't authenticate to our proxy).
 //
 // PDPA rules (topics/pdpa.md):
 //   food_photo     → 30-day retention in Blob
@@ -63,7 +67,7 @@ export async function POST(req: Request) {
 
   let blobUrl: string;
   try {
-    const blob = await put(blobPath, file, { access: 'public', contentType });
+    const blob = await put(blobPath, file, { access: 'private', contentType });
     blobUrl = blob.url;
   } catch (e) {
     console.error('[attachments] blob put failed', { e, blobPath, size: file.size });
@@ -82,11 +86,11 @@ export async function POST(req: Request) {
       byteSize: file.size,
       expiresAt,
     });
-    return Response.json({ id: row.id, url: blobUrl });
+    // Return the auth-gated proxy URL so the browser <img>, the chat send
+    // round-trip, and historical hydration all reference the same shape.
+    return Response.json({ id: row.id, url: `/api/attachments/${row.id}` });
   } catch (e) {
     console.error('[attachments] db insert failed', { e, blobPath });
-    // Blob upload already happened; return the URL anyway so chat can proceed.
-    // Cleanup of the orphan blob row will be picked up by photo-expiry Inngest job.
     return err('saved to storage but failed to record — refresh and try again', 500);
   }
 }

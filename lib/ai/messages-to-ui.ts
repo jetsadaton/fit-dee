@@ -29,10 +29,13 @@ export function dbRowsToUIMessages(rows: Message[], attachmentMap: Map<string, A
       for (const attId of r.attachments ?? []) {
         const att = attachmentMap.get(attId);
         if (!att) continue;
+        // Use the auth-gated proxy URL — blobUrl points at the private
+        // Vercel Blob store and is unreachable from the browser without
+        // the store token.
         parts.push({
           type: 'file',
           mediaType: att.contentType,
-          url: att.blobUrl,
+          url: `/api/attachments/${att.id}`,
         });
       }
 
