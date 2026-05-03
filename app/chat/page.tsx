@@ -8,7 +8,8 @@ import { findLatestForUser } from '@/lib/db/repositories/chat-threads';
 import { findByThreadAndDate } from '@/lib/db/repositories/messages';
 import { findActive as findActivePlan } from '@/lib/db/repositories/workout-plans';
 import { findByIds as findAttachmentsByIds } from '@/lib/db/repositories/attachments';
-import { collectAttachmentIds, dbRowsToUIMessages } from '@/lib/ai/messages-to-ui';
+import { getStatesByIds as getFoodLogStates } from '@/lib/db/repositories/food-logs';
+import { collectAttachmentIds, collectFoodLogPendingIds, dbRowsToUIMessages } from '@/lib/ai/messages-to-ui';
 import { ChatClient } from './chat-client';
 
 export default async function ChatPage() {
@@ -27,9 +28,13 @@ export default async function ChatPage() {
   const rows = thread ? await findByThreadAndDate(thread.id, todayIct) : [];
 
   const attachmentIds = collectAttachmentIds(rows);
-  const attachments = await findAttachmentsByIds(session.user.id, attachmentIds);
+  const foodLogIds = collectFoodLogPendingIds(rows);
+  const [attachments, foodLogStateMap] = await Promise.all([
+    findAttachmentsByIds(session.user.id, attachmentIds),
+    getFoodLogStates(session.user.id, foodLogIds),
+  ]);
   const attachmentMap = new Map(attachments.map((a) => [a.id, a]));
-  const initialMessages = dbRowsToUIMessages(rows, attachmentMap);
+  const initialMessages = dbRowsToUIMessages(rows, attachmentMap, foodLogStateMap);
 
   return (
     <ChatClient

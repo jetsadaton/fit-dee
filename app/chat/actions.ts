@@ -6,13 +6,13 @@
 
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
-import { confirmOwned, softDeleteOwned } from '@/lib/db/repositories/food-logs';
+import { confirmOwned, getStatesByIds as getFoodLogStates, softDeleteOwned } from '@/lib/db/repositories/food-logs';
 import { findLatestForUser } from '@/lib/db/repositories/chat-threads';
 import { findByThreadAndDate } from '@/lib/db/repositories/messages';
 import { findByIds as findAttachmentsByIds } from '@/lib/db/repositories/attachments';
 import { findByUserId as findProfile, updatePlanFields } from '@/lib/db/repositories/profiles';
 import { latest as latestWeight } from '@/lib/db/repositories/weight-logs';
-import { collectAttachmentIds, dbRowsToUIMessages } from '@/lib/ai/messages-to-ui';
+import { collectAttachmentIds, collectFoodLogPendingIds, dbRowsToUIMessages } from '@/lib/ai/messages-to-ui';
 import { computeTdee } from '@/lib/services/tdee';
 import type { UIMessage } from 'ai';
 import type { LogActionResult } from '@/app/today/actions';
@@ -26,9 +26,13 @@ export async function fetchChatByDateAction(dateIct: string): Promise<UIMessage[
   if (!thread) return [];
   const rows = await findByThreadAndDate(thread.id, dateIct);
   const attachmentIds = collectAttachmentIds(rows);
-  const attachments = await findAttachmentsByIds(session.user.id, attachmentIds);
+  const foodLogIds = collectFoodLogPendingIds(rows);
+  const [attachments, foodLogStateMap] = await Promise.all([
+    findAttachmentsByIds(session.user.id, attachmentIds),
+    getFoodLogStates(session.user.id, foodLogIds),
+  ]);
   const attachmentMap = new Map(attachments.map((a) => [a.id, a]));
-  return dbRowsToUIMessages(rows, attachmentMap);
+  return dbRowsToUIMessages(rows, attachmentMap, foodLogStateMap);
 }
 
 export async function confirmFoodLogAction(pendingId: string): Promise<LogActionResult> {

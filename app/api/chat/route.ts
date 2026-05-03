@@ -22,9 +22,15 @@ import { buildSystemPrompt, PROMPT_VERSION } from '@/lib/ai/prompts/system-v2';
 import { checkChatLimit } from '@/lib/ai/rate-limit';
 import { createCoachTools } from '@/lib/ai/tools';
 import { getOrCreate as getOrCreateThread, touch as touchThread } from '@/lib/db/repositories/chat-threads';
+import { get as getBlob } from '@vercel/blob';
 import { create as createMessage } from '@/lib/db/repositories/messages';
-import { findByBlobUrls as findAttachmentsByBlobUrls } from '@/lib/db/repositories/attachments';
+import { findByIds as findAttachmentsByIds } from '@/lib/db/repositories/attachments';
 import type { ToolCall } from '@/lib/types/db/chat';
+
+const ATTACHMENT_ID_RE = /\/api\/attachments\/([0-9a-f-]{36})(?:[/?#].*)?$/i;
+function extractAttachmentId(url: string): string | null {
+  return ATTACHMENT_ID_RE.exec(url)?.[1] ?? null;
+}
 
 export const runtime = 'nodejs';
 export const maxDuration = 30; // seconds — Vercel default for Hobby tier
@@ -79,15 +85,25 @@ export async function POST(req: Request) {
           .map((p) => p.text)
           .join('\n')
       : '';
-  // File parts arrive with the public Blob URL (set by /api/attachments).
-  // Resolve back to attachment row IDs so historical views can re-render the image.
-  // TODO: tighten this duck-type when the AI SDK's part union stabilizes.
-  const latestUserBlobUrls: string[] =
+  // File parts arrive with our auth-gated proxy URL (`/api/attachments/<id>`).
+  // Parse the row IDs out so we can both (a) persist them on the user message
+  // and (b) inline the bytes as base64 for Kimi below.
+  const latestUserAttachmentIds: string[] =
     latest && latest.role === 'user'
-      ? latest.parts.flatMap((p) =>
-          p.type === 'file' && typeof (p as { url?: unknown }).url === 'string' ? [(p as { url: string }).url] : [],
-        )
+      ? latest.parts.flatMap((p) => {
+          if (p.type !== 'file') return [];
+          const url = (p as { url?: unknown }).url;
+          if (typeof url !== 'string') return [];
+          const id = extractAttachmentId(url);
+          return id ? [id] : [];
+        })
       : [];
+
+  // Resolve attachment rows once — needed both to verify ownership before
+  // persisting and (further down) to inline bytes for the vision call.
+  const ownedAttachments =
+    latestUserAttachmentIds.length > 0 ? await findAttachmentsByIds(userId, latestUserAttachmentIds) : [];
+  const ownedById = new Map(ownedAttachments.map((a) => [a.id, a]));
 
   // Persist the user turn BEFORE streaming starts. If we wait for `onFinish`,
   // a user who sends a message and navigates away before the LLM stream
@@ -97,10 +113,8 @@ export async function POST(req: Request) {
   // the user message survives navigation regardless of stream completion.
   // Trade-off: a failed/aborted assistant response leaves an orphan user
   // turn (no reply). Better than silently dropping the input.
-  if (latestUserText || latestUserBlobUrls.length > 0) {
+  if (latestUserText || ownedAttachments.length > 0) {
     try {
-      const ownedAttachments =
-        latestUserBlobUrls.length > 0 ? await findAttachmentsByBlobUrls(userId, latestUserBlobUrls) : [];
       await createMessage({
         threadId: thread.id,
         userId,
@@ -115,7 +129,53 @@ export async function POST(req: Request) {
 
   const systemPrompt = buildSystemPrompt(memory);
   const startedAt = Date.now();
-  const modelMessages = await convertToModelMessages(body.messages);
+
+  // Kimi can't authenticate to /api/attachments/<id>, so before handing the
+  // messages to streamText we fetch each referenced blob from private
+  // storage and replace the proxy URL with a base64 `data:` URI inline.
+  // Only touch parts whose attachment ID resolves to a row owned by this
+  // user — anything else is dropped to be safe.
+  const dataUrlCache = new Map<string, string>();
+  async function resolveProxyUrl(url: string): Promise<string | null> {
+    if (dataUrlCache.has(url)) return dataUrlCache.get(url)!;
+    const id = extractAttachmentId(url);
+    if (!id) return null;
+    let att = ownedById.get(id);
+    if (!att) {
+      // History messages reference attachments not in the latest turn; fetch
+      // ownership lazily so we don't block on a join we may not need.
+      const [row] = await findAttachmentsByIds(userId, [id]);
+      if (!row) return null;
+      att = row;
+    }
+    try {
+      const result = await getBlob(att.blobUrl, { access: 'private' });
+      if (!result || result.statusCode !== 200) return null;
+      const buf = Buffer.from(await new Response(result.stream).arrayBuffer());
+      const dataUrl = `data:${att.contentType};base64,${buf.toString('base64')}`;
+      dataUrlCache.set(url, dataUrl);
+      return dataUrl;
+    } catch (err) {
+      console.error('[chat] inline blob failed', { err, attId: att.id });
+      return null;
+    }
+  }
+
+  const inlinedMessages = await Promise.all(
+    body.messages.map(async (m) => ({
+      ...m,
+      parts: await Promise.all(
+        (m.parts ?? []).map(async (p) => {
+          if (p.type !== 'file') return p;
+          const url = (p as { url?: unknown }).url;
+          if (typeof url !== 'string' || !url.startsWith('/api/attachments/')) return p;
+          const dataUrl = await resolveProxyUrl(url);
+          return dataUrl ? { ...p, url: dataUrl } : p;
+        }),
+      ),
+    })),
+  );
+  const modelMessages = await convertToModelMessages(inlinedMessages as typeof body.messages);
 
   // Cost/latency: thinking mode roughly triples token usage and time, but is
   // worth it for vision (the model has to read what's in the photo before

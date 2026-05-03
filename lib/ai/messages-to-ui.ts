@@ -16,8 +16,13 @@
 import type { UIMessage } from 'ai';
 import type { Attachment } from '@/lib/types/db/attachments';
 import type { Message, ToolCall } from '@/lib/types/db/chat';
+import type { FoodLogStatus } from '@/lib/db/repositories/food-logs';
 
-export function dbRowsToUIMessages(rows: Message[], attachmentMap: Map<string, Attachment>): UIMessage[] {
+export function dbRowsToUIMessages(
+  rows: Message[],
+  attachmentMap: Map<string, Attachment>,
+  foodLogStateMap: Map<string, FoodLogStatus> = new Map(),
+): UIMessage[] {
   return rows
     .filter((r) => r.role === 'user' || r.role === 'assistant')
     .map((r) => {
@@ -29,10 +34,13 @@ export function dbRowsToUIMessages(rows: Message[], attachmentMap: Map<string, A
       for (const attId of r.attachments ?? []) {
         const att = attachmentMap.get(attId);
         if (!att) continue;
+        // Use the auth-gated proxy URL — blobUrl points at the private
+        // Vercel Blob store and is unreachable from the browser without
+        // the store token.
         parts.push({
           type: 'file',
           mediaType: att.contentType,
-          url: att.blobUrl,
+          url: `/api/attachments/${att.id}`,
         });
       }
 
@@ -43,6 +51,17 @@ export function dbRowsToUIMessages(rows: Message[], attachmentMap: Map<string, A
       const toolCalls = (r.toolCalls as ToolCall[] | null) ?? [];
       for (const tc of toolCalls) {
         if (!tc.result) continue;
+        let output: Record<string, unknown> = tc.result;
+        // food_log_confirm: stamp the live DB status onto the payload so the
+        // confirm card shows the correct (confirmed/cancelled/idle) view
+        // when the user reloads the chat.
+        if (tc.name === 'log_food' && (tc.result as { type?: string }).type === 'food_log_confirm') {
+          const pid = (tc.result as { pendingId?: unknown }).pendingId;
+          if (typeof pid === 'string') {
+            const status = foodLogStateMap.get(pid);
+            if (status) output = { ...tc.result, currentStatus: status };
+          }
+        }
         parts.push({
           type: `tool-${tc.name}`,
           state: 'output-available',
@@ -50,7 +69,7 @@ export function dbRowsToUIMessages(rows: Message[], attachmentMap: Map<string, A
           // so React keys stay deterministic across re-renders.
           toolCallId: `${r.id}-${tc.name}`,
           input: tc.arguments,
-          output: tc.result,
+          output,
         });
       }
 
@@ -60,6 +79,23 @@ export function dbRowsToUIMessages(rows: Message[], attachmentMap: Map<string, A
         parts: parts as UIMessage['parts'],
       };
     });
+}
+
+/** Collect every food-log pendingId referenced by tool-log_food parts in
+ *  a batch of message rows. Caller batch-fetches the live status via
+ *  food-logs.getStatesByIds and passes the map back into dbRowsToUIMessages. */
+export function collectFoodLogPendingIds(rows: Message[]): string[] {
+  const ids = new Set<string>();
+  for (const r of rows) {
+    const toolCalls = (r.toolCalls as ToolCall[] | null) ?? [];
+    for (const tc of toolCalls) {
+      if (tc.name !== 'log_food' || !tc.result) continue;
+      if ((tc.result as { type?: string }).type !== 'food_log_confirm') continue;
+      const pid = (tc.result as { pendingId?: unknown }).pendingId;
+      if (typeof pid === 'string') ids.add(pid);
+    }
+  }
+  return Array.from(ids);
 }
 
 /** Collect every attachment ID referenced across a batch of message rows. */
