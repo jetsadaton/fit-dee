@@ -13,6 +13,10 @@ export type FoodLogConfirmPayload = {
   proteinG: number;
   carbG: number;
   fatG: number;
+  /** DB-resolved at hydration time so the card renders the right state on
+   *  re-mount (user navigated away after confirming, came back). Live tool
+   *  execution leaves this undefined → treated as 'pending'. */
+  currentStatus?: 'pending' | 'confirmed' | 'cancelled';
 };
 
 export type WaterLogDonePayload = {

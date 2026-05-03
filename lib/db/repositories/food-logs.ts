@@ -5,7 +5,7 @@
 // totals — per topic doc; coach-proposed but unconfirmed rows live in DB
 // but are invisible to summaries).
 
-import { and, asc, between, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm';
+import { and, asc, between, eq, gte, inArray, isNotNull, isNull, lt, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { attachments, foodLogs, foods } from '@/lib/db/schema';
 import type { DailyFoodTotals, FoodLog, NewFoodLog } from '@/lib/types/db/logs';
@@ -94,6 +94,24 @@ export async function confirm(id: string): Promise<FoodLog | undefined> {
     .where(and(eq(foodLogs.id, id), isNull(foodLogs.deletedAt)))
     .returning();
   return row;
+}
+
+export type FoodLogStatus = 'pending' | 'confirmed' | 'cancelled';
+
+/** Batch lookup of pending/confirmed/cancelled state for a set of food log
+ *  IDs. Used by chat hydration to render the right confirm-card state when
+ *  the user revisits a thread after saving. */
+export async function getStatesByIds(userId: string, ids: string[]): Promise<Map<string, FoodLogStatus>> {
+  if (ids.length === 0) return new Map();
+  const rows = await db
+    .select({ id: foodLogs.id, confirmedAt: foodLogs.confirmedAt, deletedAt: foodLogs.deletedAt })
+    .from(foodLogs)
+    .where(and(eq(foodLogs.userId, userId), inArray(foodLogs.id, ids)));
+  const out = new Map<string, FoodLogStatus>();
+  for (const r of rows) {
+    out.set(r.id, r.deletedAt ? 'cancelled' : r.confirmedAt ? 'confirmed' : 'pending');
+  }
+  return out;
 }
 
 /** Confirm with ownership check — safe for user-facing actions. */

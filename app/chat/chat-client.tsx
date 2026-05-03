@@ -45,8 +45,14 @@ const MEAL_LABEL: Record<string, string> = {
 const QUICK_CHIPS_BASE = ['🍱 กินอะไรดี', '💪 วันนี้ทำอะไร', '📝 บันทึกอาหาร', '⚖️ ชั่งน้ำหนัก'];
 
 function FoodConfirmCard({ payload, historical = false }: { payload: FoodLogConfirmPayload; historical?: boolean }) {
+  // Initial state priority:
+  //   1. payload.currentStatus from DB hydration (source of truth on remount)
+  //   2. historical=true (viewing past day → assume done)
+  //   3. 'idle' (live tool execution path)
+  const initialFromPayload =
+    payload.currentStatus === 'confirmed' || payload.currentStatus === 'cancelled' ? payload.currentStatus : null;
   const [state, setState] = useState<'idle' | 'loading' | 'confirmed' | 'cancelled'>(
-    historical ? 'confirmed' : 'idle',
+    initialFromPayload ?? (historical ? 'confirmed' : 'idle'),
   );
 
   const handleConfirm = async () => {
@@ -61,35 +67,33 @@ function FoodConfirmCard({ payload, historical = false }: { payload: FoodLogConf
     setState('cancelled');
   };
 
-  if (state === 'confirmed') {
-    return (
-      <div style={{ background: T.bg3, borderRadius: 12, padding: '10px 14px', fontSize: 13, color: T.textDim }}>
-        ✓ บันทึก <strong style={{ color: T.text }}>{payload.nameTh}</strong> แล้ว
-      </div>
-    );
-  }
-  if (state === 'cancelled') {
-    return (
-      <div style={{ background: T.bg3, borderRadius: 12, padding: '10px 14px', fontSize: 13, color: T.textDim }}>
-        ไม่ได้บันทึก
-      </div>
-    );
-  }
+  const isDone = state === 'confirmed' || state === 'cancelled';
+  const isLoading = state === 'loading';
+
+  // Header label varies with state — keeps the card recognisable in history.
+  const headerLabel =
+    state === 'confirmed'
+      ? '✓ บันทึกแล้ว'
+      : state === 'cancelled'
+        ? '✕ ไม่ได้บันทึก'
+        : '📋 โค้ชแนะนำให้บันทึก · ยังไม่บันทึก';
+  const headerColor = state === 'confirmed' ? T.lime : state === 'cancelled' ? T.textMute : T.textMute;
+  const borderColor = state === 'confirmed' ? `${T.lime}55` : T.border;
 
   return (
     <div
       style={{
         background: T.bg3,
-        border: `1px solid ${T.border}`,
+        border: `1px solid ${borderColor}`,
         borderRadius: 14,
         padding: '12px 14px',
         fontSize: 13,
         fontFamily: 'var(--font-inter), var(--font-noto-sans-thai)',
+        opacity: state === 'cancelled' ? 0.65 : 1,
       }}
     >
-      {/* Header — makes it clear this is a proposal, not a saved record */}
-      <div style={{ fontSize: 11, color: T.textMute, fontWeight: 600, marginBottom: 8, letterSpacing: 0.2 }}>
-        📋 โค้ชแนะนำให้บันทึก · ยังไม่บันทึก
+      <div style={{ fontSize: 11, color: headerColor, fontWeight: 600, marginBottom: 8, letterSpacing: 0.2 }}>
+        {headerLabel}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
@@ -108,47 +112,49 @@ function FoodConfirmCard({ payload, historical = false }: { payload: FoodLogConf
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: isDone ? 0 : 12 }}>
         <MacroPill label="โปรตีน" value={payload.proteinG} unit="g" color="#6EE7B7" />
         <MacroPill label="คาร์บ" value={payload.carbG} unit="g" color="#93C5FD" />
         <MacroPill label="ไขมัน" value={payload.fatG} unit="g" color="#FCA5A5" />
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button
-          onClick={handleConfirm}
-          disabled={state === 'loading'}
-          style={{
-            flex: 1,
-            padding: '8px 0',
-            borderRadius: 999,
-            border: 'none',
-            background: state === 'loading' ? T.bg4 : T.coral,
-            color: state === 'loading' ? T.textMute : '#0E0F12',
-            fontWeight: 800,
-            fontSize: 13,
-            cursor: state === 'loading' ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {state === 'loading' ? '…' : 'บันทึกเลย'}
-        </button>
-        <button
-          onClick={handleCancel}
-          disabled={state === 'loading'}
-          style={{
-            flex: 1,
-            padding: '8px 0',
-            borderRadius: 999,
-            border: `1px solid ${T.border}`,
-            background: 'transparent',
-            color: T.textDim,
-            fontSize: 13,
-            cursor: state === 'loading' ? 'not-allowed' : 'pointer',
-          }}
-        >
-          ไม่บันทึก
-        </button>
-      </div>
+      {!isDone && (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={handleConfirm}
+            disabled={isLoading}
+            style={{
+              flex: 1,
+              padding: '8px 0',
+              borderRadius: 999,
+              border: 'none',
+              background: isLoading ? T.bg4 : T.coral,
+              color: isLoading ? T.textMute : '#0E0F12',
+              fontWeight: 800,
+              fontSize: 13,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {isLoading ? '…' : 'บันทึกเลย'}
+          </button>
+          <button
+            onClick={handleCancel}
+            disabled={isLoading}
+            style={{
+              flex: 1,
+              padding: '8px 0',
+              borderRadius: 999,
+              border: `1px solid ${T.border}`,
+              background: 'transparent',
+              color: T.textDim,
+              fontSize: 13,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            ไม่บันทึก
+          </button>
+        </div>
+      )}
     </div>
   );
 }
